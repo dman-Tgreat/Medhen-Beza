@@ -194,3 +194,32 @@
   font-size: 0.8125rem; /* 13px */
   line-height: 1.4;
 }
+
+/* ─── EmergencyButton subtle pulse animation ──────────────────────────────── */
+@keyframes pulse-subtle {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(198, 40, 40, 0);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2.4s ease-in-out infinite;
+}
+
+/* ─── Custom scrollbar (WebKit) ───────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-light);
+}

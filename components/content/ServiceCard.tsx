@@ -1,28 +1,63 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { ArrowRight, Stethoscope } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { CardRoot, CardBody, CardLink } from "./Card";
+import { cn } from "@/lib/utils";
 
-interface ServiceCardProps {
-  title: string;
+export interface ServiceCardData {
+  /** A Lucide icon component */
+  icon: LucideIcon;
+  /** Service name */
+  name: string;
+  /** One-to-two sentence description */
   description: string;
-  category?: string;
+  /** Route to the service detail page */
+  href: string;
 }
 
-export function ServiceCard({ title, description, category }: ServiceCardProps) {
+export interface ServiceCardProps {
+  data: ServiceCardData;
+  className?: string;
+}
+
+/**
+ * ServiceCard — icon swatch → name → short description → "Learn more →" link.
+ * No image; the icon carries the visual identity of the service.
+ */
+export function ServiceCard({ data, className }: ServiceCardProps) {
+  const Icon = data.icon;
+
   return (
-    <Card className="group hover:border-teal-300 transition-all duration-300">
-      <CardHeader>
-        <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center mb-2 group-hover:bg-teal-700 group-hover:text-white transition-colors">
-          <Stethoscope className="w-6 h-6" />
+    <CardRoot className={cn("group", className)}>
+      <CardBody>
+        {/* Icon swatch */}
+        <div
+          className={cn(
+            "w-12 h-12 rounded-md flex items-center justify-center shrink-0",
+            "bg-primary-light text-primary",
+            "transition-colors duration-200",
+            "group-hover:bg-primary group-hover:text-white"
+          )}
+        >
+          <Icon className="w-6 h-6" strokeWidth={1.75} aria-hidden />
         </div>
-        {category && <span className="text-xs font-semibold text-teal-600 uppercase tracking-wider">{category}</span>}
-        <CardTitle className="group-hover:text-teal-700 transition-colors">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <CardDescription>{description}</CardDescription>
-        <div className="flex items-center gap-1 text-xs font-semibold text-teal-700 group-hover:translate-x-1 transition-transform cursor-pointer">
-          Learn More <ArrowRight className="w-3.5 h-3.5" />
-        </div>
-      </CardContent>
-    </Card>
+
+        {/* Name */}
+        <h3 className="text-h4 font-semibold text-text leading-snug">
+          {data.name}
+        </h3>
+
+        {/* Description */}
+        <p className="text-small text-text-muted leading-relaxed flex-1">
+          {data.description}
+        </p>
+
+        {/* CTA */}
+        <CardLink href={data.href} label="Learn more" className="mt-auto" />
+      </CardBody>
+    </CardRoot>
   );
 }
+
+// ─── Mock data for local preview ──────────────────────────────────────────────
+export const SERVICE_CARD_MOCK: ServiceCardData[] = [
+  // imported inline so pages can spread this in when there's no CMS yet
+];

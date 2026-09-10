@@ -1,88 +1,389 @@
-import { ShieldCheck, Calendar, PhoneCall, Award } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Calendar, PhoneCall, ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { HOSPITAL_INFO } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import { type BreadcrumbItem } from "@/components/layout/Breadcrumbs";
 
-export function Hero() {
+// ─── Shared internal helpers ──────────────────────────────────────────────────
+
+function StatBadge({
+  value,
+  label,
+}: {
+  value: string;
+  label: string;
+}) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-teal-50/70 via-white to-slate-50 py-16 lg:py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-6">
-            <Badge variant="default" className="gap-1.5 py-1 px-3 text-xs bg-teal-100 text-teal-800 border-teal-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-teal-600" /> Leading Healthcare Excellence
-            </Badge>
+    <div className="space-y-0.5">
+      <div className="text-2xl sm:text-3xl font-bold text-text tracking-tight">
+        {value}
+      </div>
+      <div className="text-caption text-text-muted font-medium">{label}</div>
+    </div>
+  );
+}
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-teal-950 leading-[1.15]">
-              Medhen Beza <span className="text-teal-600">Hospital</span>
+// ─── Hero (Homepage) ──────────────────────────────────────────────────────────
+
+export interface HeroProps {
+  eyebrow?: string;
+  headline?: string;
+  /** Highlighted portion of the headline (appended in a different color) */
+  headlineAccent?: string;
+  supportingText?: string;
+  primaryCta?: { label: string; href: string };
+  secondaryCta?: { label: string; href: string };
+  /** URL passed to next/image for the right-column photo */
+  photoSrc?: string;
+  photoAlt?: string;
+  stats?: { value: string; label: string }[];
+  className?: string;
+}
+
+/**
+ * Hero — full homepage hero.
+ * Left column: eyebrow badge, headline, supporting text, two CTA buttons, stats strip.
+ * Right column: real-photo slot (with placeholder gradient if no src given).
+ */
+export function Hero({
+  eyebrow = "Leading Healthcare Excellence",
+  headline = "Medhen Beza",
+  headlineAccent = "Hospital",
+  supportingText = "Compassionate care, advanced medicine, exceptional service — delivering patient-centered clinical care, 24/7 emergency response, and state-of-the-art medical technology.",
+  primaryCta = { label: "Book Appointment", href: "/appointments" },
+  secondaryCta = { label: "Emergency Services", href: "/emergency" },
+  photoSrc,
+  photoAlt = "Medical team at Medhen Beza Hospital",
+  stats = [
+    { value: "50+", label: "Specialized Doctors" },
+    { value: "24/7", label: "Emergency & Care" },
+    { value: "15+", label: "Medical Departments" },
+  ],
+  className,
+}: HeroProps) {
+  return (
+    <section
+      className={cn(
+        "relative overflow-hidden bg-gradient-to-b from-primary-light/60 via-surface to-background",
+        "py-16 lg:py-24",
+        className
+      )}
+    >
+      {/* Decorative background circles */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full bg-secondary-light/40 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-24 -left-24 w-[400px] h-[400px] rounded-full bg-primary-light/50 blur-3xl"
+      />
+
+      <div className="layout-container relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* ── Left column ── */}
+          <div className="lg:col-span-7 space-y-7">
+            {/* Eyebrow pill */}
+            {eyebrow && (
+              <div className="inline-flex items-center gap-2 rounded-full border border-secondary/20 bg-secondary-light px-4 py-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
+                <span className="text-caption font-semibold text-secondary uppercase tracking-wider">
+                  {eyebrow}
+                </span>
+              </div>
+            )}
+
+            {/* Headline */}
+            <h1 className="text-display font-black tracking-tight text-text leading-[1.1]">
+              {headline}{" "}
+              <span className="text-secondary">{headlineAccent}</span>
             </h1>
 
-            <p className="text-lg text-slate-600 font-normal leading-relaxed max-w-xl">
-              {HOSPITAL_INFO.tagline}. Delivering patient-centered clinical care, 24/7 emergency response, and state-of-the-art medical technology.
+            {/* Supporting text */}
+            <p className="text-body text-text-muted leading-relaxed max-w-xl">
+              {supportingText}
             </p>
 
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Button size="lg" className="gap-2 bg-teal-700 hover:bg-teal-800 text-white shadow-lg shadow-teal-900/10">
-                <Calendar className="w-5 h-5" /> Book Appointment
+            {/* CTAs */}
+            <div className="flex flex-wrap items-center gap-4">
+              <Button asChild size="lg" variant="default">
+                <Link href={primaryCta.href} className="gap-2">
+                  <Calendar className="w-5 h-5" />
+                  {primaryCta.label}
+                </Link>
               </Button>
-              <Button size="lg" variant="outline" className="gap-2 border-slate-300 text-slate-700 hover:bg-slate-100">
-                <PhoneCall className="w-5 h-5 text-teal-600" /> Emergency Services
-              </Button>
+              {secondaryCta && (
+                <Button asChild size="lg" variant="secondary">
+                  <Link href={secondaryCta.href} className="gap-2">
+                    <PhoneCall className="w-5 h-5" />
+                    {secondaryCta.label}
+                  </Link>
+                </Button>
+              )}
             </div>
 
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-slate-200/80">
-              <div>
-                <div className="text-2xl sm:text-3xl font-bold text-teal-950">50+</div>
-                <div className="text-xs font-medium text-slate-500">Specialized Doctors</div>
+            {/* Stats strip */}
+            {stats && stats.length > 0 && (
+              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-border">
+                {stats.map((s) => (
+                  <StatBadge key={s.label} value={s.value} label={s.label} />
+                ))}
               </div>
-              <div>
-                <div className="text-2xl sm:text-3xl font-bold text-teal-950">24/7</div>
-                <div className="text-xs font-medium text-slate-500">Emergency & Care</div>
-              </div>
-              <div>
-                <div className="text-2xl sm:text-3xl font-bold text-teal-950">15+</div>
-                <div className="text-xs font-medium text-slate-500">Medical Departments</div>
-              </div>
-            </div>
+            )}
           </div>
 
+          {/* ── Right column — photo slot ── */}
           <div className="lg:col-span-5 relative">
-            <div className="rounded-3xl bg-gradient-to-tr from-teal-800 to-teal-600 p-8 text-white shadow-2xl space-y-6 border border-teal-500/20">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center">
-                  <Award className="w-6 h-6 text-teal-200" />
+            <div className="relative rounded-lg overflow-hidden aspect-[4/5] bg-primary-light border border-border shadow-modal">
+              {photoSrc ? (
+                <Image
+                  src={photoSrc}
+                  alt={photoAlt}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 42vw"
+                />
+              ) : (
+                /* Placeholder when no real photo is available yet */
+                <div className="absolute inset-0 bg-gradient-to-br from-secondary via-primary to-secondary-dark flex flex-col items-center justify-center gap-4 text-white/90">
+                  <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                    <svg
+                      viewBox="0 0 40 40"
+                      className="w-10 h-10 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path d="M20 4a8 8 0 1 0 0 16A8 8 0 0 0 20 4zM6 36c0-7.732 6.268-14 14-14s14 6.268 14 14" />
+                    </svg>
+                  </div>
+                  <p className="text-small font-medium text-white/70 text-center px-4">
+                    Photo slot — pass{" "}
+                    <code className="bg-white/10 px-1 rounded">photoSrc</code>{" "}
+                    prop
+                  </p>
                 </div>
-                <div>
-                  <h3 className="font-bold text-lg">Hospital System Status</h3>
-                  <p className="text-xs text-teal-100">App Router & Tailwind CSS Ready</p>
-                </div>
-              </div>
+              )}
 
-              <div className="space-y-3 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-teal-100">Stack Status:</span>
-                  <span className="font-semibold text-emerald-300">Next.js + TypeScript</span>
+              {/* Floating accent card */}
+              <div className="absolute bottom-4 left-4 right-4 rounded-md bg-surface/90 backdrop-blur-md border border-border/60 p-3 flex items-center gap-3 shadow-dropdown">
+                <div className="w-9 h-9 rounded-md bg-secondary-light flex items-center justify-center shrink-0">
+                  <svg
+                    viewBox="0 0 20 20"
+                    className="w-5 h-5 text-secondary"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm-.75-11.25a.75.75 0 0 1 1.5 0v4a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1 0-1.5H9.25V6.75Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-teal-100">UI Components:</span>
-                  <span className="font-semibold text-emerald-300">shadcn/ui Initialized</span>
+                <div className="min-w-0">
+                  <p className="text-caption font-semibold text-text leading-tight">
+                    Available 24 / 7
+                  </p>
+                  <p className="text-caption text-text-muted truncate">
+                    Emergency & outpatient services open now
+                  </p>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-teal-100">Database ORM:</span>
-                  <span className="font-semibold text-emerald-300">Prisma (PostgreSQL)</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-teal-100">Icons:</span>
-                  <span className="font-semibold text-emerald-300">Lucide Icons</span>
-                </div>
-              </div>
-
-              <div className="pt-2 text-center text-xs text-teal-100">
-                Placeholder Homepage Running Cleanly
+                <span className="ml-auto h-2 w-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── HeroWithBackground ───────────────────────────────────────────────────────
+
+export interface HeroWithBackgroundProps {
+  /** URL of the full-bleed background image */
+  backgroundSrc?: string;
+  backgroundAlt?: string;
+  eyebrow?: string;
+  headline?: string;
+  headlineAccent?: string;
+  supportingText?: string;
+  primaryCta?: { label: string; href: string };
+  secondaryCta?: { label: string; href: string };
+  className?: string;
+}
+
+/**
+ * HeroWithBackground — full-bleed image background with a dark/teal overlay.
+ * Centered content, two CTAs, designed for landing pages or section promos.
+ */
+export function HeroWithBackground({
+  backgroundSrc,
+  backgroundAlt = "Hospital background",
+  eyebrow = "World-Class Healthcare",
+  headline = "Your Health,",
+  headlineAccent = "Our Priority",
+  supportingText = "From routine check-ups to complex surgeries, Medhen Beza Hospital brings together the region's finest specialists under one roof.",
+  primaryCta = { label: "Explore Services", href: "/services" },
+  secondaryCta = { label: "Find a Doctor", href: "/doctors" },
+  className,
+}: HeroWithBackgroundProps) {
+  return (
+    <section
+      className={cn(
+        "relative overflow-hidden min-h-[560px] flex items-center justify-center",
+        "py-24 lg:py-32",
+        className
+      )}
+    >
+      {/* Background layer */}
+      {backgroundSrc ? (
+        <Image
+          src={backgroundSrc}
+          alt={backgroundAlt}
+          fill
+          priority
+          className="object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-dark via-primary to-secondary" />
+      )}
+
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-text/60" />
+
+      {/* Content */}
+      <div className="layout-container relative text-center text-white space-y-8 max-w-3xl mx-auto">
+        {eyebrow && (
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-4 py-1.5">
+            <span className="text-caption font-semibold text-white/90 uppercase tracking-widest">
+              {eyebrow}
+            </span>
+          </div>
+        )}
+
+        <h1 className="text-display font-black tracking-tight leading-[1.1]">
+          {headline}{" "}
+          <span className="text-secondary-light">{headlineAccent}</span>
+        </h1>
+
+        <p className="text-body text-white/80 leading-relaxed max-w-2xl mx-auto">
+          {supportingText}
+        </p>
+
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <Button asChild size="lg" variant="default">
+            <Link href={primaryCta.href}>{primaryCta.label}</Link>
+          </Button>
+          {secondaryCta && (
+            <Button
+              asChild
+              size="lg"
+              className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 border"
+            >
+              <Link href={secondaryCta.href}>{secondaryCta.label}</Link>
+            </Button>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── PageHero ────────────────────────────────────────────────────────────────
+
+export interface PageHeroProps {
+  eyebrow?: string;
+  /** The page title — rendered as <h1> */
+  title: string;
+  /** One supporting sentence */
+  description?: string;
+  /** Breadcrumb items (auto-prepends Home). Omit href on the last item. */
+  breadcrumbs?: BreadcrumbItem[];
+  className?: string;
+}
+
+/**
+ * PageHero — compact hero for interior pages.
+ * Eyebrow, one-line <h1>, optional supporting sentence, breadcrumb trail.
+ */
+export function PageHero({
+  eyebrow,
+  title,
+  description,
+  breadcrumbs = [],
+  className,
+}: PageHeroProps) {
+  return (
+    <section
+      className={cn(
+        "bg-gradient-to-b from-primary-light/50 to-surface border-b border-border",
+        "py-10 lg:py-14",
+        className
+      )}
+    >
+      <div className="layout-container space-y-4">
+        {/* Breadcrumbs */}
+        {breadcrumbs.length > 0 && (
+          <nav aria-label="Breadcrumb">
+            <ol className="flex items-center flex-wrap gap-1 list-none p-0 m-0">
+              <li className="flex items-center gap-1">
+                <Link
+                  href="/"
+                  className="flex items-center gap-1 text-caption text-text-muted hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline"
+                >
+                  <Home className="w-3.5 h-3.5" aria-hidden />
+                  Home
+                </Link>
+              </li>
+              {breadcrumbs.map((item, i) => {
+                const isLast = i === breadcrumbs.length - 1;
+                return (
+                  <li key={i} className="flex items-center gap-1">
+                    <ChevronRight
+                      className="w-3.5 h-3.5 text-border"
+                      aria-hidden
+                    />
+                    {item.href && !isLast ? (
+                      <Link
+                        href={item.href}
+                        className="text-caption text-text-muted hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline"
+                      >
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <span
+                        className="text-caption font-semibold text-text"
+                        aria-current="page"
+                      >
+                        {item.label}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
+        )}
+
+        {/* Eyebrow */}
+        {eyebrow && (
+          <p className="text-caption font-semibold uppercase tracking-widest text-secondary">
+            {eyebrow}
+          </p>
+        )}
+
+        {/* Title */}
+        <h1 className="text-h1 font-bold tracking-tight text-text">{title}</h1>
+
+        {/* Description */}
+        {description && (
+          <p className="text-body text-text-muted leading-relaxed max-w-2xl">
+            {description}
+          </p>
+        )}
       </div>
     </section>
   );
