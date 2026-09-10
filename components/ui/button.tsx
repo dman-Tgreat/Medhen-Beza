@@ -1,32 +1,35 @@
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-small font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:scale-[0.98]",
   {
     variants: {
       variant: {
+        primary:
+          "bg-primary text-white hover:bg-primary-dark shadow-cta border border-transparent",
         default:
-          "bg-teal-700 text-white hover:bg-teal-800 shadow-md shadow-teal-900/10",
-        destructive:
-          "bg-rose-600 text-white hover:bg-rose-700 shadow-md shadow-rose-900/10",
-        outline:
-          "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-xs",
+          "bg-primary text-white hover:bg-primary-dark shadow-cta border border-transparent",
         secondary:
-          "bg-teal-100 text-teal-900 hover:bg-teal-200 shadow-xs",
-        ghost: "hover:bg-slate-100 text-slate-700 hover:text-slate-900",
-        link: "text-teal-700 underline-offset-4 hover:underline",
+          "bg-surface text-primary border border-primary hover:bg-primary-light hover:text-primary-dark hover:border-primary-dark font-medium",
+        outline:
+          "bg-surface text-text border border-border hover:bg-background hover:text-text-muted",
+        ghost:
+          "bg-transparent text-text hover:bg-primary-light hover:text-primary-dark border border-transparent",
+        emergency:
+          "bg-emergency text-white hover:bg-emergency-dark shadow-emergency font-semibold border border-transparent",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-12 rounded-xl px-6 text-base",
-        icon: "h-10 w-10",
+        sm: "h-8 rounded-sm px-3 text-small",
+        lg: "h-12 rounded-lg px-6 text-body font-semibold",
+        icon: "h-10 w-10 p-0 shrink-0",
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "primary",
       size: "default",
     },
   }
@@ -34,12 +37,15 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
     return (
-      <button
+      <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
@@ -50,3 +56,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 export { Button, buttonVariants };
+

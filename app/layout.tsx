@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"],
+});
 
 export const metadata: Metadata = {
   title: {
@@ -19,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased scroll-smooth">
-      <body className={`${inter.className} min-h-full flex flex-col bg-slate-50 text-slate-900`}>
+    <html lang="en" className={`${inter.variable} h-full antialiased scroll-smooth`}>
+      <body className={`${inter.className} min-h-full flex flex-col bg-background text-text font-sans`}>
         {children}
       </body>
     </html>
