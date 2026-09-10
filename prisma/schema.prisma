@@ -1,4 +1,4 @@
-// Prisma schema for Medhen Beza Hospital
+// Prisma schema for Medhen Beza Hospital & CMS — Phase 1
 
 generator client {
   provider = "prisma-client-js"
@@ -9,92 +9,372 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  DOCTOR
-  STAFF
-  PATIENT
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum ContentStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  PUBLISHED
+  REJECTED
+  ARCHIVED
 }
 
-enum AppointmentStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-  COMPLETED
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
 }
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum ContactMessageStatus {
+  UNREAD
+  READ
+  REPLIED
+  ARCHIVED
+}
+
+// ─── 1. Role-Based Access Control (RBAC) ──────────────────────────────────────
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  password  String
-  role      Role     @default(PATIENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String     @id @default(uuid())
+  email        String     @unique
+  name         String
+  password     String     // Hashed password
+  avatarUrl    String?
+  isActive     Boolean    @default(true)
+  userRoles    UserRole[]
+  auditLogs    AuditLog[]
+  mediaUploads Media[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("users")
 }
+
+model Role {
+  id              String           @id @default(uuid())
+  name            String           @unique // e.g. "Hospital Director"
+  code            String           @unique // e.g. "HOSPITAL_DIRECTOR"
+  description     String?
+  isSystem        Boolean          @default(true)
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("roles")
+}
+
+model Permission {
+  id              String           @id @default(uuid())
+  action          String           // e.g. "CREATE", "READ", "UPDATE", "DELETE", "APPROVE", "PUBLISH"
+  resource        String           // e.g. "DOCTORS", "DEPARTMENTS", "SERVICES", "NEWS", "GALLERY", "CAREERS", "PAGES", "SETTINGS", "USERS", "AUDIT_LOGS"
+  description     String?
+  rolePermissions RolePermission[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([action, resource])
+  @@map("permissions")
+}
+
+model UserRole {
+  id         String   @id @default(uuid())
+  userId     String
+  roleId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  assignedAt   DateTime   @default(now())
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ─── 2. Departments, Services, Doctors ────────────────────────────────────────
 
 model Department {
   id           String        @id @default(uuid())
   name         String        @unique
-  description  String?
+  slug         String        @unique
+  description  String
+  image        String?
+  icon         String?
+  phone        String?
+  email        String?
+  location     String?
+  workingHours String?
+  status       ContentStatus @default(DRAFT)
+  isFeatured   Boolean       @default(false)
+  order        Int           @default(0)
   doctors      Doctor[]
-  appointments Appointment[]
+  services     Service[]
+  careers      Career[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-}
 
-model Doctor {
-  id             String        @id @default(uuid())
-  name           String
-  specialty      String
-  qualification  String
-  email          String        @unique
-  phone          String?
-  imageUrl       String?
-  availableDays  String[]
-  departmentId   String
-  department     Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  appointments   Appointment[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  @@map("departments")
 }
 
 model Service {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  category    String?
-  icon        String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String        @id @default(uuid())
+  title            String
+  slug             String        @unique
+  description      String
+  content          String?       @db.Text
+  image            String?
+  icon             String?
+  availabilityInfo String?
+  additionalInfo   String?
+  departmentId     String?
+  department       Department?   @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  status           ContentStatus @default(DRAFT)
+  isFeatured       Boolean       @default(false)
+  order            Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@map("services")
 }
 
-model Appointment {
-  id           String            @id @default(uuid())
-  patientName  String
-  patientEmail String
-  patientPhone String
-  date         DateTime
-  timeSlot     String
-  status       AppointmentStatus @default(PENDING)
-  notes        String?
-  doctorId     String
-  doctor       Doctor            @relation(fields: [doctorId], references: [id])
-  departmentId String
-  department   Department        @relation(fields: [departmentId], references: [id])
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+model Doctor {
+  id               String        @id @default(uuid())
+  fullName         String
+  slug             String        @unique
+  profilePhoto     String?
+  specialty        String
+  position         String?
+  biography        String?       @db.Text
+  qualifications   String[]
+  experience       String?       @db.Text
+  languages        String[]
+  areasOfExpertise String[]
+  availability     String?
+  departmentId     String
+  department       Department    @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  status           ContentStatus @default(DRAFT)
+  rejectionReason  String?
+  isFeatured       Boolean       @default(false)
+  order            Int           @default(0)
+  publishedAt      DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@map("doctors")
+}
+
+// ─── 3. News & Categories ─────────────────────────────────────────────────────
+
+model NewsCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  news        News[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("news_categories")
 }
 
 model News {
+  id              String        @id @default(uuid())
+  title           String
+  slug            String        @unique
+  summary         String        @db.Text
+  content         String        @db.Text
+  featuredImage   String?
+  authorName      String?
+  tags            String[]
+  seoTitle        String?
+  seoDescription  String?
+  categoryId      String?
+  category        NewsCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?
+  isFeatured      Boolean       @default(false)
+  viewCount       Int           @default(0)
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("news")
+}
+
+// ─── 4. Gallery & Media ───────────────────────────────────────────────────────
+
+model Gallery {
+  id           String        @id @default(uuid())
+  title        String
+  description  String?
+  album        String        @default("General") // e.g. "Facilities", "Events", "Medical Activities"
+  type         MediaType     @default(IMAGE)
+  url          String
+  thumbnailUrl String?
+  duration     String?       // for videos, e.g. "2:14"
+  status       ContentStatus @default(DRAFT)
+  order        Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("gallery")
+}
+
+model Media {
+  id           String    @id @default(uuid())
+  filename     String
+  originalName String
+  url          String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  publicId     String?   // Cloudinary / S3 asset key
+  uploadedById String?
+  uploadedBy   User?     @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("media")
+}
+
+// ─── 5. Careers ───────────────────────────────────────────────────────────────
+
+model Career {
+  id                      String         @id @default(uuid())
+  position                String
+  slug                    String         @unique
+  employmentType          EmploymentType @default(FULL_TIME)
+  location                String         @default("Addis Ababa, Ethiopia")
+  departmentId            String?
+  department              Department?    @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  description             String         @db.Text
+  responsibilities        String[]
+  requirements            String[]
+  qualifications          String[]
+  deadline                DateTime
+  applicationInstructions String         @default("Apply by sending your CV to careers@medhenbeza.com")
+  status                  ContentStatus  @default(DRAFT)
+  rejectionReason         String?
+  isFeatured              Boolean        @default(false)
+  publishedAt             DateTime?
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+
+  @@map("careers")
+}
+
+// ─── 6. Events, FAQs, Pages ───────────────────────────────────────────────────
+
+model HospitalEvent {
+  id              String        @id @default(uuid())
+  title           String
+  slug            String        @unique
+  description     String        @db.Text
+  eventDate       DateTime
+  location        String?
+  image           String?
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?
+  isFeatured      Boolean       @default(false)
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("hospital_events")
+}
+
+model FAQ {
+  id        String        @id @default(uuid())
+  question  String
+  answer    String        @db.Text
+  category  String        @default("General")
+  order     Int           @default(0)
+  status    ContentStatus @default(PUBLISHED)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("faqs")
+}
+
+model Page {
+  id        String        @id @default(uuid())
+  title     String
+  slug      String        @unique // e.g. "about", "facilities", "emergency"
+  content   String        @db.Text // Rich HTML or JSON string
+  status    ContentStatus @default(PUBLISHED)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("pages")
+}
+
+// ─── 7. Inquiries & Site Settings ─────────────────────────────────────────────
+
+model ContactMessage {
+  id        String               @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String               @db.Text
+  status    ContactMessageStatus @default(UNREAD)
+  notes     String?              @db.Text
+  repliedAt DateTime?
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@map("contact_messages")
+}
+
+model SiteSetting {
   id          String   @id @default(uuid())
-  title       String
-  slug        String   @unique
-  summary     String
-  content     String
-  category    String
-  imageUrl    String?
-  publishedAt DateTime @default(now())
-  createdAt   DateTime @default(now())
+  key         String   @unique
+  value       String   @db.Text
+  group       String   @default("general") // general, contact, emergency, seo
+  description String?
   updatedAt   DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+// ─── 8. Audit Trail ───────────────────────────────────────────────────────────
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  userId         String?
+  userEmail      String?
+  userName       String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action         String   // CREATE, UPDATE, DELETE, APPROVE, REJECT, PUBLISH, UNPUBLISH, ARCHIVE, LOGIN
+  entityType     String   // Doctor, Career, News, Department, Service, User, Role, Setting
+  entityId       String
+  previousStatus String?
+  newStatus      String?
+  changes        String?  @db.Text // JSON string diff
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
 }

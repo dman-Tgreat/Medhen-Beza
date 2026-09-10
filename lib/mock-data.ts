@@ -17,6 +17,14 @@ import {
   Eye,
   Microscope,
   Pill,
+  Award,
+  ShieldCheck,
+  Users,
+  HeartHandshake,
+  UserCheck,
+  Building2,
+  Sparkles,
+  type LucideIcon,
 } from "lucide-react";
 
 import type { ServiceCardData } from "@/components/content/ServiceCard";
@@ -313,3 +321,240 @@ export const MOCK_GALLERY: GalleryCardData[] = [
     href: "/gallery",
   },
 ];
+
+// ─── About Page Structured Types & Data ──────────────────────────────────────
+
+export interface AboutHeroData {
+  title: string;
+  supportingText: string;
+  image?: string;
+  imageAlt: string;
+}
+
+export interface AboutIntroductionData {
+  eyebrow: string;
+  title: string;
+  paragraphs: string[];
+  photo?: string;
+  photoAlt: string;
+  ctaLabel: string;
+  ctaHref: string;
+}
+
+export interface AboutMissionVisionData {
+  mission: {
+    eyebrow: string;
+    title: string;
+    text: string;
+  };
+  vision: {
+    eyebrow: string;
+    title: string;
+    text: string;
+  };
+}
+
+export interface AboutValueItem {
+  icon: LucideIcon;
+  label: string;
+  description: string;
+}
+
+export interface AboutLeaderItem {
+  name: string;
+  position: string;
+  photo?: string;
+  photoAlt?: string;
+}
+
+export interface AboutEnvironmentImage {
+  name: string;
+  category: string;
+  image?: string;
+  imageAlt: string;
+}
+
+export interface AboutEnvironmentData {
+  eyebrow: string;
+  title: string;
+  description: string;
+  featured: AboutEnvironmentImage;
+  supporting: AboutEnvironmentImage[];
+}
+
+export interface AboutAccreditationItem {
+  name: string;
+  issuer: string;
+  logo?: string;
+  logoAlt?: string;
+}
+
+export interface AboutFinalCtaData {
+  title: string;
+  description: string;
+  ctaLabel: string;
+  ctaHref: string;
+}
+
+export interface AboutPageData {
+  hero: AboutHeroData;
+  introduction: AboutIntroductionData;
+  missionVision: AboutMissionVisionData;
+  values: AboutValueItem[];
+  leadership: AboutLeaderItem[];
+  environment: AboutEnvironmentData;
+  accreditations: AboutAccreditationItem[];
+  finalCta: AboutFinalCtaData;
+}
+
+export const MOCK_ABOUT_PAGE: AboutPageData = {
+  hero: {
+    title: "About Medhen Beza",
+    supportingText:
+      "[Placeholder] Committed to clinical excellence, compassionate patient care, and modern medical standards for the Addis Ababa community and beyond.",
+    image: "",
+    imageAlt: "Medhen Beza Hospital main medical facility",
+  },
+  introduction: {
+    eyebrow: "Our Story & Purpose",
+    title: "[Placeholder] Dedicated to compassionate care & clinical innovation",
+    paragraphs: [
+      "[Placeholder] Medhen Beza Hospital was established with a clear mandate: to provide accessible, patient-centered, and high-quality medical services to individuals and families throughout the region.",
+      "[Placeholder] Our modern clinical campus brings together specialized physicians, experienced nursing teams, and advanced diagnostic infrastructure to deliver comprehensive healthcare across multiple medical disciplines.",
+      "[Placeholder] Guided by strong ethical commitments and evidence-based clinical practices, we strive to make every patient visit safe, dignified, and supportive from admission through recovery.",
+    ],
+    photo: "",
+    photoAlt: "Medical team and care providers at Medhen Beza Hospital",
+    ctaLabel: "Contact Us",
+    ctaHref: "/contact",
+  },
+  missionVision: {
+    mission: {
+      eyebrow: "Our Mission",
+      title: "Compassionate, high-standard healthcare for every patient",
+      text: "[Placeholder] To deliver high-quality, patient-focused healthcare services that enhance wellness, prevent illness, and heal with empathy, dignity, and professional integrity.",
+    },
+    vision: {
+      eyebrow: "Our Vision",
+      title: "Setting the benchmark for healthcare excellence in the region",
+      text: "[Placeholder] To be recognized as a premier center of clinical excellence and medical innovation in East Africa, trusted by patients, families, and healthcare professionals alike.",
+    },
+  },
+  values: [
+    {
+      icon: Heart,
+      label: "Compassion",
+      description: "Treating every patient and family member with empathy, warmth, and genuine human kindness.",
+    },
+    {
+      icon: Award,
+      label: "Excellence",
+      description: "Pursuing the highest clinical and operational standards across all our services and departments.",
+    },
+    {
+      icon: ShieldCheck,
+      label: "Integrity",
+      description: "Upholding honesty, ethical transparency, patient confidentiality, and medical accountability.",
+    },
+    {
+      icon: Users,
+      label: "Teamwork",
+      description: "Collaborating across multidisciplinary teams to ensure holistic and coordinated patient care.",
+    },
+    {
+      icon: HeartHandshake,
+      label: "Respect",
+      description: "Valuing individual dignity, cultural diversity, and patient autonomy at every point of interaction.",
+    },
+    {
+      icon: UserCheck,
+      label: "Patient Focus",
+      description: "Placing patient safety, comfort, and positive clinical outcomes at the center of every decision.",
+    },
+  ],
+  leadership: [
+    {
+      name: "[Placeholder] Dr. Medical Director",
+      position: "Chief Medical Officer",
+      photo: "",
+      photoAlt: "Chief Medical Officer portrait",
+    },
+    {
+      name: "[Placeholder] Hospital Managing Director",
+      position: "Managing Director / CEO",
+      photo: "",
+      photoAlt: "Managing Director portrait",
+    },
+    {
+      name: "[Placeholder] Dr. Clinical Lead",
+      position: "Head of Clinical Services & Surgery",
+      photo: "",
+      photoAlt: "Head of Clinical Services portrait",
+    },
+    {
+      name: "[Placeholder] Director of Nursing",
+      position: "Director of Nursing & Patient Experience",
+      photo: "",
+      photoAlt: "Director of Nursing portrait",
+    },
+  ],
+  environment: {
+    eyebrow: "Our Environment",
+    title: "A calm, modern care facility designed for healing",
+    description:
+      "[Placeholder] Take a look at our clinical and welcoming hospital environment, designed for patient comfort, safety, and efficient care delivery.",
+    featured: {
+      name: "Main Campus & Inpatient Pavilion",
+      category: "Main Campus",
+      image: "",
+      imageAlt: "Medhen Beza Hospital main campus and inpatient building exterior",
+    },
+    supporting: [
+      {
+        name: "Reception & Patient Welcoming Area",
+        category: "Welcoming & Admitting",
+        image: "",
+        imageAlt: "Spacious and calm hospital reception and welcoming desk",
+      },
+      {
+        name: "Diagnostic Pathology & Lab Suites",
+        category: "Diagnostics & Imaging",
+        image: "",
+        imageAlt: "Modern diagnostic laboratory and testing stations",
+      },
+      {
+        name: "Specialized Clinical Treatment Suites",
+        category: "Clinical Care",
+        image: "",
+        imageAlt: "Comfortable and sterile patient treatment consultation suite",
+      },
+    ],
+  },
+  accreditations: [
+    {
+      name: "National Health Regulatory Authority (EFDA)",
+      issuer: "Ministry of Health Ethiopia",
+      logo: "",
+      logoAlt: "National Health Authority Certification badge",
+    },
+    {
+      name: "Quality & Patient Safety Standards Accreditation",
+      issuer: "Healthcare Quality Board",
+      logo: "",
+      logoAlt: "Healthcare Quality Standards seal",
+    },
+    {
+      name: "Clinical Diagnostic Excellence Certification",
+      issuer: "Medical Laboratory Standards",
+      logo: "",
+      logoAlt: "Clinical Diagnostic Excellence badge",
+    },
+  ],
+  finalCta: {
+    title: "Have questions about our hospital?",
+    description: "Our team is ready to help.",
+    ctaLabel: "Contact Us",
+    ctaHref: "/contact",
+  },
+};
+
