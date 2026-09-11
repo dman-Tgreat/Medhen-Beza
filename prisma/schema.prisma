@@ -1,4 +1,5 @@
 // Prisma schema for Medhen Beza Hospital & CMS — Phase 1
+// PostgreSQL Database Schema
 
 generator client {
   provider = "prisma-client-js"
@@ -11,6 +12,10 @@ datasource db {
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
+/// Content approval state machine enum
+/// Transitions:
+///   DRAFT -> PENDING_APPROVAL -> APPROVED -> PUBLISHED -> ARCHIVED
+///   PENDING_APPROVAL -> REJECTED -> DRAFT
 enum ContentStatus {
   DRAFT
   PENDING_APPROVAL
@@ -20,12 +25,14 @@ enum ContentStatus {
   ARCHIVED
 }
 
+/// Gallery and Asset Media Type Discriminator
 enum MediaType {
   IMAGE
   VIDEO
   DOCUMENT
 }
 
+/// Employment Type for Career Openings
 enum EmploymentType {
   FULL_TIME
   PART_TIME
@@ -33,6 +40,7 @@ enum EmploymentType {
   INTERNSHIP
 }
 
+/// Contact Inquiry Message Processing Status
 enum ContactMessageStatus {
   UNREAD
   READ
@@ -43,43 +51,102 @@ enum ContactMessageStatus {
 // ─── 1. Role-Based Access Control (RBAC) ──────────────────────────────────────
 
 model User {
-  id           String     @id @default(uuid())
-  email        String     @unique
-  name         String
-  password     String     // Hashed password
-  avatarUrl    String?
-  isActive     Boolean    @default(true)
-  userRoles    UserRole[]
-  auditLogs    AuditLog[]
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String // Hashed password (e.g. bcrypt / argon2)
+  avatarUrl String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // RBAC Relations
+  userRoles UserRole[]
+
+  // Audit Logs
+  auditLogs AuditLog[]
+
+  // Media Uploads
   mediaUploads Media[]
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+
+  // Content Ownership Tracking: Doctors
+  createdDoctors   Doctor[] @relation("DoctorCreatedBy")
+  submittedDoctors Doctor[] @relation("DoctorSubmittedBy")
+  approvedDoctors  Doctor[] @relation("DoctorApprovedBy")
+  publishedDoctors Doctor[] @relation("DoctorPublishedBy")
+
+  // Content Ownership Tracking: Departments
+  createdDepartments   Department[] @relation("DepartmentCreatedBy")
+  submittedDepartments Department[] @relation("DepartmentSubmittedBy")
+  approvedDepartments  Department[] @relation("DepartmentApprovedBy")
+  publishedDepartments Department[] @relation("DepartmentPublishedBy")
+
+  // Content Ownership Tracking: Services
+  createdServices   Service[] @relation("ServiceCreatedBy")
+  submittedServices Service[] @relation("ServiceSubmittedBy")
+  approvedServices  Service[] @relation("ServiceApprovedBy")
+  publishedServices Service[] @relation("ServicePublishedBy")
+
+  // Content Ownership Tracking: News
+  createdNews   News[] @relation("NewsCreatedBy")
+  submittedNews News[] @relation("NewsSubmittedBy")
+  approvedNews  News[] @relation("NewsApprovedBy")
+  publishedNews News[] @relation("NewsPublishedBy")
+
+  // Content Ownership Tracking: Gallery
+  createdGalleries   Gallery[] @relation("GalleryCreatedBy")
+  submittedGalleries Gallery[] @relation("GallerySubmittedBy")
+  approvedGalleries  Gallery[] @relation("GalleryApprovedBy")
+  publishedGalleries Gallery[] @relation("GalleryPublishedBy")
+
+  // Content Ownership Tracking: Careers
+  createdCareers   Career[] @relation("CareerCreatedBy")
+  submittedCareers Career[] @relation("CareerSubmittedBy")
+  approvedCareers  Career[] @relation("CareerApprovedBy")
+  publishedCareers Career[] @relation("CareerPublishedBy")
+
+  // Content Ownership Tracking: Pages
+  createdPages   Page[] @relation("PageCreatedBy")
+  submittedPages Page[] @relation("PageSubmittedBy")
+  approvedPages  Page[] @relation("PageApprovedBy")
+  publishedPages Page[] @relation("PagePublishedBy")
+
+  // Content Ownership Tracking: Hospital Events
+  createdEvents   HospitalEvent[] @relation("EventCreatedBy")
+  submittedEvents HospitalEvent[] @relation("EventSubmittedBy")
+  approvedEvents  HospitalEvent[] @relation("EventApprovedBy")
+  publishedEvents HospitalEvent[] @relation("EventPublishedBy")
+
+  // Site Settings updates
+  siteSettingsUpdated SiteSetting[]
 
   @@map("users")
 }
 
 model Role {
-  id              String           @id @default(uuid())
-  name            String           @unique // e.g. "Hospital Director"
-  code            String           @unique // e.g. "HOSPITAL_DIRECTOR"
-  description     String?
-  isSystem        Boolean          @default(true)
+  id          String   @id @default(uuid())
+  name        String   @unique // e.g. "Hospital Director", "Medical Director"
+  code        String   @unique // e.g. "HOSPITAL_DIRECTOR", "MEDICAL_DIRECTOR"
+  description String?
+  isSystem    Boolean  @default(true) // System-seeded roles cannot be deleted
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   userRoles       UserRole[]
   rolePermissions RolePermission[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
 
   @@map("roles")
 }
 
 model Permission {
-  id              String           @id @default(uuid())
-  action          String           // e.g. "CREATE", "READ", "UPDATE", "DELETE", "APPROVE", "PUBLISH"
-  resource        String           // e.g. "DOCTORS", "DEPARTMENTS", "SERVICES", "NEWS", "GALLERY", "CAREERS", "PAGES", "SETTINGS", "USERS", "AUDIT_LOGS"
-  description     String?
+  id          String   @id @default(uuid())
+  action      String // e.g. "CREATE", "READ", "UPDATE", "DELETE", "SUBMIT", "APPROVE", "PUBLISH", "ARCHIVE"
+  resource    String // e.g. "DOCTORS", "DEPARTMENTS", "SERVICES", "NEWS", "GALLERY", "CAREERS", "PAGES", "SETTINGS", "USERS", "ROLES", "AUDIT_LOGS", "MEDIA", "MESSAGES"
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   rolePermissions RolePermission[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
 
   @@unique([action, resource])
   @@map("permissions")
@@ -112,72 +179,162 @@ model RolePermission {
 // ─── 2. Departments, Services, Doctors ────────────────────────────────────────
 
 model Department {
-  id           String        @id @default(uuid())
-  name         String        @unique
-  slug         String        @unique
-  description  String
-  image        String?
-  icon         String?
+  id           String  @id @default(uuid())
+  name         String  @unique
+  slug         String  @unique
+  description  String  @db.Text
+  image        String? // Cover / Department Photo URL
+  icon         String? // Icon identifier or URL
   phone        String?
   email        String?
-  location     String?
+  location     String? // Building / Wing / Floor
   workingHours String?
-  status       ContentStatus @default(DRAFT)
-  isFeatured   Boolean       @default(false)
-  order        Int           @default(0)
-  doctors      Doctor[]
-  services     Service[]
-  careers      Career[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  isFeatured   Boolean @default(false)
+  order        Int     @default(0)
 
+  // SEO Metadata
+  metaTitle       String?
+  metaDescription String? @db.Text
+  canonicalUrl    String?
+  ogImage         String?
+
+  // Approval Workflow State & Audit
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?       @db.Text
+
+  createdById String?
+  createdBy   User?    @relation("DepartmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  submittedById String?
+  submittedBy   User?     @relation("DepartmentSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt   DateTime?
+
+  approvedById String?
+  approvedBy   User?     @relation("DepartmentApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+
+  publishedById String?
+  publishedBy   User?     @relation("DepartmentPublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+
+  archivedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  doctors  Doctor[]
+  services Service[]
+  careers  Career[]
+
+  @@index([status])
+  @@index([slug])
   @@map("departments")
 }
 
 model Service {
-  id               String        @id @default(uuid())
+  id               String  @id @default(uuid())
   title            String
-  slug             String        @unique
-  description      String
-  content          String?       @db.Text
+  slug             String  @unique
+  description      String  @db.Text
+  content          String? @db.Text // In-depth service details / preparation
   image            String?
   icon             String?
-  availabilityInfo String?
-  additionalInfo   String?
-  departmentId     String?
-  department       Department?   @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  status           ContentStatus @default(DRAFT)
-  isFeatured       Boolean       @default(false)
-  order            Int           @default(0)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  availabilityInfo String? // e.g. "24/7", "Mon-Fri 8:00 AM - 5:00 PM"
+  additionalInfo   String? @db.Text
+  isFeatured       Boolean @default(false)
+  order            Int     @default(0)
 
+  // Department Relation (Service belongs to one Department)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+
+  // SEO Metadata
+  metaTitle       String?
+  metaDescription String? @db.Text
+  canonicalUrl    String?
+  ogImage         String?
+
+  // Approval Workflow State & Audit
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?       @db.Text
+
+  createdById String?
+  createdBy   User?    @relation("ServiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  submittedById String?
+  submittedBy   User?     @relation("ServiceSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt   DateTime?
+
+  approvedById String?
+  approvedBy   User?     @relation("ServiceApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+
+  publishedById String?
+  publishedBy   User?     @relation("ServicePublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+
+  archivedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  @@index([departmentId])
+  @@index([status])
+  @@index([slug])
   @@map("services")
 }
 
 model Doctor {
-  id               String        @id @default(uuid())
+  id               String   @id @default(uuid())
   fullName         String
-  slug             String        @unique
+  slug             String   @unique
   profilePhoto     String?
   specialty        String
-  position         String?
-  biography        String?       @db.Text
-  qualifications   String[]
-  experience       String?       @db.Text
-  languages        String[]
+  position         String? // e.g. "Chief of Cardiology", "Senior Consultant"
+  biography        String?  @db.Text
+  qualifications   String[] // e.g. ["MD", "PhD", "FACC"]
+  experience       String?  @db.Text
+  languages        String[] // e.g. ["Amharic", "English", "Oromo"]
   areasOfExpertise String[]
-  availability     String?
-  departmentId     String
-  department       Department    @relation(fields: [departmentId], references: [id], onDelete: Restrict)
-  status           ContentStatus @default(DRAFT)
-  rejectionReason  String?
-  isFeatured       Boolean       @default(false)
-  order            Int           @default(0)
-  publishedAt      DateTime?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  availability     String? // e.g. "Monday, Wednesday 9:00 AM - 1:00 PM"
+  isFeatured       Boolean  @default(false)
+  order            Int      @default(0)
 
+  // Department Relation (Doctor belongs to one Department)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+
+  // SEO Metadata
+  metaTitle       String?
+  metaDescription String? @db.Text
+  canonicalUrl    String?
+  ogImage         String?
+
+  // Approval Workflow State & Audit
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?       @db.Text
+
+  createdById String?
+  createdBy   User?    @relation("DoctorCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  submittedById String?
+  submittedBy   User?     @relation("DoctorSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt   DateTime?
+
+  approvedById String?
+  approvedBy   User?     @relation("DoctorApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+
+  publishedById String?
+  publishedBy   User?     @relation("DoctorPublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+
+  archivedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  @@index([departmentId])
+  @@index([status])
+  @@index([slug])
   @@map("doctors")
 }
 
@@ -188,71 +345,136 @@ model NewsCategory {
   name        String   @unique
   slug        String   @unique
   description String?
-  news        News[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  news News[]
 
   @@map("news_categories")
 }
 
 model News {
-  id              String        @id @default(uuid())
-  title           String
-  slug            String        @unique
-  summary         String        @db.Text
-  content         String        @db.Text
-  featuredImage   String?
-  authorName      String?
-  tags            String[]
-  seoTitle        String?
-  seoDescription  String?
-  categoryId      String?
-  category        NewsCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  status          ContentStatus @default(DRAFT)
-  rejectionReason String?
-  isFeatured      Boolean       @default(false)
-  viewCount       Int           @default(0)
-  publishedAt     DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  summary       String   @db.Text
+  content       String   @db.Text
+  featuredImage String?
+  authorName    String? // Public-facing byline
+  tags          String[] // Tag list stored as native PostgreSQL text array
+  isFeatured    Boolean  @default(false)
+  viewCount     Int      @default(0)
 
+  // News Category Relation
+  categoryId String?
+  category   NewsCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // SEO Metadata
+  metaTitle       String?
+  metaDescription String? @db.Text
+  canonicalUrl    String?
+  ogImage         String?
+
+  // Approval Workflow State & Audit
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?       @db.Text
+
+  createdById String?
+  createdBy   User?    @relation("NewsCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  submittedById String?
+  submittedBy   User?     @relation("NewsSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt   DateTime?
+
+  approvedById String?
+  approvedBy   User?     @relation("NewsApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+
+  publishedById String?
+  publishedBy   User?     @relation("NewsPublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+
+  archivedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([slug])
   @@map("news")
 }
 
 // ─── 4. Gallery & Media ───────────────────────────────────────────────────────
 
 model Gallery {
-  id           String        @id @default(uuid())
-  title        String
-  description  String?
-  album        String        @default("General") // e.g. "Facilities", "Events", "Medical Activities"
-  type         MediaType     @default(IMAGE)
-  url          String
-  thumbnailUrl String?
-  duration     String?       // for videos, e.g. "2:14"
-  status       ContentStatus @default(DRAFT)
-  order        Int           @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id          String    @id @default(uuid())
+  title       String
+  description String?   @db.Text
+  album       String    @default("General") // e.g. "Facilities", "Events", "Medical Activities", "Diagnostics"
+  type        MediaType @default(IMAGE) // Discriminator: IMAGE vs VIDEO
 
+  // Asset links
+  url          String // Main URL (image URL or direct video stream URL)
+  thumbnailUrl String? // Poster/Thumbnail image for video or preview for image
+  videoUrl     String? // External embed URL (YouTube / Vimeo / Cloudinary video)
+  duration     String? // Video runtime string (e.g. "03:45")
+  width        Int?
+  height       Int?
+  altText      String?
+  order        Int     @default(0)
+
+  // Approval Workflow State & Audit
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?       @db.Text
+
+  createdById String?
+  createdBy   User?    @relation("GalleryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  submittedById String?
+  submittedBy   User?     @relation("GallerySubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt   DateTime?
+
+  approvedById String?
+  approvedBy   User?     @relation("GalleryApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+
+  publishedById String?
+  publishedBy   User?     @relation("GalleryPublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+
+  archivedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  @@index([type])
+  @@index([album])
+  @@index([status])
   @@map("gallery")
 }
 
 model Media {
-  id           String    @id @default(uuid())
-  filename     String
-  originalName String
-  url          String
-  mimeType     String
-  size         Int
-  width        Int?
-  height       Int?
-  publicId     String?   // Cloudinary / S3 asset key
-  uploadedById String?
-  uploadedBy   User?     @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id              String  @id @default(uuid())
+  filename        String // Stored file name / generated key
+  originalName    String // Original uploaded file name
+  url             String // Public CDN / signed access URL
+  storageProvider String  @default("cloudinary") // "cloudinary" | "s3" | "minio" | "gcs" | "local"
+  storageKey      String // Cloudinary public_id or S3/MinIO object key
+  bucket          String? // S3/MinIO bucket name if applicable
+  mimeType        String // e.g. "image/webp", "image/png", "video/mp4", "application/pdf"
+  sizeBytes       Int // File size in bytes
+  width           Int? // Width in pixels (for images/videos)
+  height          Int? // Height in pixels (for images/videos)
+  altText         String? // Accessibility text
+  folder          String? @default("uploads")
 
+  // Uploader tracking
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([storageProvider, storageKey])
+  @@index([uploadedById])
   @@map("media")
 }
 
@@ -264,41 +486,135 @@ model Career {
   slug                    String         @unique
   employmentType          EmploymentType @default(FULL_TIME)
   location                String         @default("Addis Ababa, Ethiopia")
-  departmentId            String?
-  department              Department?    @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   description             String         @db.Text
   responsibilities        String[]
   requirements            String[]
   qualifications          String[]
   deadline                DateTime
   applicationInstructions String         @default("Apply by sending your CV to careers@medhenbeza.com")
-  status                  ContentStatus  @default(DRAFT)
-  rejectionReason         String?
   isFeatured              Boolean        @default(false)
-  publishedAt             DateTime?
-  createdAt               DateTime       @default(now())
-  updatedAt               DateTime       @updatedAt
 
+  // Department Relation
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  // SEO Metadata
+  metaTitle       String?
+  metaDescription String? @db.Text
+  canonicalUrl    String?
+
+  // Approval Workflow State & Audit
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?       @db.Text
+
+  createdById String?
+  createdBy   User?    @relation("CareerCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  submittedById String?
+  submittedBy   User?     @relation("CareerSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt   DateTime?
+
+  approvedById String?
+  approvedBy   User?     @relation("CareerApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+
+  publishedById String?
+  publishedBy   User?     @relation("CareerPublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+
+  archivedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  @@index([departmentId])
+  @@index([status])
+  @@index([slug])
   @@map("careers")
 }
 
-// ─── 6. Events, FAQs, Pages ───────────────────────────────────────────────────
+// ─── 6. Pages, Events, FAQs ───────────────────────────────────────────────────
+
+model Page {
+  id      String  @id @default(uuid())
+  title   String
+  slug    String  @unique // e.g. "about", "facilities", "emergency", "patient-guide"
+  content String  @db.Text // Rich HTML or serialized JSON (Block/TipTap editor)
+  excerpt String? @db.Text
+
+  // SEO Metadata
+  metaTitle       String?
+  metaDescription String? @db.Text
+  canonicalUrl    String?
+  ogImage         String?
+
+  // Approval Workflow State & Audit
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?       @db.Text
+
+  createdById String?
+  createdBy   User?    @relation("PageCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  submittedById String?
+  submittedBy   User?     @relation("PageSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt   DateTime?
+
+  approvedById String?
+  approvedBy   User?     @relation("PageApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+
+  publishedById String?
+  publishedBy   User?     @relation("PagePublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+
+  archivedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  @@index([status])
+  @@index([slug])
+  @@map("pages")
+}
 
 model HospitalEvent {
-  id              String        @id @default(uuid())
-  title           String
-  slug            String        @unique
-  description     String        @db.Text
-  eventDate       DateTime
-  location        String?
-  image           String?
-  status          ContentStatus @default(DRAFT)
-  rejectionReason String?
-  isFeatured      Boolean       @default(false)
-  publishedAt     DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String   @db.Text
+  eventDate   DateTime
+  location    String?
+  image       String?
+  isFeatured  Boolean  @default(false)
 
+  // SEO Metadata
+  metaTitle       String?
+  metaDescription String? @db.Text
+  canonicalUrl    String?
+
+  // Approval Workflow State & Audit
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?       @db.Text
+
+  createdById String?
+  createdBy   User?    @relation("EventCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  submittedById String?
+  submittedBy   User?     @relation("EventSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt   DateTime?
+
+  approvedById String?
+  approvedBy   User?     @relation("EventApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+
+  publishedById String?
+  publishedBy   User?     @relation("EventPublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+
+  archivedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  @@index([status])
+  @@index([slug])
   @@map("hospital_events")
 }
 
@@ -312,19 +628,9 @@ model FAQ {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
+  @@index([category])
+  @@index([status])
   @@map("faqs")
-}
-
-model Page {
-  id        String        @id @default(uuid())
-  title     String
-  slug      String        @unique // e.g. "about", "facilities", "emergency"
-  content   String        @db.Text // Rich HTML or JSON string
-  status    ContentStatus @default(PUBLISHED)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-
-  @@map("pages")
 }
 
 // ─── 7. Inquiries & Site Settings ─────────────────────────────────────────────
@@ -337,44 +643,51 @@ model ContactMessage {
   subject   String
   message   String               @db.Text
   status    ContactMessageStatus @default(UNREAD)
-  notes     String?              @db.Text
+  notes     String?              @db.Text // Internal follow-up notes
   repliedAt DateTime?
   createdAt DateTime             @default(now())
   updatedAt DateTime             @updatedAt
 
+  @@index([status])
+  @@index([createdAt])
   @@map("contact_messages")
 }
 
 model SiteSetting {
   id          String   @id @default(uuid())
-  key         String   @unique
-  value       String   @db.Text
-  group       String   @default("general") // general, contact, emergency, seo
+  key         String   @unique // e.g. "contact.emergency_phone", "contact.email", "general.social_links"
+  value       String   @db.Text // String value or serialized JSON payload
+  group       String   @default("general") // "general" | "contact" | "emergency" | "social" | "hours" | "seo"
   description String?
+  isPublic    Boolean  @default(true) // Whether this setting is exposed via public site config API
+  updatedById String?
+  updatedBy   User?    @relation(fields: [updatedById], references: [id], onDelete: SetNull)
   updatedAt   DateTime @updatedAt
 
+  @@index([group])
   @@map("site_settings")
 }
 
 // ─── 8. Audit Trail ───────────────────────────────────────────────────────────
 
 model AuditLog {
-  id             String   @id @default(uuid())
+  id             String         @id @default(uuid())
   userId         String?
   userEmail      String?
   userName       String?
-  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  action         String   // CREATE, UPDATE, DELETE, APPROVE, REJECT, PUBLISH, UNPUBLISH, ARCHIVE, LOGIN
-  entityType     String   // Doctor, Career, News, Department, Service, User, Role, Setting
-  entityId       String
-  previousStatus String?
-  newStatus      String?
-  changes        String?  @db.Text // JSON string diff
+  user           User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action         String // CREATE, SUBMIT, APPROVE, REJECT, PUBLISH, UNPUBLISH, ARCHIVE, DELETE, UPDATE, LOGIN
+  contentType    String // Doctor, Department, Service, News, Gallery, Career, Page, Event, SiteSetting, User, Role
+  contentId      String
+  previousStatus ContentStatus?
+  newStatus      ContentStatus?
+  changes        String?        @db.Text // JSON diff string of changed attributes
   ipAddress      String?
   userAgent      String?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime       @default(now())
 
   @@index([userId])
-  @@index([entityType, entityId])
+  @@index([contentType, contentId])
+  @@index([createdAt])
   @@map("audit_logs")
 }
