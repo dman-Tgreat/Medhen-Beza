@@ -75,7 +75,7 @@ export default function ServicesPage() {
             {/* Search Input */}
             <div className="relative flex-1 max-w-md">
               <Search
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-light"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-16 h-16 text-text-light"
                 aria-hidden
               />
               <Input
@@ -83,7 +83,7 @@ export default function ServicesPage() {
                 placeholder="Search services, procedures, treatments..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 bg-background h-11 text-small border-border focus-visible:ring-primary"
+                className="pl-10 pr-4 bg-background h-11 w-40 text-small border-border focus-visible:ring-primary"
                 aria-label="Search services"
               />
               {searchQuery && (
