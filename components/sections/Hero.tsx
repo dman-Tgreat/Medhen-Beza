@@ -106,16 +106,16 @@ export function Hero({
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-4">
-              <Button asChild size="lg" variant="default">
-                <Link href={primaryCta.href} className="gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+              <Button asChild size="lg" variant="primary" className="w-full sm:w-auto">
+                <Link href={primaryCta.href}>
                   <Calendar className="w-5 h-5" />
                   {primaryCta.label}
                 </Link>
               </Button>
               {secondaryCta && (
-                <Button asChild size="lg" variant="secondary">
-                  <Link href={secondaryCta.href} className="gap-2">
+                <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto">
+                  <Link href={secondaryCta.href}>
                     <PhoneCall className="w-5 h-5" />
                     {secondaryCta.label}
                   </Link>
@@ -273,15 +273,16 @@ export function HeroWithBackground({
           {supportingText}
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <Button asChild size="lg" variant="default">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto">
+          <Button asChild size="lg" variant="primary" className="w-full sm:w-auto">
             <Link href={primaryCta.href}>{primaryCta.label}</Link>
           </Button>
           {secondaryCta && (
             <Button
               asChild
               size="lg"
-              className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 border"
+              variant="outline"
+              className="w-full sm:w-auto bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white"
             >
               <Link href={secondaryCta.href}>{secondaryCta.label}</Link>
             </Button>

@@ -315,9 +315,9 @@ function EmergencyCTA() {
         </div>
 
         {/* CTA buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
-            <Link href="/contact" className="gap-2 inline-flex items-center">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto">
+          <Button asChild size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90">
+            <Link href="/contact">
               <Mail className="w-5 h-5" aria-hidden />
               Contact Us
             </Link>
@@ -326,6 +326,7 @@ function EmergencyCTA() {
             phone={HOSPITAL_INFO.emergencyPhone}
             label="Emergency Line"
             size="lg"
+            className="w-full sm:w-auto"
           />
         </div>
 

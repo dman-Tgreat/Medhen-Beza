@@ -219,8 +219,8 @@ export default function MessagesAdminPage() {
                 <Button variant="ghost" size="sm" onClick={() => setViewingMessage(null)} className="text-xs">
                   Close
                 </Button>
-                <Button variant="primary" size="sm" onClick={handleSendReply} className="text-xs shadow-cta">
-                  <CornerDownLeft className="h-3.5 w-3.5 mr-1.5" />
+                <Button variant="primary" size="sm" onClick={handleSendReply} className="text-xs">
+                  <CornerDownLeft className="h-3.5 w-3.5" />
                   Send Email Reply
                 </Button>
               </DialogFooter>

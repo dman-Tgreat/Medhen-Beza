@@ -123,18 +123,15 @@ export default function FAQsPage() {
             Our patient support and front desk reception team are ready to
             answer your questions 24/7.
           </p>
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
-            <Button asChild size="default">
-              <Link href="/contact" className="gap-2">
+          <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
+            <Button asChild size="default" className="w-full sm:w-auto">
+              <Link href="/contact">
                 <Mail className="w-4 h-4" />
                 Contact Us
               </Link>
             </Button>
-            <Button asChild variant="secondary" size="default">
-              <a
-                href={`tel:${HOSPITAL_INFO.generalPhone.replace(/\s/g, "")}`}
-                className="gap-2"
-              >
+            <Button asChild variant="secondary" size="default" className="w-full sm:w-auto">
+              <a href={`tel:${HOSPITAL_INFO.generalPhone.replace(/\s/g, "")}`}>
                 <PhoneCall className="w-4 h-4" />
                 Call {HOSPITAL_INFO.generalPhone}
               </a>

@@ -56,25 +56,26 @@ const EmergencyButton = React.forwardRef<
 
     const sharedClassName = cn(
       // Generous touch targets — never smaller than 44 px tall
-      "min-h-[44px] px-5 gap-2 font-semibold tracking-wide",
+      "min-h-[44px] px-5 font-semibold tracking-wide",
       "animate-pulse-subtle hover:[animation:none]",
       className
     );
 
     if (phone) {
       return (
-        <a
-          href={`tel:${phone.replace(/\s/g, "")}`}
-          aria-label={`Call emergency line: ${phone}`}
-          className={cn(
-            "inline-flex items-center justify-center rounded-md transition-all",
-            "bg-emergency text-white hover:bg-emergency-dark shadow-emergency",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emergency focus-visible:ring-offset-2",
-            sharedClassName
-          )}
+        <Button
+          asChild
+          variant="emergency"
+          size={size}
+          className={sharedClassName}
         >
-          {content}
-        </a>
+          <a
+            href={`tel:${phone.replace(/\s/g, "")}`}
+            aria-label={`Call emergency line: ${phone}`}
+          >
+            {content}
+          </a>
+        </Button>
       );
     }
 

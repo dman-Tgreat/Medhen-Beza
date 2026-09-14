@@ -178,48 +178,48 @@ export default function AdminDashboardPage() {
 
         <div className="flex items-center gap-2 shrink-0">
           {currentRole === "HOSPITAL_DIRECTOR" && (
-            <Link href="/admin/approvals">
-              <Button variant="primary" size="sm" className="shadow-cta">
-                <FileCheck className="w-4 h-4 mr-1.5" />
+            <Button asChild variant="primary" size="sm">
+              <Link href="/admin/approvals">
+                <FileCheck className="w-4 h-4" />
                 Review Approvals ({pendingApprovals.length})
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
 
           {currentRole === "MEDICAL_DIRECTOR" && (
-            <Link href="/admin/content/doctors">
-              <Button variant="primary" size="sm" className="shadow-cta">
-                <Plus className="w-4 h-4 mr-1.5" />
+            <Button asChild variant="primary" size="sm">
+              <Link href="/admin/content/doctors">
+                <Plus className="w-4 h-4" />
                 Add Doctor Profile
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
 
           {currentRole === "HR_STAFF" && (
-            <Link href="/admin/content/careers">
-              <Button variant="primary" size="sm" className="shadow-cta">
-                <Plus className="w-4 h-4 mr-1.5" />
-                Post New Vacancy
-              </Button>
-            </Link>
+            <Button asChild variant="primary" size="sm">
+              <Link href="/admin/content/careers">
+                <Plus className="w-4 h-4" />
+                Post Vacancy
+              </Link>
+            </Button>
           )}
 
           {currentRole === "CONTENT_STAFF" && (
-            <Link href="/admin/content/news">
-              <Button variant="primary" size="sm" className="shadow-cta">
-                <Plus className="w-4 h-4 mr-1.5" />
+            <Button asChild variant="primary" size="sm">
+              <Link href="/admin/content/news">
+                <Plus className="w-4 h-4" />
                 New News Article
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
 
           {currentRole === "SYSTEM_ADMIN" && (
-            <Link href="/admin/users">
-              <Button variant="primary" size="sm" className="shadow-cta">
-                <Plus className="w-4 h-4 mr-1.5" />
+            <Button asChild variant="primary" size="sm">
+              <Link href="/admin/users">
+                <Plus className="w-4 h-4" />
                 Create Admin User
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
         </div>
       </div>
@@ -312,7 +312,7 @@ export default function AdminDashboardPage() {
                           className="h-8 text-xs text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
                           onClick={() => alert(`Approved: ${item.title}`)}
                         >
-                          <Check className="h-3.5 w-3.5 mr-1 text-emerald-600" />
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
                           Approve
                         </Button>
                         <Button
@@ -321,16 +321,16 @@ export default function AdminDashboardPage() {
                           className="h-8 text-xs text-emergency hover:bg-emergency-light"
                           onClick={() => alert(`Rejected: ${item.title}`)}
                         >
-                          <X className="h-3.5 w-3.5 mr-1" />
+                          <X className="h-3.5 w-3.5" />
                           Reject
                         </Button>
                       </div>
                     ) : (
-                      <Link href="/admin/approvals">
-                        <Button variant="outline" size="sm" className="h-8 text-xs bg-surface">
+                      <Button asChild variant="outline" size="sm" className="h-8 text-xs bg-surface">
+                        <Link href="/admin/approvals">
                           Track Status
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
                     )}
                   </div>
                 ))}

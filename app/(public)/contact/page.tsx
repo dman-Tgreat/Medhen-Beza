@@ -169,12 +169,13 @@ export default function ContactPage() {
               <Button
                 asChild
                 size="sm"
-                className="bg-emergency hover:bg-emergency-dark text-white border-transparent w-full justify-center"
+                variant="emergency"
+                className="w-full justify-center"
               >
                 <a
                   href={`tel:${HOSPITAL_INFO.emergencyPhone.replace(/\s/g, "")}`}
                 >
-                  <PhoneCall className="w-4 h-4 mr-2" />
+                  <PhoneCall className="w-4 h-4" />
                   Call Emergency: {HOSPITAL_INFO.emergencyPhone}
                 </a>
               </Button>
@@ -360,7 +361,7 @@ export default function ContactPage() {
                   disabled={isSubmitting}
                   className="w-full sm:w-auto font-bold"
                 >
-                  <Send className="w-4 h-4 mr-2" />
+                  <Send className="w-4 h-4" />
                   {isSubmitting ? "Sending Message..." : "Submit Message"}
                 </Button>
               </form>

@@ -86,7 +86,7 @@ export default async function CareerDetailPage({ params }: CareerPageProps) {
 
           <Button asChild size="lg" className="shrink-0 font-bold">
             <a href={`mailto:${career.contactEmail}?subject=Application for ${encodeURIComponent(career.position)}`}>
-              <Mail className="w-4 h-4 mr-2" />
+              <Mail className="w-4 h-4" />
               Apply via Email
             </a>
           </Button>

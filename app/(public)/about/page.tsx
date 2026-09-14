@@ -183,7 +183,7 @@ function HospitalIntroduction({ data }: { data: AboutPageData["introduction"] })
 
           <div className="pt-2">
             <Button asChild size="lg">
-              <Link href={data.ctaHref} className="inline-flex items-center gap-2">
+              <Link href={data.ctaHref}>
                 <Mail className="w-4 h-4" aria-hidden />
                 {data.ctaLabel}
               </Link>
@@ -483,9 +483,9 @@ function FinalCTA({ data }: { data: AboutPageData["finalCta"] }) {
           <Button
             asChild
             size="lg"
-            className="bg-white text-primary hover:bg-white/90 shadow-cta border border-transparent font-semibold"
+            className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-cta border border-transparent font-semibold"
           >
-            <Link href={data.ctaHref} className="inline-flex items-center gap-2">
+            <Link href={data.ctaHref}>
               <Mail className="w-4 h-4" aria-hidden />
               {data.ctaLabel}
             </Link>

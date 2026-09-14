@@ -54,12 +54,12 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Link href="/admin">
-              <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                <ArrowLeft className="w-4 h-4 mr-1.5" />
+            <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+              <Link href="/admin">
+                <ArrowLeft className="w-4 h-4" />
                 Return to Dashboard
-              </Button>
-            </Link>
+              </Link>
+            </Button>
 
             <Button
               variant="primary"
@@ -67,7 +67,7 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
               onClick={() => setRole("HOSPITAL_DIRECTOR")}
               className="w-full sm:w-auto"
             >
-              <RefreshCw className="w-4 h-4 mr-1.5" />
+              <RefreshCw className="w-4 h-4" />
               Switch to Hospital Director
             </Button>
           </div>

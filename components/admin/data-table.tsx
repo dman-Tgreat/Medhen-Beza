@@ -202,8 +202,8 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
             {description && <p className="text-small text-text-muted mt-1">{description}</p>}
           </div>
           {onAddNew && (
-            <Button onClick={onAddNew} variant="primary" size="default" className="shadow-cta shrink-0">
-              <Plus className="h-4 w-4 mr-1.5" />
+            <Button onClick={onAddNew} variant="primary" size="default" className="shrink-0">
+              <Plus className="h-4 w-4" />
               {addNewLabel}
             </Button>
           )}
@@ -309,7 +309,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               className="h-7 text-xs bg-surface"
               onClick={() => alert(`Batch submitted ${selectedIds.size} items for approval`)}
             >
-              <Send className="h-3 w-3 mr-1 text-primary" />
+              <Send className="h-3 w-3 text-primary" />
               Submit Selected
             </Button>
             {canApprove && (
@@ -319,7 +319,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                 className="h-7 text-xs bg-surface text-emerald-700 hover:bg-emerald-50"
                 onClick={() => alert(`Approved ${selectedIds.size} items`)}
               >
-                <CheckCircle className="h-3 w-3 mr-1 text-emerald-600" />
+                <CheckCircle className="h-3 w-3 text-emerald-600" />
                 Approve Selected
               </Button>
             )}
@@ -329,7 +329,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               className="h-7 text-xs text-emergency hover:bg-emergency-light"
               onClick={() => alert(`Deleted ${selectedIds.size} items`)}
             >
-              <Trash2 className="h-3 w-3 mr-1" />
+              <Trash2 className="h-3 w-3" />
               Delete Selected
             </Button>
           </div>
@@ -580,7 +580,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               className="h-8 px-2.5 text-xs bg-surface"
             >
-              <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+              <ChevronLeft className="h-3.5 w-3.5" />
               Previous
             </Button>
             <span className="text-xs font-semibold text-text px-2">
@@ -594,7 +594,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               className="h-8 px-2.5 text-xs bg-surface"
             >
               Next
-              <ChevronRight className="h-3.5 w-3.5 ml-1" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>

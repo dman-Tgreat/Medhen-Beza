@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-small font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-small font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:scale-[0.98] select-none relative overflow-hidden shrink-0 [&_svg]:shrink-0 [&_svg]:pointer-events-none",
   {
     variants: {
       variant: {
@@ -22,10 +22,10 @@ const buttonVariants = cva(
           "bg-emergency text-white hover:bg-emergency-dark shadow-emergency font-semibold border border-transparent",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-8 rounded-sm px-3 text-small",
-        lg: "h-12 rounded-lg px-6 text-body font-semibold",
-        icon: "h-10 w-10 p-0 shrink-0",
+        default: "h-10 px-4 py-2 [&_svg]:size-4",
+        sm: "h-8 rounded-sm px-3 text-small [&_svg]:size-3.5",
+        lg: "h-12 rounded-lg px-6 text-body font-semibold [&_svg]:size-5",
+        icon: "h-10 w-10 p-0 shrink-0 [&_svg]:size-4",
       },
     },
     defaultVariants: {

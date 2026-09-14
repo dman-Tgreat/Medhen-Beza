@@ -223,8 +223,8 @@ export default function SettingsAdminPage() {
           </Tabs>
 
           <div className="flex justify-end pt-4">
-            <Button type="submit" variant="primary" size="default" className="shadow-cta">
-              <Save className="h-4 w-4 mr-1.5" />
+            <Button type="submit" variant="primary" size="default">
+              <Save className="h-4 w-4" />
               Save Configuration Changes
             </Button>
           </div>

@@ -150,11 +150,11 @@ export default function AdminLoginPage() {
             <Button
               type="submit"
               variant="primary"
-              className="w-full h-10 text-xs font-semibold shadow-cta mt-2"
+              className="w-full h-10 text-xs font-semibold mt-2"
               disabled={loading}
             >
               {loading ? "Authenticating..." : "Sign In to CMS"}
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </form>
 

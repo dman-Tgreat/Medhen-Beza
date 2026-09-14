@@ -309,7 +309,7 @@ export function ContentFormModal({
                 onClick={() => handleAddTag(field.name)}
                 className="h-8 text-xs shrink-0"
               >
-                <Plus className="h-3.5 w-3.5 mr-1" />
+                <Plus className="h-3.5 w-3.5" />
                 Add
               </Button>
             </div>
@@ -355,7 +355,7 @@ export function ContentFormModal({
               onClick={() => handleSubmit("draft")}
               className="text-xs bg-surface"
             >
-              <Save className="h-3.5 w-3.5 mr-1.5" />
+              <Save className="h-3.5 w-3.5" />
               Save as Draft
             </Button>
 
@@ -366,7 +366,7 @@ export function ContentFormModal({
               onClick={() => handleSubmit("submit")}
               className="text-xs"
             >
-              <Send className="h-3.5 w-3.5 mr-1.5" />
+              <Send className="h-3.5 w-3.5" />
               Submit for Approval
             </Button>
 
@@ -376,9 +376,9 @@ export function ContentFormModal({
                 variant="primary"
                 size="sm"
                 onClick={() => handleSubmit("publish")}
-                className="text-xs shadow-cta"
+                className="text-xs"
               >
-                <Globe className="h-3.5 w-3.5 mr-1.5" />
+                <Globe className="h-3.5 w-3.5" />
                 Save & Publish
               </Button>
             )}

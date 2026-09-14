@@ -333,7 +333,7 @@ export default function ApprovalsPage() {
                           onClick={() => setReviewModalItem(item)}
                           className="h-8 text-xs bg-surface"
                         >
-                          <Eye className="h-3.5 w-3.5 mr-1 text-text-muted" />
+                          <Eye className="h-3.5 w-3.5 text-text-muted" />
                           Review Details
                         </Button>
 
@@ -346,7 +346,7 @@ export default function ApprovalsPage() {
                               onClick={() => handleApprove(item.id)}
                               className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0"
                             >
-                              <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                              <CheckCircle2 className="h-3.5 w-3.5" />
                               Approve
                             </Button>
                             <Button
@@ -355,7 +355,7 @@ export default function ApprovalsPage() {
                               onClick={() => setRejectModalItem(item)}
                               className="h-8 text-xs text-emergency hover:bg-emergency-light"
                             >
-                              <XCircle className="h-3.5 w-3.5 mr-1" />
+                              <XCircle className="h-3.5 w-3.5" />
                               Reject
                             </Button>
                           </>
@@ -368,7 +368,7 @@ export default function ApprovalsPage() {
                             onClick={() => handlePublish(item.id)}
                             className="h-8 text-xs"
                           >
-                            <Globe className="h-3.5 w-3.5 mr-1" />
+                            <Globe className="h-3.5 w-3.5" />
                             Publish Now
                           </Button>
                         )}
@@ -477,7 +477,7 @@ export default function ApprovalsPage() {
                         }}
                         className="text-xs text-emergency hover:bg-emergency-light"
                       >
-                        <XCircle className="h-3.5 w-3.5 mr-1" />
+                        <XCircle className="h-3.5 w-3.5" />
                         Reject Submission
                       </Button>
                       <Button
@@ -486,7 +486,7 @@ export default function ApprovalsPage() {
                         onClick={() => handleApprove(reviewModalItem.id)}
                         className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
                       >
-                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                        <CheckCircle2 className="h-3.5 w-3.5" />
                         Approve Content
                       </Button>
                     </>
@@ -499,7 +499,7 @@ export default function ApprovalsPage() {
                       onClick={() => handlePublish(reviewModalItem.id)}
                       className="text-xs"
                     >
-                      <Globe className="h-3.5 w-3.5 mr-1" />
+                      <Globe className="h-3.5 w-3.5" />
                       Publish Live
                     </Button>
                   )}

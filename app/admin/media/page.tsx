@@ -153,9 +153,9 @@ export default function MediaAdminPage() {
           <Button
             variant="primary"
             onClick={() => setUploadModalOpen(true)}
-            className="shadow-cta shrink-0"
+            className="shrink-0"
           >
-            <Upload className="h-4 w-4 mr-1.5" />
+            <Upload className="h-4 w-4" />
             Upload New Media
           </Button>
         </div>
