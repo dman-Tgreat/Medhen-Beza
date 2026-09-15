@@ -85,14 +85,14 @@ export function Hero({
           {/* ── Left column ── */}
           <div className="lg:col-span-7 space-y-7">
             {/* Eyebrow pill */}
-            {eyebrow && (
+            {/* {eyebrow && (
               <div className="inline-flex items-center gap-2 rounded-full border border-secondary/20 bg-secondary-light px-4 py-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
                 <span className="text-caption font-semibold text-secondary uppercase tracking-wider">
                   {eyebrow}
                 </span>
               </div>
-            )}
+            )} */}
 
             {/* Headline */}
             <h1 className="text-display font-black tracking-tight text-text leading-[1.1]">

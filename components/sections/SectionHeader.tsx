@@ -24,7 +24,6 @@ export interface SectionHeaderProps {
  * with the "View all →" link pushed to the right on md+ screens.
  */
 export function SectionHeader({
-  eyebrow,
   title,
   description,
   viewAllHref,
@@ -36,18 +35,6 @@ export function SectionHeader({
 
   return (
     <div className={cn("space-y-3", centered && "text-center", className)}>
-      {/* Eyebrow */}
-      {eyebrow && (
-        <p
-          className={cn(
-            "text-caption font-semibold uppercase tracking-widest text-secondary",
-            centered && "mx-auto"
-          )}
-        >
-          {eyebrow}
-        </p>
-      )}
-
       {/* Heading row — flex when viewAll link is present */}
       <div
         className={cn(

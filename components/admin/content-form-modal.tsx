@@ -307,7 +307,7 @@ export function ContentFormModal({
                 variant="outline"
                 size="sm"
                 onClick={() => handleAddTag(field.name)}
-                className="h-8 text-xs shrink-0"
+                className="text-xs shrink-0"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Add

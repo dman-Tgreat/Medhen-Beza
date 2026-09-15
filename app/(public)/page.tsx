@@ -329,21 +329,6 @@ function EmergencyCTA() {
             className="w-full sm:w-auto"
           />
         </div>
-
-        {/* Emergency number as plain text */}
-        <div className="flex items-center justify-center gap-2 text-white/70">
-          <Phone className="w-4 h-4 shrink-0" aria-hidden />
-          <span className="text-small">
-            Emergency:{" "}
-            <a
-              href={`tel:${HOSPITAL_INFO.emergencyPhone.replace(/\s/g, "")}`}
-              className="font-semibold text-white underline-offset-2 hover:underline"
-            >
-              {HOSPITAL_INFO.emergencyPhone}
-            </a>
-            {" "}— available 24 / 7
-          </span>
-        </div>
       </div>
     </section>
   );

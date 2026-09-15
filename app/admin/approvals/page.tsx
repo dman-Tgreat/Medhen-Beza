@@ -267,11 +267,11 @@ export default function ApprovalsPage() {
 
             {/* Content Type Filter */}
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-text-light" />
+              <Filter className="h-5 w-5 text-text-light" />
               <select
                 value={selectedTypeFilter}
                 onChange={(e) => setSelectedTypeFilter(e.target.value)}
-                className="h-8 rounded-md border border-border bg-background px-2.5 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary"
+                className="h-10 rounded-md border border-border bg-background px-2.5 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="ALL">All Content Types</option>
                 <option value="Doctor">Doctors</option>
@@ -331,7 +331,7 @@ export default function ApprovalsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => setReviewModalItem(item)}
-                          className="h-8 text-xs bg-surface"
+                          className="text-xs bg-surface"
                         >
                           <Eye className="h-3.5 w-3.5 text-text-muted" />
                           Review Details
@@ -344,7 +344,7 @@ export default function ApprovalsPage() {
                               variant="primary"
                               size="sm"
                               onClick={() => handleApprove(item.id)}
-                              className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+                              className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0"
                             >
                               <CheckCircle2 className="h-3.5 w-3.5" />
                               Approve
@@ -353,7 +353,7 @@ export default function ApprovalsPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => setRejectModalItem(item)}
-                              className="h-8 text-xs text-emergency hover:bg-emergency-light"
+                              className="text-xs text-emergency hover:bg-emergency-light"
                             >
                               <XCircle className="h-3.5 w-3.5" />
                               Reject
@@ -366,7 +366,7 @@ export default function ApprovalsPage() {
                             variant="secondary"
                             size="sm"
                             onClick={() => handlePublish(item.id)}
-                            className="h-8 text-xs"
+                            className="text-xs"
                           >
                             <Globe className="h-3.5 w-3.5" />
                             Publish Now

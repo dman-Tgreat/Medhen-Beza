@@ -309,7 +309,7 @@ export default function AdminDashboardPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 text-xs text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+                          className=" text-xs text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
                           onClick={() => alert(`Approved: ${item.title}`)}
                         >
                           <Check className="h-3.5 w-3.5 text-emerald-600" />
@@ -318,7 +318,7 @@ export default function AdminDashboardPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 text-xs text-emergency hover:bg-emergency-light"
+                          className="text-xs text-emergency hover:bg-emergency-light"
                           onClick={() => alert(`Rejected: ${item.title}`)}
                         >
                           <X className="h-3.5 w-3.5" />

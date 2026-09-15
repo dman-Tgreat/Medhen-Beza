@@ -72,11 +72,6 @@ function AboutHero({ data }: { data: AboutPageData["hero"] }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Text content side */}
           <div className="order-2 lg:order-1 lg:col-span-7 space-y-6">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-caption font-semibold bg-primary-light text-primary uppercase tracking-widest">
-              <Sparkles className="w-3.5 h-3.5" aria-hidden />
-              About Our Hospital
-            </span>
-
             <h1 className="text-display font-bold tracking-tight text-text">
               {data.title}
             </h1>

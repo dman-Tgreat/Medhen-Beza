@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedDept, setSelectedDept] = React.useState<string>("all");
+  const [isSearchFocused, setIsSearchFocused] = React.useState(false);
 
   // Filter services by search text and department
   const filteredServices = React.useMemo(() => {
@@ -73,17 +74,22 @@ export default function ServicesPage() {
         <div className="layout-container py-4">
           <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
+            <div className={cn(
+              "relative transition-all duration-300 ease-in-out",
+              isSearchFocused ? "md:flex-[3]" : "flex-1 max-w-lg"
+            )}>
               <Search
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-16 h-16 text-text-light"
-                aria-hidden
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light pointer-events-none"
+                aria-hidden 
               />
               <Input
                 type="text"
                 placeholder="Search services, procedures, treatments..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 bg-background h-11 w-40 text-small border-border focus-visible:ring-primary"
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
+                className="pl-10 pr-4 bg-background h-11 text-small border-border focus-visible:ring-primary"
                 aria-label="Search services"
               />
               {searchQuery && (
@@ -97,7 +103,10 @@ export default function ServicesPage() {
             </div>
 
             {/* Department Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+            <div className={cn(
+              "flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none transition-all duration-300 ease-in-out",
+              isSearchFocused ? "md:flex-[1] md:opacity-60" : "md:flex-[2]"
+            )}>
               <button
                 onClick={() => setSelectedDept("all")}
                 className={cn(

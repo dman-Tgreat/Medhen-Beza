@@ -306,7 +306,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
             <Button
               variant="outline"
               size="sm"
-              className="h-7 text-xs bg-surface"
+              className="text-xs bg-surface"
               onClick={() => alert(`Batch submitted ${selectedIds.size} items for approval`)}
             >
               <Send className="h-3 w-3 text-primary" />
@@ -316,7 +316,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 text-xs bg-surface text-emerald-700 hover:bg-emerald-50"
+                className="text-xs bg-surface text-emerald-700 hover:bg-emerald-50"
                 onClick={() => alert(`Approved ${selectedIds.size} items`)}
               >
                 <CheckCircle className="h-3 w-3 text-emerald-600" />
@@ -326,7 +326,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs text-emergency hover:bg-emergency-light"
+              className="]text-xs text-emergency hover:bg-emergency-light"
               onClick={() => alert(`Deleted ${selectedIds.size} items`)}
             >
               <Trash2 className="h-3 w-3" />
@@ -447,7 +447,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 text-text-muted hover:text-text"
+                              className="w-7 text-text-muted hover:text-text"
                             >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
@@ -578,7 +578,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               size="sm"
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="h-8 px-2.5 text-xs bg-surface"
+              className="px-2.5 text-xs bg-surface"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
               Previous
@@ -591,7 +591,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               size="sm"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="h-8 px-2.5 text-xs bg-surface"
+              className="px-2.5 text-xs bg-surface"
             >
               Next
               <ChevronRight className="h-3.5 w-3.5" />
