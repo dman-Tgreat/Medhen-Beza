@@ -100,10 +100,7 @@ export default async function DepartmentDetailPage({
 
             {/* Department Head / Leadership note */}
             <div className="flex items-center gap-4 p-4 rounded-lg bg-surface border border-border">
-              <div className="w-12 h-12 rounded-full bg-primary-light text-primary flex items-center justify-center font-bold text-small shrink-0">
-                MD
-              </div>
-              <div className="min-w-0">
+              <div className="min-w-0 pl-2">
                 <p className="text-caption font-semibold uppercase tracking-wider text-text-muted">
                   Department Head & Lead Specialist
                 </p>

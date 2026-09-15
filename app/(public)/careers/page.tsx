@@ -86,7 +86,7 @@ export default function CareersPage() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             {/* Search input */}
             <div className="md:col-span-6 relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-light" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light" />
               <Input
                 type="text"
                 placeholder="Search job titles or keywords..."

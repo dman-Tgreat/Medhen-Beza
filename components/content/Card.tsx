@@ -24,7 +24,7 @@ export const CardRoot = React.forwardRef<HTMLDivElement, CardRootProps>(
       ref={ref}
       className={cn(
         // Structure
-        "relative flex flex-col overflow-hidden",
+        "relative flex flex-col overflow-hidden h-full",
         "rounded-lg bg-surface border border-border",
         // Hover lift — shared across ALL card types
         !noHover && [

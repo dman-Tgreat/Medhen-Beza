@@ -51,13 +51,13 @@ export default function FAQsPage() {
       <main className="layout-container pt-10 space-y-12 max-w-4xl mx-auto">
         {/* 2. Live Search Input at the Top */}
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light" />
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light" />
           <Input
             type="text"
             placeholder="Type a question or keyword (e.g. visiting hours, insurance, parking, appointment)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 pr-10 bg-surface h-13 text-body border-border shadow-xs focus-visible:ring-primary rounded-lg"
+            className="pl-12.5 pr-10 bg-surface h-13 text-body border-border shadow-xs focus-visible:ring-primary rounded-lg"
             aria-label="Search FAQs"
           />
           {searchQuery && (
