@@ -149,8 +149,8 @@ export default function NewsPage() {
                       </p>
                     </div>
 
-                    <Button asChild size="sm">
-                      <Link href={featuredArticle.href} className="gap-1.5">
+                    <Button asChild size="default" className="w-full sm:w-auto min-h-[44px] justify-center">
+                      <Link href={featuredArticle.href} className="gap-1.5 justify-center">
                         Read Story
                         <ArrowRight className="w-4 h-4" />
                       </Link>
@@ -178,7 +178,7 @@ export default function NewsPage() {
                   key={cat}
                   onClick={() => handleCategoryChange(cat)}
                   className={cn(
-                    "px-4 py-2 rounded-full text-small font-semibold whitespace-nowrap transition-colors border",
+                    "min-h-[44px] px-4 py-2.5 rounded-full text-small font-semibold whitespace-nowrap transition-colors border flex items-center shrink-0 cursor-pointer",
                     isSelected
                       ? "bg-primary text-white border-primary shadow-xs"
                       : "bg-surface text-text-muted border-border hover:border-primary-light hover:text-primary"

@@ -88,7 +88,7 @@ export default function DoctorsPage() {
       />
 
       {/* 2. Persistent Sticky Search & Filter Bar */}
-      <section className="bg-surface border-b border-border sticky top-16 z-20 shadow-xs">
+      <section className="bg-surface border-b border-border sticky top-[72px] lg:top-[80px] z-20 shadow-xs">
         <div className="layout-container py-4">
           <div className="flex items-center gap-3">
             {/* Search Input */}
@@ -102,7 +102,7 @@ export default function DoctorsPage() {
                 placeholder="Search doctors by name, specialty, or condition..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-9 bg-background h-11 text-small border-border focus-visible:ring-primary"
+                className="pl-10 pr-9 bg-background min-h-[44px] h-11 text-base sm:text-small border-border focus-visible:ring-primary"
                 aria-label="Search doctors"
               />
               {searchQuery && (
@@ -208,7 +208,7 @@ export default function DoctorsPage() {
                       <select
                         value={selectedDept}
                         onChange={(e) => setSelectedDept(e.target.value)}
-                        className="w-full h-11 rounded-md border border-border bg-background px-3 text-small font-medium text-text focus:ring-2 focus:ring-primary"
+                        className="w-full min-h-[44px] h-11 rounded-md border border-border bg-background px-3 text-base sm:text-small font-medium text-text focus:ring-2 focus:ring-primary"
                       >
                         <option value="all">All Departments</option>
                         {MOCK_DEPARTMENTS_DETAILED.map((dept) => (
@@ -227,7 +227,7 @@ export default function DoctorsPage() {
                       <select
                         value={selectedSpecialty}
                         onChange={(e) => setSelectedSpecialty(e.target.value)}
-                        className="w-full h-11 rounded-md border border-border bg-background px-3 text-small font-medium text-text focus:ring-2 focus:ring-primary"
+                        className="w-full min-h-[44px] h-11 rounded-md border border-border bg-background px-3 text-base sm:text-small font-medium text-text focus:ring-2 focus:ring-primary"
                       >
                         <option value="all">All Specialties</option>
                         {ALL_SPECIALTIES.map((spec) => (

@@ -56,11 +56,11 @@ export default function EmergencyPage() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <a
                 href={`tel:${emergencyPhoneRaw}`}
-                className="inline-flex items-center justify-center gap-3 rounded-lg bg-white text-emergency px-6 py-4 text-h2 sm:text-h1 font-black hover:bg-white/90 transition-transform active:scale-95 shadow-md"
+                className="inline-flex items-center justify-center gap-2.5 sm:gap-3 rounded-lg bg-white text-emergency px-4 sm:px-6 py-3.5 sm:py-4 text-xl sm:text-h2 md:text-h1 font-black hover:bg-white/90 transition-transform active:scale-95 shadow-md max-w-full"
                 aria-label={`Call emergency line at ${HOSPITAL_INFO.emergencyPhone}`}
               >
-                <PhoneCall className="w-8 h-8 shrink-0 animate-bounce" />
-                <span>{HOSPITAL_INFO.emergencyPhone}</span>
+                <PhoneCall className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 animate-bounce" />
+                <span className="whitespace-nowrap sm:whitespace-normal">{HOSPITAL_INFO.emergencyPhone}</span>
               </a>
 
               <p className="text-small text-white/90 font-medium max-w-xs">

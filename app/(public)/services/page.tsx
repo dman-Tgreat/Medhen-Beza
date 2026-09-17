@@ -70,7 +70,7 @@ export default function ServicesPage() {
       />
 
       {/* 2. Filter & Search Bar */}
-      <section className="bg-surface border-b border-border sticky top-16 z-20 shadow-xs">
+      <section className="bg-surface border-b border-border sticky top-[72px] lg:top-[80px] z-20 shadow-xs">
         <div className="layout-container py-4">
           <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
             {/* Search Input */}

@@ -405,7 +405,7 @@ function HospitalEnvironment({ data }: { data: AboutPageData["environment"] }) {
         </div>
 
         {/* Link to full facilities page */}
-        <div className="pt-2 text-right">
+        <div className="pt-2 text-left sm:text-right">
           <Link
             href="/facilities"
             className="inline-flex items-center gap-1.5 text-small font-semibold text-primary hover:text-primary-dark transition-[gap] duration-200 hover:gap-2.5"

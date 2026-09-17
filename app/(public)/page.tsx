@@ -122,7 +122,7 @@ function QuickActions() {
             key={href}
             href={href}
             className={cn(
-              "group flex flex-col items-center text-center gap-3 p-6 rounded-lg",
+              "group flex flex-col items-center text-center gap-2.5 sm:gap-3 p-4 sm:p-6 rounded-lg",
               "bg-surface border border-border",
               "transition-[border-color,transform] duration-200 ease-out",
               "hover:-translate-y-0.5 hover:border-primary-light",

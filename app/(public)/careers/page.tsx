@@ -86,13 +86,13 @@ export default function CareersPage() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             {/* Search input */}
             <div className="md:col-span-6 relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light pointer-events-none" />
               <Input
                 type="text"
                 placeholder="Search job titles or keywords..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 bg-background h-11 text-small border-border"
+                className="pl-10 pr-4 bg-background min-h-[44px] h-11 text-base sm:text-small border-border"
               />
             </div>
 
@@ -101,7 +101,7 @@ export default function CareersPage() {
               <select
                 value={selectedDept}
                 onChange={(e) => setSelectedDept(e.target.value)}
-                className="w-full h-11 rounded-md border border-border bg-background px-3 text-small font-medium text-text focus:ring-2 focus:ring-primary cursor-pointer"
+                className="w-full min-h-[44px] h-11 rounded-md border border-border bg-background px-3 text-base sm:text-small font-medium text-text focus:ring-2 focus:ring-primary cursor-pointer"
                 aria-label="Filter by department"
               >
                 <option value="all">All Departments</option>
@@ -118,7 +118,7 @@ export default function CareersPage() {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full h-11 rounded-md border border-border bg-background px-3 text-small font-medium text-text focus:ring-2 focus:ring-primary cursor-pointer"
+                className="w-full min-h-[44px] h-11 rounded-md border border-border bg-background px-3 text-base sm:text-small font-medium text-text focus:ring-2 focus:ring-primary cursor-pointer"
                 aria-label="Filter by employment type"
               >
                 <option value="All">All Job Types</option>
@@ -201,9 +201,9 @@ export default function CareersPage() {
                       </div>
 
                       {/* Right: Apply / View CTA */}
-                      <div className="shrink-0 flex sm:flex-col items-center sm:items-end gap-3">
-                        <Button asChild size="default" className="w-full sm:w-auto">
-                          <Link href={job.href} className="gap-2">
+                      <div className="shrink-0 flex flex-col sm:items-end gap-3 w-full sm:w-auto">
+                        <Button asChild size="default" className="w-full sm:w-auto min-h-[44px] justify-center">
+                          <Link href={job.href} className="gap-2 justify-center">
                             <span>View Details & Apply</span>
                             <ArrowRight className="w-4 h-4" />
                           </Link>

@@ -297,7 +297,7 @@ export default function ContactPage() {
                       name="department"
                       value={formData.department}
                       onChange={handleChange}
-                      className="w-full h-10 rounded-md border border-border bg-background px-3 text-small text-text focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                      className="w-full min-h-[44px] h-11 sm:min-h-[40px] sm:h-10 rounded-md border border-border bg-background px-3 text-base sm:text-small text-text focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
                     >
                       <option value="General Inquiries">General Inquiries</option>
                       {MOCK_DEPARTMENTS_DETAILED.map((d) => (
@@ -343,7 +343,7 @@ export default function ContactPage() {
                     placeholder="How can our clinical or administrative team assist you?"
                     value={formData.message}
                     onChange={handleChange}
-                    className={`w-full rounded-md border border-border bg-background p-3 text-small text-text placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-primary ${
+                    className={`w-full rounded-md border border-border bg-background p-3 text-base sm:text-small text-text placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-primary ${
                       errors.message ? "border-emergency focus:ring-emergency" : ""
                     }`}
                     required
@@ -359,7 +359,7 @@ export default function ContactPage() {
                   type="submit"
                   size="lg"
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto font-bold"
+                  className="w-full sm:w-auto min-h-[48px] h-12 sm:h-14 px-8 font-bold justify-center"
                 >
                   <Send className="w-4 h-4" />
                   {isSubmitting ? "Sending Message..." : "Submit Message"}

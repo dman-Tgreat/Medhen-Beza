@@ -37,30 +37,30 @@ export default function EventsPage() {
       <main className="layout-container pt-10 space-y-10">
         {/* 2. Upcoming vs Past Distinction Tabs */}
         <div className="flex items-center justify-between flex-wrap gap-4 border-b border-border pb-4">
-          <div className="inline-flex p-1 rounded-lg bg-surface border border-border shadow-xs">
+          <div className="inline-flex p-1 rounded-lg bg-surface border border-border shadow-xs w-full sm:w-auto">
             <button
               onClick={() => setActiveTab("upcoming")}
               className={cn(
-                "inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-small font-bold transition-all",
+                "flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 min-h-[44px] rounded-md text-small font-bold transition-all cursor-pointer text-center",
                 activeTab === "upcoming"
                   ? "bg-primary text-white shadow-xs"
                   : "text-text-muted hover:text-text"
               )}
             >
-              <Calendar className="w-4 h-4" />
-              Upcoming Events ({upcomingEvents.length})
+              <Calendar className="w-4 h-4 shrink-0" />
+              <span>Upcoming ({upcomingEvents.length})</span>
             </button>
             <button
               onClick={() => setActiveTab("past")}
               className={cn(
-                "inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-small font-bold transition-all",
+                "flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 min-h-[44px] rounded-md text-small font-bold transition-all cursor-pointer text-center",
                 activeTab === "past"
                   ? "bg-secondary text-white shadow-xs"
                   : "text-text-muted hover:text-text"
               )}
             >
-              <CalendarCheck2 className="w-4 h-4" />
-              Past Events ({pastEvents.length})
+              <CalendarCheck2 className="w-4 h-4 shrink-0" />
+              <span>Past ({pastEvents.length})</span>
             </button>
           </div>
 
