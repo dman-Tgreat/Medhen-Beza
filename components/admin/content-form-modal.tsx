@@ -141,7 +141,7 @@ export function ContentFormModal({
               value={val}
               onChange={(e) => handleChange(field.name, e.target.value)}
               placeholder={field.placeholder}
-              className="text-xs h-9 bg-surface"
+              className="text-base sm:text-xs min-h-[44px] sm:min-h-[36px] sm:h-9 bg-surface"
               required={field.required}
             />
             {field.helperText && <p className="text-[11px] text-text-light">{field.helperText}</p>}
@@ -158,7 +158,7 @@ export function ContentFormModal({
               value={String(val || "")}
               onValueChange={(v) => handleChange(field.name, v)}
             >
-              <SelectTrigger className="text-xs h-9 bg-surface">
+              <SelectTrigger className="text-base sm:text-xs min-h-[44px] sm:min-h-[36px] sm:h-9 bg-surface">
                 <SelectValue placeholder={field.placeholder || "Select option"} />
               </SelectTrigger>
               <SelectContent>
@@ -184,7 +184,7 @@ export function ContentFormModal({
               value={val}
               onChange={(e) => handleChange(field.name, e.target.value)}
               placeholder={field.placeholder}
-              className="w-full rounded-md border border-border bg-surface p-2.5 text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-md border border-border bg-surface p-2.5 text-base sm:text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary"
             />
             {field.helperText && <p className="text-[11px] text-text-light">{field.helperText}</p>}
           </div>
@@ -300,14 +300,14 @@ export function ContentFormModal({
                   }
                 }}
                 placeholder="Type and press add (e.g. Cardiology, Amharic, English)"
-                className="text-xs h-8 bg-surface"
+                className="text-base sm:text-xs min-h-[44px] sm:min-h-[36px] sm:h-8 bg-surface flex-1"
               />
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => handleAddTag(field.name)}
-                className="text-xs shrink-0"
+                className="text-xs shrink-0 min-h-[44px] sm:min-h-[36px] px-3"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Add
@@ -323,10 +323,10 @@ export function ContentFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-surface">
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-surface">
         {/* Header */}
-        <div className="p-6 pb-4 border-b border-border bg-background">
-          <DialogTitle className="text-lg font-bold text-text">{title}</DialogTitle>
+        <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-border bg-background">
+          <DialogTitle className="text-base sm:text-lg font-bold text-text">{title}</DialogTitle>
           {description && (
             <DialogDescription className="text-xs text-text-muted mt-1">
               {description}
@@ -335,25 +335,30 @@ export function ContentFormModal({
         </div>
 
         {/* Form Body with optional Tabs */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           <div className="space-y-4">
             {fields.map((f) => renderField(f))}
           </div>
         </div>
 
         {/* Footer with Workflow Action Buttons */}
-        <div className="p-4 border-t border-border bg-background flex flex-col sm:flex-row items-center justify-between gap-3">
-          <Button variant="ghost" size="sm" onClick={onClose} className="text-xs text-text-muted">
+        <div className="p-3 sm:p-4 border-t border-border bg-background flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="w-full sm:w-auto text-xs text-text-muted justify-center min-h-[44px] sm:min-h-[36px]"
+          >
             Cancel
           </Button>
 
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto justify-end">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => handleSubmit("draft")}
-              className="text-xs bg-surface"
+              className="w-full sm:w-auto text-xs bg-surface justify-center min-h-[44px] sm:min-h-[36px]"
             >
               <Save className="h-3.5 w-3.5" />
               Save as Draft
@@ -364,7 +369,7 @@ export function ContentFormModal({
               variant="secondary"
               size="sm"
               onClick={() => handleSubmit("submit")}
-              className="text-xs"
+              className="w-full sm:w-auto text-xs justify-center min-h-[44px] sm:min-h-[36px]"
             >
               <Send className="h-3.5 w-3.5" />
               Submit for Approval
@@ -376,7 +381,7 @@ export function ContentFormModal({
                 variant="primary"
                 size="sm"
                 onClick={() => handleSubmit("publish")}
-                className="text-xs"
+                className="w-full sm:w-auto text-xs justify-center min-h-[44px] sm:min-h-[36px]"
               >
                 <Globe className="h-3.5 w-3.5" />
                 Save & Publish

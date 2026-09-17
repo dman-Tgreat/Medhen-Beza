@@ -211,10 +211,10 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
       )}
 
       {/* Filter and search toolbar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-surface p-3.5 rounded-lg border border-border">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-surface p-3 sm:p-3.5 rounded-lg border border-border">
         {/* Search */}
-        <div className="relative flex-1 min-w-[240px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light" />
+        <div className="relative flex-1 w-full min-w-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light pointer-events-none" />
           <Input
             value={searchQuery}
             onChange={(e) => {
@@ -222,14 +222,14 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               setCurrentPage(1);
             }}
             placeholder={searchPlaceholder}
-            className="pl-9 h-9 text-xs bg-background"
+            className="pl-9 min-h-[44px] sm:min-h-[36px] sm:h-9 text-base sm:text-xs bg-background w-full"
           />
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 w-full md:w-auto">
           {/* Status Filter */}
-          <div className="w-[150px]">
+          <div className="w-full sm:w-[150px]">
             <Select
               value={statusFilter}
               onValueChange={(val) => {
@@ -237,7 +237,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                 setCurrentPage(1);
               }}
             >
-              <SelectTrigger className="h-9 text-xs bg-background">
+              <SelectTrigger className="min-h-[44px] sm:min-h-[36px] sm:h-9 text-base sm:text-xs bg-background w-full">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -254,7 +254,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
 
           {/* Category Filter (Optional) */}
           {categories && categories.length > 0 && (
-            <div className="w-[160px]">
+            <div className="w-full sm:w-[160px]">
               <Select
                 value={categoryFilter}
                 onValueChange={(val) => {
@@ -262,7 +262,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                   setCurrentPage(1);
                 }}
               >
-                <SelectTrigger className="h-9 text-xs bg-background">
+                <SelectTrigger className="min-h-[44px] sm:min-h-[36px] sm:h-9 text-base sm:text-xs bg-background w-full">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>

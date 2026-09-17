@@ -176,9 +176,9 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
           {currentRole === "HOSPITAL_DIRECTOR" && (
-            <Button asChild variant="primary" size="sm">
+            <Button asChild variant="primary" size="default" className="w-full sm:w-auto min-h-[44px] justify-center">
               <Link href="/admin/approvals">
                 <FileCheck className="w-4 h-4" />
                 Review Approvals ({pendingApprovals.length})
@@ -187,7 +187,7 @@ export default function AdminDashboardPage() {
           )}
 
           {currentRole === "MEDICAL_DIRECTOR" && (
-            <Button asChild variant="primary" size="sm">
+            <Button asChild variant="primary" size="default" className="w-full sm:w-auto min-h-[44px] justify-center">
               <Link href="/admin/content/doctors">
                 <Plus className="w-4 h-4" />
                 Add Doctor Profile
@@ -196,7 +196,7 @@ export default function AdminDashboardPage() {
           )}
 
           {currentRole === "HR_STAFF" && (
-            <Button asChild variant="primary" size="sm">
+            <Button asChild variant="primary" size="default" className="w-full sm:w-auto min-h-[44px] justify-center">
               <Link href="/admin/content/careers">
                 <Plus className="w-4 h-4" />
                 Post Vacancy
@@ -205,7 +205,7 @@ export default function AdminDashboardPage() {
           )}
 
           {currentRole === "CONTENT_STAFF" && (
-            <Button asChild variant="primary" size="sm">
+            <Button asChild variant="primary" size="default" className="w-full sm:w-auto min-h-[44px] justify-center">
               <Link href="/admin/content/news">
                 <Plus className="w-4 h-4" />
                 New News Article
@@ -214,7 +214,7 @@ export default function AdminDashboardPage() {
           )}
 
           {currentRole === "SYSTEM_ADMIN" && (
-            <Button asChild variant="primary" size="sm">
+            <Button asChild variant="primary" size="default" className="w-full sm:w-auto min-h-[44px] justify-center">
               <Link href="/admin/users">
                 <Plus className="w-4 h-4" />
                 Create Admin User
@@ -305,11 +305,11 @@ export default function AdminDashboardPage() {
 
                     {/* Quick action buttons for Hospital Director */}
                     {canApprove ? (
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 w-full sm:w-auto shrink-0">
                         <Button
                           variant="outline"
                           size="sm"
-                          className=" text-xs text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+                          className="w-full sm:w-auto text-xs text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 min-h-[38px] justify-center"
                           onClick={() => alert(`Approved: ${item.title}`)}
                         >
                           <Check className="h-3.5 w-3.5 text-emerald-600" />
@@ -318,7 +318,7 @@ export default function AdminDashboardPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-xs text-emergency hover:bg-emergency-light"
+                          className="w-full sm:w-auto text-xs text-emergency hover:bg-emergency-light min-h-[38px] justify-center"
                           onClick={() => alert(`Rejected: ${item.title}`)}
                         >
                           <X className="h-3.5 w-3.5" />
@@ -326,7 +326,7 @@ export default function AdminDashboardPage() {
                         </Button>
                       </div>
                     ) : (
-                      <Button asChild variant="outline" size="sm" className="h-8 text-xs bg-surface">
+                      <Button asChild variant="outline" size="sm" className="w-full sm:w-auto min-h-[38px] sm:min-h-[32px] sm:h-8 text-xs bg-surface justify-center shrink-0">
                         <Link href="/admin/approvals">
                           Track Status
                         </Link>
