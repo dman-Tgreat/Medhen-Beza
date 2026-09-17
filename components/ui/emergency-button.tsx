@@ -56,8 +56,8 @@ const EmergencyButton = React.forwardRef<
 
     const sharedClassName = cn(
       // Generous touch targets — never smaller than 44 px tall
-      "min-h-[44px] px-5 font-semibold tracking-wide",
-      "animate-pulse-subtle hover:[animation:none]",
+      "font-semibold tracking-wide animate-pulse-subtle hover:[animation:none]",
+      size === "lg" ? "min-h-[48px] h-12 sm:h-14 px-6 text-body" : "min-h-[44px] px-4 sm:px-5",
       className
     );
 

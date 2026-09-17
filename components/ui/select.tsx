@@ -19,7 +19,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-md border bg-surface px-3 py-2 text-small text-text shadow-none transition-colors",
+      "flex min-h-[44px] h-11 sm:min-h-[40px] sm:h-10 w-full items-center justify-between rounded-md border bg-surface px-3 py-2 text-base sm:text-small text-text shadow-none transition-colors",
       "placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       error
         ? "border-emergency focus:ring-emergency"

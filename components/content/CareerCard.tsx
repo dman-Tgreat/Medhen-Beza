@@ -80,12 +80,12 @@ export function CareerCard({ data, className }: CareerCardProps) {
           </li>
         </ul>
 
-        {/* Divider */}
-        <div className="border-t border-border" />
+        {/* Divider pinned to bottom */}
+        <div className="border-t border-border mt-auto pt-1" />
 
         {/* CTA */}
-        <Button asChild variant="secondary" size="sm" className="w-full">
-          <a href={data.href}>View Position</a>
+        <Button asChild variant="secondary" size="default" className="w-full min-h-[44px]">
+          <a href={data.href} className="w-full justify-center">View Position</a>
         </Button>
       </CardBody>
     </CardRoot>

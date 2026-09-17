@@ -66,7 +66,7 @@ export function FAQAccordion({
               onClick={() => toggle(index)}
               className={cn(
                 "group w-full flex items-center justify-between gap-4",
-                "px-5 py-4 sm:py-5 text-left",
+                "px-5 py-4 sm:py-5 min-h-[48px] text-left",
                 "bg-surface hover:bg-primary-light/40",
                 "transition-colors duration-150",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"

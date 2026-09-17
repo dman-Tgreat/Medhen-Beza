@@ -105,19 +105,29 @@ export function Hero({
               {supportingText}
             </p>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-              <Button asChild size="lg" variant="primary" className="w-full sm:w-auto">
-                <Link href={primaryCta.href}>
-                  <Calendar className="w-5 h-5" />
-                  {primaryCta.label}
+            {/* CTAs — mobile-first full-width stack with matched height & padding */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full">
+              <Button
+                asChild
+                size="lg"
+                variant="primary"
+                className="w-full sm:w-auto min-h-[48px] h-12 sm:h-14 px-6 justify-center text-center"
+              >
+                <Link href={primaryCta.href} className="w-full sm:w-auto flex items-center justify-center gap-2">
+                  <Calendar className="w-5 h-5 shrink-0" />
+                  <span>{primaryCta.label}</span>
                 </Link>
               </Button>
               {secondaryCta && (
-                <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto">
-                  <Link href={secondaryCta.href}>
-                    <PhoneCall className="w-5 h-5" />
-                    {secondaryCta.label}
+                <Button
+                  asChild
+                  size="lg"
+                  variant="secondary"
+                  className="w-full sm:w-auto min-h-[48px] h-12 sm:h-14 px-6 justify-center text-center"
+                >
+                  <Link href={secondaryCta.href} className="w-full sm:w-auto flex items-center justify-center gap-2">
+                    <PhoneCall className="w-5 h-5 shrink-0" />
+                    <span>{secondaryCta.label}</span>
                   </Link>
                 </Button>
               )}
@@ -274,17 +284,26 @@ export function HeroWithBackground({
         </p>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto">
-          <Button asChild size="lg" variant="primary" className="w-full sm:w-auto">
-            <Link href={primaryCta.href}>{primaryCta.label}</Link>
+          <Button
+            asChild
+            size="lg"
+            variant="primary"
+            className="w-full sm:w-auto min-h-[48px] h-12 sm:h-14 px-6 justify-center text-center"
+          >
+            <Link href={primaryCta.href} className="w-full sm:w-auto flex items-center justify-center">
+              {primaryCta.label}
+            </Link>
           </Button>
           {secondaryCta && (
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="w-full sm:w-auto bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white"
+              className="w-full sm:w-auto min-h-[48px] h-12 sm:h-14 px-6 justify-center text-center bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white"
             >
-              <Link href={secondaryCta.href}>{secondaryCta.label}</Link>
+              <Link href={secondaryCta.href} className="w-full sm:w-auto flex items-center justify-center">
+                {secondaryCta.label}
+              </Link>
             </Button>
           )}
         </div>

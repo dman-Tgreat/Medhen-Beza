@@ -12,7 +12,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-md border bg-surface px-3 py-2 text-small text-text shadow-none transition-colors",
+          "flex min-h-[44px] h-11 sm:min-h-[40px] sm:h-10 w-full rounded-md border bg-surface px-3 py-2 text-base sm:text-small text-text shadow-none transition-colors",
           "placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50",
           error
             ? "border-emergency focus-visible:ring-emergency"

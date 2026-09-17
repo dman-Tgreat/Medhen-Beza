@@ -146,13 +146,11 @@ export function Header() {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          isScrolled
-            ? "bg-surface/95 backdrop-blur-md border-b border-border shadow-nav"
-            : "bg-transparent"
+          "bg-surface/95 backdrop-blur-md border-b border-border shadow-nav"
         )}
       >
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-[72px]">
+          <div className="flex items-center justify-between h-[72px] lg:h-[80px]">
             {/* Logo — always visible */}
             <Logo />
 
@@ -210,7 +208,7 @@ export function Header() {
       </header>
 
       {/* Spacer to prevent content from sitting under fixed header */}
-      <div className="h-16 lg:h-[72px]" aria-hidden="true" />
+      <div className="h-[72px] lg:h-[80px]" aria-hidden="true" />
 
       {/* Mobile Nav Drawer */}
       <MobileNav
