@@ -37,7 +37,6 @@ import { FacilityCard } from "@/components/content/FacilityCard";
 import { GalleryCard } from "@/components/content/GalleryCard";
 import { NewsAndEventsSection } from "@/components/public/NewsAndEventsSection";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { HOSPITAL_INFO } from "@/lib/constants";
 import {
   getPublicServices,
   getPublicDepartments,
@@ -46,6 +45,7 @@ import {
   getPublicEvents,
   getPublicGallery,
   getPublicFacilities,
+  getPublicSiteSettings,
 } from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -143,7 +143,15 @@ function QuickActions() {
 }
 
 // ─── 4. Hospital Introduction ─────────────────────────────────────────────────
-function HospitalIntro() {
+function HospitalIntro({ settings }: { settings: any }) {
+  const paragraphs = settings.hospitalIntroParagraphs?.length
+    ? settings.hospitalIntroParagraphs
+    : [
+        `${settings.hospitalName} provides patient-centred, modern clinical care in ${settings.city}, delivering healthcare with empathy, clinical precision, and dignity.`,
+        "Our multidisciplinary teams of specialists work across cutting-edge diagnostic and surgical units to serve families across Ethiopia.",
+        "Committed to continuous clinical excellence and modern standards of practice.",
+      ];
+
   return (
     <Section>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -152,7 +160,7 @@ function HospitalIntro() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary-light via-secondary-light to-primary-light flex flex-col items-center justify-center gap-3 text-primary/40">
             <Building2 className="w-20 h-20" strokeWidth={1} />
             <p className="text-caption font-medium text-center px-6">
-              [Photo slot — hospital exterior or lobby image]
+              {settings.hospitalName} Modern Campus
             </p>
           </div>
         </div>
@@ -163,21 +171,13 @@ function HospitalIntro() {
             About Us
           </p>
           <h2 className="text-h2 font-bold tracking-tight text-text">
-            Trusted care for every stage of life
+            {settings.hospitalIntroTitle || "Trusted care for every stage of life"}
           </h2>
 
           <div className="space-y-3 text-body text-text-muted leading-relaxed border-l-4 border-primary-light pl-4">
-            <p>
-              Medhen Beza Hospital provides patient-centred, modern clinical care in Addis Ababa,
-              delivering healthcare with empathy, clinical precision, and dignity.
-            </p>
-            <p>
-              Our multidisciplinary teams of specialists work across cutting-edge diagnostic
-              and surgical units to serve families across Ethiopia.
-            </p>
-            <p>
-              Committed to continuous clinical excellence and modern standards of practice.
-            </p>
+            {paragraphs.map((p: string, idx: number) => (
+              <p key={idx}>{p}</p>
+            ))}
           </div>
 
           <Link
@@ -229,7 +229,7 @@ function FacilitiesShowcase({ facilities }: { facilities: any[] }) {
 }
 
 // ─── 11. Emergency / Contact CTA block ───────────────────────────────────────
-function EmergencyCTA() {
+function EmergencyCTA({ phone }: { phone: string }) {
   return (
     <section className="bg-gradient-to-br from-primary-dark via-primary to-secondary py-16 lg:py-24">
       <div className="layout-container text-center space-y-8 max-w-2xl mx-auto">
@@ -254,13 +254,13 @@ function EmergencyCTA() {
             Contact Us
           </Link>
           <a
-            href={`tel:${HOSPITAL_INFO.emergencyPhone.replace(/\s/g, "")}`}
-            aria-label={`Call emergency line: ${HOSPITAL_INFO.emergencyPhone}`}
+            href={`tel:${phone.replace(/\s/g, "")}`}
+            aria-label={`Call emergency line: ${phone}`}
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-small font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer select-none h-12 sm:h-14 px-6 text-body w-full sm:w-auto bg-emergency text-white hover:bg-emergency/90 tracking-wide"
           >
             <PhoneCall className="w-4 h-4 shrink-0" aria-hidden />
             <span>🚨 Emergency Line</span>
-            <span className="font-normal opacity-90 tracking-tight">{HOSPITAL_INFO.emergencyPhone}</span>
+            <span className="font-normal opacity-90 tracking-tight">{phone}</span>
           </a>
         </div>
       </div>
@@ -270,7 +270,7 @@ function EmergencyCTA() {
 
 // ─── Page Component (Server Component) ────────────────────────────────────────
 export default async function HomePage() {
-  const [services, departments, doctors, news, events, gallery, facilities] = await Promise.all([
+  const [services, departments, doctors, news, events, gallery, facilities, settings] = await Promise.all([
     getPublicServices(),
     getPublicDepartments(),
     getPublicDoctors(),
@@ -278,23 +278,27 @@ export default async function HomePage() {
     getPublicEvents(),
     getPublicGallery(),
     getPublicFacilities(),
+    getPublicSiteSettings(),
   ]);
 
   return (
     <>
-      <JsonLd data={hospitalJsonLd()} />
+      <JsonLd data={hospitalJsonLd(settings)} />
       {/* ── 2. Hero ─────────────────────────────────────────────── */}
       <Hero
-        eyebrow="Leading Healthcare Excellence"
-        headline="Compassionate care."
-        headlineAccent="Trusted healthcare."
-        supportingText="Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first."
+        eyebrow={settings.tagline || "Leading Healthcare Excellence"}
+        headline={settings.heroHeadline || "Compassionate care."}
+        headlineAccent={settings.heroHeadlineAccent || "Trusted healthcare."}
+        supportingText={
+          settings.heroSupportingText ||
+          "Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first."
+        }
         primaryCta={{ label: "Explore Services", href: "/services" }}
         secondaryCta={{ label: "Find a Doctor", href: "/doctors" }}
         stats={[
-          { value: "50+", label: "Specialists" },
-          { value: "24 / 7", label: "Emergency" },
-          { value: "15+", label: "Departments" },
+          { value: settings.statSpecialists || "50+", label: "Specialists" },
+          { value: settings.statEmergency || "24 / 7", label: "Emergency" },
+          { value: settings.statDepartments || "15+", label: "Departments" },
         ]}
       />
 
@@ -305,7 +309,7 @@ export default async function HomePage() {
 
       {/* ── 4. Hospital Introduction ──────────────────────────────── */}
       <ScrollReveal>
-        <HospitalIntro />
+        <HospitalIntro settings={settings} />
       </ScrollReveal>
 
       {/* ── 5. Services ──────────────────────────────────────────── */}
@@ -393,7 +397,7 @@ export default async function HomePage() {
           <SectionHeader
             eyebrow="Photo & Video"
             title="Gallery"
-            description="A glimpse of our facilities, events, and the people who make Medhen Beza Hospital what it is."
+            description={`A glimpse of our facilities, events, and the people who make ${settings.hospitalName} what it is.`}
             viewAllHref="/gallery"
             viewAllLabel="View Gallery"
           />
@@ -412,7 +416,7 @@ export default async function HomePage() {
 
       {/* ── 11. Emergency / Contact CTA ──────────────────────────── */}
       <ScrollReveal>
-        <EmergencyCTA />
+        <EmergencyCTA phone={settings.emergencyPhone} />
       </ScrollReveal>
     </>
   );

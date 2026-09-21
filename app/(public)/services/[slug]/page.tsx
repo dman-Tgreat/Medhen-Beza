@@ -21,8 +21,8 @@ import {
   getPublicServices,
   getPublicDepartmentBySlug,
   getPublicDoctors,
+  getPublicSiteSettings,
 } from "@/lib/queries/public";
-import { HOSPITAL_INFO } from "@/lib/constants";
 import { contentMetadata, absoluteUrl, hospitalReference } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 
@@ -60,9 +60,10 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
     notFound();
   }
 
-  const [department, allDoctors] = await Promise.all([
+  const [department, allDoctors, settings] = await Promise.all([
     getPublicDepartmentBySlug(service.departmentSlug),
     getPublicDoctors(),
+    getPublicSiteSettings(),
   ]);
 
   const relatedDoctors = allDoctors.filter(
@@ -167,10 +168,10 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                   <div>
                     <span className="font-semibold text-text block">Inquiry Phone</span>
                     <a
-                      href={`tel:${department?.phone || HOSPITAL_INFO.generalPhone}`}
+                      href={`tel:${(department?.phone || settings.generalPhone).replace(/\s/g, "")}`}
                       className="text-primary hover:underline font-medium"
                     >
-                      {department?.phone || HOSPITAL_INFO.generalPhone}
+                      {department?.phone || settings.generalPhone}
                     </a>
                   </div>
                 </div>

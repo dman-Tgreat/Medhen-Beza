@@ -12,24 +12,33 @@ import {
 } from "lucide-react";
 import { PageHero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/button";
-import { HOSPITAL_INFO } from "@/lib/constants";
+import { getPublicSiteSettings, getPublicPageBySlug } from "@/lib/queries/public";
 
 export const metadata: Metadata = {
-  title: "Emergency Services 24/7 | Medhen Beza Hospital",
+  title: "Emergency Services 24/7 | Hospital Emergency Care",
   description:
-    "24/7 Emergency Medical Response & Trauma Center at Medhen Beza Hospital. Immediate critical care hotline: +251 911 000 999. Gate 1, Bole Road, Addis Ababa.",
+    "24/7 Emergency Medical Response & Trauma Center. Immediate critical care hotline available around the clock.",
 };
 
-export default function EmergencyPage() {
-  const emergencyPhoneRaw = HOSPITAL_INFO.emergencyPhone.replace(/\s/g, "");
+export default async function EmergencyPage() {
+  const settings = await getPublicSiteSettings();
+  const dbPage = await getPublicPageBySlug("emergency");
+
+  const phone = settings.emergencyPhone;
+  const emergencyPhoneRaw = phone.replace(/\s/g, "");
+  const gateInfo = settings.emergencyGate || "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road";
+  const hoursInfo = settings.emergencyHours || "Open 24 Hours · 7 Days a Week · All Holidays";
 
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* 1. Minimal Calm PageHero */}
       <PageHero
         eyebrow="24/7 Trauma & Critical Response"
-        title="Emergency Medical Services"
-        description="Immediate emergency care and rapid trauma response available 24 hours a day, 365 days a year."
+        title={dbPage?.title || "Emergency Medical Services"}
+        description={
+          dbPage?.excerpt ||
+          "Immediate emergency care and rapid trauma response available 24 hours a day, 365 days a year."
+        }
         breadcrumbs={[{ label: "Emergency" }]}
       />
 
@@ -57,10 +66,10 @@ export default function EmergencyPage() {
               <a
                 href={`tel:${emergencyPhoneRaw}`}
                 className="inline-flex items-center justify-center gap-2.5 sm:gap-3 rounded-lg bg-white text-emergency px-4 sm:px-6 py-3.5 sm:py-4 text-xl sm:text-h2 md:text-h1 font-black hover:bg-white/90 transition-transform active:scale-95 shadow-md max-w-full"
-                aria-label={`Call emergency line at ${HOSPITAL_INFO.emergencyPhone}`}
+                aria-label={`Call emergency line at ${phone}`}
               >
                 <PhoneCall className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 animate-bounce" />
-                <span className="whitespace-nowrap sm:whitespace-normal">{HOSPITAL_INFO.emergencyPhone}</span>
+                <span className="whitespace-nowrap sm:whitespace-normal">{phone}</span>
               </a>
 
               <p className="text-small text-white/90 font-medium max-w-xs">
@@ -77,7 +86,7 @@ export default function EmergencyPage() {
               <div>
                 <p className="font-bold">Emergency Gate & Entrance</p>
                 <p className="text-white/85 text-caption mt-0.5">
-                  Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road
+                  {gateInfo}
                 </p>
               </div>
             </div>
@@ -87,7 +96,7 @@ export default function EmergencyPage() {
               <div>
                 <p className="font-bold">Operating Hours</p>
                 <p className="text-white/85 text-caption mt-0.5">
-                  Open 24 Hours · 7 Days a Week · All Holidays
+                  {hoursInfo}
                 </p>
               </div>
             </div>
@@ -180,8 +189,7 @@ export default function EmergencyPage() {
               Emergency Entrance Directions
             </h3>
             <p className="text-small text-text-muted">
-              Follow the illuminated red emergency signage at Gate 1 on Bole
-              Road. Direct ramp access for ambulances and private emergency
+              Follow the illuminated red emergency signage at {gateInfo}. Direct ramp access for ambulances and private emergency
               vehicles.
             </p>
           </div>
