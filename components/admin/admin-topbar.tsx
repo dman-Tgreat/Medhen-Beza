@@ -4,22 +4,13 @@ import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAdminRole } from "./role-context";
-import { UserRoleType } from "@/lib/admin/types";
 import {
   Menu,
   ExternalLink,
   Bell,
-  Check,
-  ChevronDown,
   UserCheck,
   LogOut,
   Shield,
-  Stethoscope,
-  Briefcase,
-  Edit3,
-  Sliders,
-  RotateCcw,
-  Sparkles,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -38,50 +29,6 @@ interface AdminTopbarProps {
   initialNotifications?: NotificationItem[];
 }
 
-const ROLE_OPTIONS: {
-  role: UserRoleType;
-  label: string;
-  sublabel: string;
-  icon: React.ComponentType<{ className?: string }>;
-  colorClass: string;
-}[] = [
-  {
-    role: "HOSPITAL_DIRECTOR",
-    label: "Hospital Director",
-    sublabel: "Full oversight & approval",
-    icon: Shield,
-    colorClass: "text-primary bg-primary-light border-primary/20",
-  },
-  {
-    role: "MEDICAL_DIRECTOR",
-    label: "Medical Director",
-    sublabel: "Clinical content author",
-    icon: Stethoscope,
-    colorClass: "text-secondary-dark bg-secondary-light border-secondary/20",
-  },
-  {
-    role: "HR_STAFF",
-    label: "HR Staff",
-    sublabel: "Careers & vacancies",
-    icon: Briefcase,
-    colorClass: "text-indigo-700 bg-indigo-50 border-indigo-200",
-  },
-  {
-    role: "CONTENT_STAFF",
-    label: "Content Staff / Editor",
-    sublabel: "News, gallery & events",
-    icon: Edit3,
-    colorClass: "text-amber-700 bg-amber-50 border-amber-200",
-  },
-  {
-    role: "SYSTEM_ADMIN",
-    label: "System Administrator",
-    sublabel: "Technical IT & RBAC",
-    icon: Sliders,
-    colorClass: "text-slate-700 bg-slate-100 border-slate-200",
-  },
-];
-
 export function AdminTopbar({
   onToggleMobileSidebar,
   isCollapsed = false,
@@ -94,11 +41,6 @@ export function AdminTopbar({
   const {
     currentRole,
     currentUser,
-    realUser,
-    isSimulating,
-    canSimulate,
-    setRole,
-    resetRole,
     logout,
   } = useAdminRole();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -173,9 +115,6 @@ export function AdminTopbar({
     return "Hospital CMS";
   };
 
-  const currentRoleOption = ROLE_OPTIONS.find((r) => r.role === currentRole) || ROLE_OPTIONS[0];
-  const IconComponent = currentRoleOption.icon;
-
   return (
     <header className="sticky top-0 z-30 flex min-h-[72px] lg:min-h-[76px] py-2.5 sm:py-3 w-full items-center justify-between border-b border-border bg-surface px-3 sm:px-4 md:px-6 shadow-sm gap-3">
       {/* Left: Mobile menu button / Desktop rail toggle & page title */}
@@ -215,132 +154,17 @@ export function AdminTopbar({
         </div>
       </div>
 
-      {/* Right: Role Switcher, Public link, Notifications, Profile */}
+      {/* Right: Authenticated role, Public link, Notifications, Profile */}
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
-        {/* Role Display or Role Simulation Toggle (Dev/QA) */}
-        {canSimulate ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className={`flex items-center gap-1.5 sm:gap-2 rounded-lg border px-2 sm:px-3 py-1.5 min-h-[44px] sm:min-h-[36px] text-xs font-medium transition-colors shadow-none focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer ${
-                  isSimulating
-                    ? "border-amber-400 bg-amber-50 text-amber-900 ring-1 ring-amber-400/50"
-                    : "border-border bg-background text-text hover:bg-primary-light/50"
-                }`}
-                title="Switch simulated user role for QA and permission testing"
-              >
-                <div
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-xs ${currentRoleOption.colorClass}`}
-                >
-                  <IconComponent className="h-3.5 w-3.5" />
-                </div>
-                <div className="hidden lg:flex flex-col text-left">
-                  <span className="text-[9px] uppercase tracking-wider text-text-light font-bold leading-none flex items-center gap-1">
-                    {isSimulating ? (
-                      <span className="text-amber-700 flex items-center gap-0.5">
-                        <Sparkles className="w-2.5 h-2.5" /> Simulating
-                      </span>
-                    ) : (
-                      "Active Role"
-                    )}
-                  </span>
-                  <span className="text-xs font-semibold text-text leading-tight whitespace-nowrap">
-                    {currentRoleOption.label}
-                  </span>
-                </div>
-                <span className="hidden sm:inline-block lg:hidden text-xs font-semibold text-text whitespace-nowrap">
-                  {currentRoleOption.label.split(" ")[0]}
-                </span>
-                <ChevronDown className="h-3.5 w-3.5 text-text-muted shrink-0" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-76 p-2">
-              <div className="px-2 py-1 flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-bold text-text flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                    Role Simulation (QA Mode)
-                  </span>
-                  <p className="text-[11px] text-text-muted mt-0.5 leading-snug">
-                    Test filtered navigation and RBAC guards across staff roles:
-                  </p>
-                </div>
-              </div>
-
-              {isSimulating && (
-                <div className="mx-1 my-1 p-2 rounded-md bg-amber-50 border border-amber-200 flex items-center justify-between">
-                  <span className="text-[11px] text-amber-800 font-medium">
-                    Simulating <strong>{currentRoleOption.label}</strong>
-                  </span>
-                  <button
-                    onClick={resetRole}
-                    className="text-[10px] font-semibold text-amber-900 hover:underline flex items-center gap-1 cursor-pointer bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300"
-                  >
-                    <RotateCcw className="w-2.5 h-2.5" /> Reset
-                  </button>
-                </div>
-              )}
-
-              <DropdownMenuSeparator />
-              <div className="space-y-1">
-                {ROLE_OPTIONS.map((item) => {
-                  const ItemIcon = item.icon;
-                  const isSelected = item.role === currentRole;
-                  const isActual = realUser?.primaryRole === item.role;
-
-                  return (
-                    <DropdownMenuItem
-                      key={item.role}
-                      onClick={() => setRole(item.role)}
-                      className={`flex items-start gap-2.5 p-2 rounded-md cursor-pointer ${
-                        isSelected ? "bg-primary-light text-primary-dark font-medium" : ""
-                      }`}
-                    >
-                      <div
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs mt-0.5 ${item.colorClass}`}
-                      >
-                        <ItemIcon className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold flex items-center gap-1">
-                            {item.label}
-                            {isActual && (
-                              <span className="text-[9px] bg-slate-200 text-slate-700 px-1 py-0.2 rounded font-normal">
-                                Your Role
-                              </span>
-                            )}
-                          </span>
-                          {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
-                        </div>
-                        <span className="text-[11px] text-text-muted block">
-                          {item.sublabel}
-                        </span>
-                      </div>
-                    </DropdownMenuItem>
-                  );
-                })}
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          /* Production Static Role Badge */
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 min-h-[36px]">
-            <div
-              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-xs ${currentRoleOption.colorClass}`}
-            >
-              <IconComponent className="h-3.5 w-3.5" />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-[9px] uppercase tracking-wider text-text-light font-bold leading-none">
-                Role
-              </span>
-              <span className="text-xs font-semibold text-text leading-tight whitespace-nowrap">
-                {currentRoleOption.label}
-              </span>
-            </div>
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 min-h-[36px]">
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-xs text-primary bg-primary-light border-primary/20">
+            <Shield className="h-3.5 w-3.5" />
           </div>
-        )}
+          <div className="flex flex-col text-left">
+            <span className="text-[9px] uppercase tracking-wider text-text-light font-bold leading-none">Authenticated Role</span>
+            <span className="text-xs font-semibold text-text leading-tight whitespace-nowrap">{currentUser.roleTitle}</span>
+          </div>
+        </div>
 
         {/* View Public Site Link */}
         <Link

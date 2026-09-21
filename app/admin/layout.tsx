@@ -11,6 +11,12 @@ export default async function AdminRootLayout({
 }) {
   const session = await getSession();
 
+  // The authentication pages live under this layout but must remain available
+  // without a session. Middleware protects every other /admin route.
+  if (!session) {
+    return <>{children}</>;
+  }
+
   // Fetch notifications for the current user (null-safe)
   const notifications = session
     ? await getAdminUserNotifications(session.id)

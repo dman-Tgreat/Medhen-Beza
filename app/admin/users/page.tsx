@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { DataTable, ColumnDef } from "@/components/admin/data-table";
 import { ContentFormModal, FormFieldConfig } from "@/components/admin/content-form-modal";
 import { RoleGuard } from "@/components/admin/role-guard";
-import { UserRoleType, MOCK_USERS } from "@/lib/admin/types";
+import { UserRoleType } from "@/lib/admin/types";
 import { Users, Shield, Key, Check, X, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

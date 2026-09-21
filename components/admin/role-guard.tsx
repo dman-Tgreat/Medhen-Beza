@@ -3,7 +3,7 @@
 import React, { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useAdminRole } from "./role-context";
-import { ShieldAlert, ArrowLeft, RefreshCw } from "lucide-react";
+import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -16,7 +16,7 @@ interface RoleGuardProps {
 
 export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
   const pathname = usePathname();
-  const { currentRole, setRole, canSimulate, canAccessRoute } = useAdminRole();
+  const { currentRole, canAccessRoute } = useAdminRole();
 
   const isAllowed = allowedRoles
     ? allowedRoles.includes(currentRole)
@@ -61,17 +61,6 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
               </Link>
             </Button>
 
-            {canSimulate && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setRole("HOSPITAL_DIRECTOR")}
-                className="w-full sm:w-auto"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Simulate Hospital Director
-              </Button>
-            )}
           </div>
         </div>
       </div>

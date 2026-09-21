@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
 
-              {/* Dev/Local Simulation Reset Link Helper */}
+              {/* Local development reset-link helper */}
               {devResetUrl && (
                 <div className="rounded-lg bg-amber-50 border border-amber-200 p-3.5 space-y-2 text-xs text-amber-900">
                   <div className="flex items-center gap-1.5 font-bold text-amber-900">
@@ -96,7 +96,7 @@ export default function ForgotPasswordPage() {
                     <span>Dev Environment Shortcut</span>
                   </div>
                   <p className="text-[11px] text-amber-800">
-                    Because email dispatch is currently stubbed in local development, you can use this simulated token link directly:
+                    Because email dispatch is currently stubbed in local development, you can use this development token link directly:
                   </p>
                   <Button asChild variant="primary" size="sm" className="w-full text-xs mt-1">
                     <Link href={devResetUrl} className="flex items-center justify-center gap-1.5">
