@@ -12,7 +12,7 @@ import {
 import { PageHero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { getFacilityBySlug, MOCK_FACILITIES_DETAILED } from "@/lib/mock-data";
+import { getPublicFacilityBySlug, getPublicFacilities } from "@/lib/queries/public";
 import { FacilityGalleryLightbox } from "./FacilityGalleryLightbox";
 
 interface FacilityPageProps {
@@ -20,7 +20,8 @@ interface FacilityPageProps {
 }
 
 export async function generateStaticParams() {
-  return MOCK_FACILITIES_DETAILED.map((fac) => ({
+  const facilities = await getPublicFacilities();
+  return facilities.map((fac) => ({
     slug: fac.slug,
   }));
 }
@@ -29,7 +30,7 @@ export async function generateMetadata({
   params,
 }: FacilityPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const facility = getFacilityBySlug(slug);
+  const facility = await getPublicFacilityBySlug(slug);
 
   if (!facility) {
     return {
@@ -47,7 +48,7 @@ export default async function FacilityDetailPage({
   params,
 }: FacilityPageProps) {
   const { slug } = await params;
-  const facility = getFacilityBySlug(slug);
+  const facility = await getPublicFacilityBySlug(slug);
 
   if (!facility) {
     notFound();

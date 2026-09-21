@@ -4,7 +4,7 @@ import { Building2, Compass, ShieldCheck } from "lucide-react";
 import { PageHero } from "@/components/sections/Hero";
 import { DepartmentCard } from "@/components/content/DepartmentCard";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { MOCK_DEPARTMENTS_DETAILED } from "@/lib/mock-data";
+import { getPublicDepartments } from "@/lib/queries/public";
 
 export const metadata: Metadata = {
   title: "Clinical Departments | Medhen Beza Hospital",
@@ -12,7 +12,9 @@ export const metadata: Metadata = {
     "Explore the medical departments and clinical divisions at Medhen Beza Hospital in Addis Ababa — Cardiology, Maternity, Pediatrics, Surgery, Neurology, and more.",
 };
 
-export default function DepartmentsPage() {
+export default async function DepartmentsPage() {
+  const departments = await getPublicDepartments();
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* 1. PageHero */}
@@ -30,7 +32,7 @@ export default function DepartmentsPage() {
             <div className="flex items-center gap-2 font-medium text-text">
               <Compass className="w-5 h-5 text-secondary shrink-0" />
               <span>
-                Showing <strong>{MOCK_DEPARTMENTS_DETAILED.length}</strong> specialized
+                Showing <strong>{departments.length}</strong> specialized
                 clinical divisions across the Medhen Beza medical campus
               </span>
             </div>
@@ -51,7 +53,7 @@ export default function DepartmentsPage() {
       {/* 3. Image-Forward Directory Grid */}
       <main className="layout-container pt-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {MOCK_DEPARTMENTS_DETAILED.map((dept) => (
+          {departments.map((dept) => (
             <ScrollReveal key={dept.slug} className="h-full">
               <DepartmentCard data={dept} />
             </ScrollReveal>

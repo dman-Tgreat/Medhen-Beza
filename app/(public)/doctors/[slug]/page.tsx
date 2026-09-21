@@ -21,18 +21,21 @@ import { DoctorCard } from "@/components/content/DoctorCard";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import {
-  getDoctorBySlug,
-  getDepartmentBySlug,
-  getRelatedDoctors,
-  MOCK_DOCTORS_DETAILED,
-} from "@/lib/mock-data";
+  getPublicDoctorBySlug,
+  getPublicRelatedDoctors,
+  getPublicDepartmentBySlug,
+  getPublicDoctors,
+} from "@/lib/queries/public";
+import { contentMetadata, hospitalReference, absoluteUrl } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 interface DoctorPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return MOCK_DOCTORS_DETAILED.map((doc) => ({
+  const doctors = await getPublicDoctors();
+  return doctors.map((doc) => ({
     slug: doc.slug,
   }));
 }
@@ -41,7 +44,7 @@ export async function generateMetadata({
   params,
 }: DoctorPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const doctor = getDoctorBySlug(slug);
+  const doctor = await getPublicDoctorBySlug(slug);
 
   if (!doctor) {
     return {
@@ -49,264 +52,200 @@ export async function generateMetadata({
     };
   }
 
-  return {
-    title: `${doctor.name} — ${doctor.specialty} | Medhen Beza Hospital`,
-    description: doctor.biography,
-  };
+  return contentMetadata({ title: doctor.metaTitle || `${doctor.name} — ${doctor.specialty}`, description: doctor.metaDescription || doctor.biography, path: `/doctors/${doctor.slug}`, canonicalUrl: doctor.canonicalUrl, image: doctor.ogImage || doctor.photo });
 }
 
 export default async function DoctorProfilePage({ params }: DoctorPageProps) {
   const { slug } = await params;
-  const doctor = getDoctorBySlug(slug);
+  const doctor = await getPublicDoctorBySlug(slug);
 
   if (!doctor) {
     notFound();
   }
 
-  const department = getDepartmentBySlug(doctor.departmentSlug);
-  const otherDoctors = getRelatedDoctors(doctor.departmentSlug, doctor.slug, 3);
+  const [department, otherDoctors] = await Promise.all([
+    getPublicDepartmentBySlug(doctor.departmentSlug),
+    getPublicRelatedDoctors(doctor.departmentSlug, doctor.slug, 3),
+  ]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* 1. PageHero */}
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Physician", name: doctor.name, description: doctor.biography, url: absoluteUrl(`/doctors/${doctor.slug}`), image: doctor.photo ? absoluteUrl(doctor.photo) : undefined, medicalSpecialty: doctor.specialty, worksFor: hospitalReference() }} />
       <PageHero
-        eyebrow="Physician Profile"
         title={doctor.name}
-        description={`${doctor.title} · ${doctor.specialty}`}
+        description={`${doctor.title} · ${doctor.department}`}
+        badge={doctor.specialty}
         breadcrumbs={[
+          { label: "Home", href: "/" },
           { label: "Doctors", href: "/doctors" },
-          { label: doctor.name },
+          { label: doctor.name, href: `/doctors/${doctor.slug}` },
         ]}
       />
 
-      <main className="layout-container pt-12 space-y-16">
-        {/* 2. Main Profile Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-          {/* Left Column: Portrait & Key Details & Quick Booking Card */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="rounded-lg bg-surface border border-border overflow-hidden shadow-xs">
-              {/* Photo Slot */}
-              <div className="relative aspect-[4/5] bg-primary-light">
+      <div className="container mx-auto px-4 -mt-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left Column: Doctor Profile Card */}
+          <div className="lg:col-span-4">
+            <div className="bg-surface rounded-2xl border border-border p-6 shadow-sm sticky top-24 space-y-6">
+              {/* Doctor Portrait */}
+              <div className="relative w-40 h-40 mx-auto rounded-full overflow-hidden border-4 border-primary-light bg-background">
                 {doctor.photo ? (
                   <Image
                     src={doctor.photo}
                     alt={doctor.name}
                     fill
                     className="object-cover"
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 33vw"
                   />
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary-light via-surface to-secondary-light/40 flex flex-col items-center justify-center text-primary/40 p-6 text-center">
-                    <UserCircle2 className="w-24 h-24 mb-2" strokeWidth={1} />
-                    <span className="text-small font-semibold text-text">
-                      {doctor.name}
-                    </span>
-                    <span className="text-caption text-text-muted mt-0.5">
-                      {doctor.specialty}
-                    </span>
+                  <div className="flex h-full w-full items-center justify-center bg-secondary-light/30">
+                    <UserCircle2 className="h-20 w-20 text-primary/40" />
                   </div>
                 )}
-
-                <span className="absolute top-3 right-3 rounded-full bg-secondary text-white px-3 py-1 text-caption font-bold tracking-wider uppercase shadow-sm">
-                  {doctor.specialty}
-                </span>
               </div>
 
-              {/* Quick Details List */}
-              <div className="p-6 space-y-5">
-                <div>
-                  <h2 className="text-h3 font-bold text-text leading-tight">
-                    {doctor.name}
-                  </h2>
-                  <p className="text-small font-medium text-secondary mt-1">
-                    {doctor.title}
-                  </p>
+              {/* Basic Info */}
+              <div className="text-center space-y-2">
+                <h2 className="text-h3 font-bold text-text">{doctor.name}</h2>
+                <p className="text-small font-medium text-secondary-dark">{doctor.title}</p>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-pill bg-primary-light text-primary-dark text-caption font-semibold">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Board Certified
                 </div>
+              </div>
 
-                <div className="space-y-3 pt-4 border-t border-border text-small text-text-muted">
-                  <div className="flex items-start gap-3">
-                    <Building2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-text">Department</p>
-                      {department ? (
-                        <Link
-                          href={department.href}
-                          className="text-primary hover:underline font-medium"
-                        >
-                          {department.name}
-                        </Link>
-                      ) : (
-                        <span>{doctor.department}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-text">Office Location</p>
-                      <span>{doctor.officeLocation}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <Clock className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-text">Clinical Hours</p>
-                      <span>{doctor.availability}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <Globe2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-text">Languages</p>
-                      <span>{doctor.languages.join(", ")}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-border space-y-2.5">
-                  <Button asChild size="lg" className="w-full">
-                    <Link href="/contact" className="gap-2 justify-center">
-                      <Calendar className="w-4 h-4" />
-                      Book Consultation
+              <div className="border-t border-border pt-4 space-y-3 text-small">
+                <div className="flex items-start gap-3">
+                  <Building2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-caption text-text-light block">Department</span>
+                    <Link
+                      href={`/departments/${doctor.departmentSlug}`}
+                      className="font-medium text-text hover:text-primary transition-colors"
+                    >
+                      {doctor.department}
                     </Link>
-                  </Button>
+                  </div>
                 </div>
+
+                <div className="flex items-start gap-3">
+                  <Clock className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-caption text-text-light block">Consultation Hours</span>
+                    <span className="font-medium text-text">{doctor.availability}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-caption text-text-light block">Clinical Location</span>
+                    <span className="font-medium text-text">{doctor.officeLocation}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Globe2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-caption text-text-light block">Languages</span>
+                    <span className="font-medium text-text">
+                      {doctor.languages.join(", ")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 space-y-2">
+                <Button asChild variant="primary" className="w-full">
+                  <Link href="/contact">Book Consultation</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={`tel:${department?.phone || "+251111234567"}`}>
+                    Call Clinic
+                  </Link>
+                </Button>
               </div>
             </div>
+          </div>
 
-            {/* Department Quick Link Card */}
-            {department && (
-              <div className="rounded-lg bg-surface border border-border p-5 space-y-3">
-                <span className="text-caption font-semibold uppercase tracking-wider text-text-muted block">
-                  Department Affiliation
-                </span>
-                <h4 className="text-small font-bold text-text">
-                  {department.name} Department
-                </h4>
-                <p className="text-caption text-text-muted line-clamp-2">
-                  {department.description}
-                </p>
-                <Link
-                  href={department.href}
-                  className="inline-flex items-center gap-1.5 text-small font-semibold text-primary hover:underline pt-1"
-                >
-                  <span>Explore department & services</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+          {/* Right Column: In-depth Biography & Qualifications */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Biography */}
+            <div className="bg-surface rounded-2xl border border-border p-6 sm:p-8 shadow-sm space-y-4">
+              <h3 className="text-h4 font-bold text-text flex items-center gap-2">
+                <UserCircle2 className="h-5 w-5 text-primary" />
+                About {doctor.name}
+              </h3>
+              <p className="text-body text-text-muted leading-relaxed whitespace-pre-line">
+                {doctor.biography}
+              </p>
+            </div>
+
+            {/* Qualifications & Education */}
+            {doctor.qualifications.length > 0 && (
+              <div className="bg-surface rounded-2xl border border-border p-6 sm:p-8 shadow-sm space-y-4">
+                <h3 className="text-h4 font-bold text-text flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                  Medical Qualifications & Fellowships
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {doctor.qualifications.map((q, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2.5 p-3 rounded-xl bg-background border border-border text-small font-medium text-text"
+                    >
+                      <CheckCircle className="h-4 w-4 text-secondary shrink-0" />
+                      <span>{q}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Areas of Clinical Expertise */}
+            {doctor.areasOfExpertise.length > 0 && (
+              <div className="bg-surface rounded-2xl border border-border p-6 sm:p-8 shadow-sm space-y-4">
+                <h3 className="text-h4 font-bold text-text flex items-center gap-2">
+                  <Award className="h-5 w-5 text-primary" />
+                  Clinical Specialties & Focus Areas
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {doctor.areasOfExpertise.map((area, idx) => (
+                    <span
+                      key={idx}
+                      className="px-3.5 py-1.5 rounded-pill bg-primary-light text-primary-dark font-medium text-small border border-primary/20"
+                    >
+                      {area}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Related Department Specialists */}
+            {otherDoctors.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-h4 font-bold text-text">
+                    Colleagues in {doctor.department}
+                  </h3>
+                  <Link
+                    href={`/departments/${doctor.departmentSlug}`}
+                    className="text-small font-semibold text-primary hover:underline flex items-center gap-1"
+                  >
+                    View Department <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {otherDoctors.map((doc) => (
+                    <DoctorCard key={doc.slug} data={doc} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
-
-          {/* Right Column: Bio, Qualifications, Expertise */}
-          <div className="lg:col-span-8 space-y-10">
-            {/* Biography */}
-            <div className="space-y-4">
-              <h3 className="text-h3 font-bold text-text">Doctor Biography</h3>
-              <p className="text-body text-text-muted leading-relaxed">
-                {doctor.biography}
-              </p>
-              <div className="p-4 rounded-md bg-surface border border-border flex items-center gap-3">
-                <Award className="w-5 h-5 text-secondary shrink-0" />
-                <span className="text-small font-medium text-text">
-                  {doctor.experience}
-                </span>
-              </div>
-            </div>
-
-            {/* Areas of Clinical Expertise */}
-            <div className="space-y-4 pt-4 border-t border-border">
-              <h3 className="text-h3 font-bold text-text">
-                Areas of Clinical Expertise
-              </h3>
-              <div className="flex flex-wrap gap-2.5">
-                {doctor.areasOfExpertise.map((item, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-2 rounded-full bg-primary-light/70 text-primary border border-primary/20 px-3.5 py-1.5 text-small font-semibold"
-                  >
-                    <CheckCircle className="w-3.5 h-3.5 text-primary" />
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Education & Qualifications */}
-            <div className="space-y-4 pt-4 border-t border-border">
-              <h3 className="text-h3 font-bold text-text">
-                Education & Board Certifications
-              </h3>
-              <ul className="space-y-3">
-                {doctor.qualifications.map((qual, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-start gap-3 text-body text-text-muted"
-                  >
-                    <div className="w-8 h-8 rounded-md bg-secondary-light text-secondary flex items-center justify-center shrink-0 mt-0.5">
-                      <GraduationCap className="w-4 h-4" />
-                    </div>
-                    <span className="mt-1 font-medium text-text">{qual}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Quality Standard */}
-            <div className="rounded-lg bg-surface border border-border p-6 flex items-start gap-4">
-              <ShieldCheck className="w-8 h-8 text-secondary shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <h4 className="text-small font-bold text-text">
-                  Certified Clinical Provider
-                </h4>
-                <p className="text-caption text-text-muted leading-relaxed">
-                  Licensed by the Ethiopian Health Regulatory Authority (EFDA)
-                  and the Ministry of Health. Adheres to international medical
-                  ethics and patient privacy protocols.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
-
-        {/* 3. Other Doctors in this Department — Keep visitors moving */}
-        {otherDoctors.length > 0 && (
-          <ScrollReveal>
-            <div className="space-y-6 pt-10 border-t border-border">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-                <div>
-                  <span className="text-caption font-semibold uppercase tracking-wider text-secondary">
-                    Department Team
-                  </span>
-                  <h3 className="text-h2 font-bold text-text tracking-tight mt-0.5">
-                    Other Specialists in {doctor.department}
-                  </h3>
-                  <p className="text-small text-text-muted max-w-2xl mt-1">
-                    Meet other consultant physicians and surgeons in this clinical
-                    division.
-                  </p>
-                </div>
-                <Link
-                  href="/doctors"
-                  className="inline-flex items-center gap-1 text-small font-semibold text-primary hover:text-primary-dark transition-colors group shrink-0"
-                >
-                  <span>View all doctors</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {otherDoctors.map((doc) => (
-                  <DoctorCard key={doc.slug} data={doc} />
-                ))}
-              </div>
-            </div>
-          </ScrollReveal>
-        )}
-      </main>
+      </div>
     </div>
   );
 }

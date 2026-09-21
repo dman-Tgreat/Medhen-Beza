@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Building2, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import { PageHero } from "@/components/sections/Hero";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { MOCK_FACILITIES_DETAILED } from "@/lib/mock-data";
+import { getPublicFacilities } from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -13,9 +13,9 @@ export const metadata: Metadata = {
     "Explore our modern clinical infrastructure, sterile operating theatres, diagnostic imaging suites, intensive care units, and inpatient rooms.",
 };
 
-export default function FacilitiesPage() {
-  const [featuredFacility, secondFacility, ...restFacilities] =
-    MOCK_FACILITIES_DETAILED;
+export default async function FacilitiesPage() {
+  const facilities = await getPublicFacilities();
+  const [featuredFacility, secondFacility, ...restFacilities] = facilities;
 
   return (
     <div className="min-h-screen bg-background pb-20">
