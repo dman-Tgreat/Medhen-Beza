@@ -45,16 +45,28 @@ export function contentMetadata(input: {
   };
 }
 
-export function hospitalJsonLd() {
+export function hospitalJsonLd(settings?: {
+  hospitalName?: string;
+  description?: string;
+  generalPhone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+}) {
   return {
     "@context": "https://schema.org",
     "@type": "Hospital",
-    name: HOSPITAL_INFO.name,
-    description: HOSPITAL_INFO.description,
+    name: settings?.hospitalName || HOSPITAL_INFO.name,
+    description: settings?.description || HOSPITAL_INFO.description,
     url: SITE_URL,
-    telephone: HOSPITAL_INFO.generalPhone,
+    telephone: settings?.generalPhone || HOSPITAL_INFO.generalPhone,
     image: absoluteUrl("/og-image.jpg"),
-    address: { "@type": "PostalAddress", streetAddress: HOSPITAL_INFO.address, addressLocality: "Addis Ababa", addressCountry: "ET" },
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: settings?.address || HOSPITAL_INFO.address,
+      addressLocality: settings?.city || "Addis Ababa",
+      addressCountry: settings?.country || "ET",
+    },
     openingHours: "Mo-Su 00:00-23:59",
   };
 }

@@ -464,10 +464,10 @@ async function main() {
       summary: "Expanding interventional heart services with state-of-the-art imaging and catheterisation equipment.",
       content: "Medhen Beza Hospital is proud to announce the commissioning of our new cardiac cath lab. This facility allows our cardiology team to deliver immediate life-saving interventions for acute myocardial infarction, coronary artery disease, and peripheral vascular disorders.",
       authorName: "Dr. Dawit Haile",
-      categoryId: category1.id,
+      category: { connect: { id: category1.id } },
       tags: ["Cardiology", "Facilities", "Healthcare Innovation"],
-      seoTitle: "New Cardiac Cath Lab | Medhen Beza Hospital",
-      seoDescription: "Medhen Beza Hospital expands cardiac care with a new state-of-the-art catheterisation lab in Addis Ababa.",
+      metaTitle: "New Cardiac Cath Lab | Medhen Beza Hospital",
+      metaDescription: "Medhen Beza Hospital expands cardiac care with a new state-of-the-art catheterisation lab in Addis Ababa.",
       status: ContentStatus.PUBLISHED,
       isFeatured: true,
       publishedAt: new Date("2026-09-01"),
@@ -478,10 +478,10 @@ async function main() {
       summary: "Key steps to recognize cardiovascular symptoms early and maintain optimal cardiovascular wellness.",
       content: "Cardiovascular diseases remain the leading cause of premature mortality worldwide. By maintaining healthy lifestyle choices, monitoring blood pressure, and scheduling regular cardiac screenings, individuals can prevent up to 80% of premature heart attacks and strokes.",
       authorName: "Clinical Health Team",
-      categoryId: category2.id,
+      category: { connect: { id: category2.id } },
       tags: ["Heart Health", "Wellness", "Preventive Care"],
-      seoTitle: "Heart Disease Prevention | Medhen Beza Hospital",
-      seoDescription: "Learn key cardiovascular risk factors and preventative strategies from specialists at Medhen Beza Hospital.",
+      metaTitle: "Heart Disease Prevention | Medhen Beza Hospital",
+      metaDescription: "Learn key cardiovascular risk factors and preventative strategies from specialists at Medhen Beza Hospital.",
       status: ContentStatus.PUBLISHED,
       isFeatured: true,
       publishedAt: new Date("2026-08-25"),
@@ -619,18 +619,91 @@ async function main() {
   // ─── 13. Seed Site Settings (§22) ───────────────────────────────────────────
   const settingsData = [
     { key: "hospital_name", value: "Medhen Beza Hospital", group: "general", description: "Official hospital name" },
-    { key: "tagline", value: "Compassionate Care, Advanced Medicine, Exceptional Service", group: "general", description: "Hospital brand tagline" },
+    { key: "tagline", value: "Leading Healthcare Excellence", group: "general", description: "Hospital brand tagline" },
+    { key: "hero_headline", value: "Compassionate care.", group: "content", description: "Homepage hero main headline" },
+    { key: "hero_headline_accent", value: "Trusted healthcare.", group: "content", description: "Homepage hero accented headline" },
+    { key: "hero_supporting_text", value: "Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first.", group: "content", description: "Homepage hero description" },
+    { key: "stat_specialists", value: "50+", group: "content", description: "Highlight stat specialists" },
+    { key: "stat_emergency", value: "24 / 7", group: "content", description: "Highlight stat emergency" },
+    { key: "stat_departments", value: "15+", group: "content", description: "Highlight stat departments" },
+    { key: "hospital_intro_title", value: "Trusted care for every stage of life", group: "content", description: "Hospital intro title" },
     { key: "emergency_phone", value: "+251 911 000 999", group: "emergency", description: "24/7 emergency dispatch hotline" },
+    { key: "ambulance_phone", value: "+251 911 000 999", group: "emergency", description: "Ambulance trauma line" },
+    { key: "emergency_gate", value: "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road", group: "emergency", description: "Emergency gate directions" },
+    { key: "emergency_hours", value: "Open 24 Hours · 7 Days a Week · All Holidays", group: "emergency", description: "Emergency department hours" },
+    { key: "visiting_hours", value: "Mon - Sun: 06:00 - 08:00, 12:00 - 14:00, 17:00 - 19:30", group: "general", description: "General ward visiting hours" },
     { key: "general_phone", value: "+251 116 000 111", group: "contact", description: "Main reception and inquiry line" },
+    { key: "hospital_phone", value: "+251 116 000 111", group: "contact", description: "Hospital switchboard phone" },
     { key: "email", value: "info@medhenbeza.com", group: "contact", description: "General inquiry email address" },
+    { key: "hospital_email", value: "info@medhenbeza.com", group: "contact", description: "Hospital email" },
     { key: "address", value: "Bole Road, Addis Ababa, Ethiopia", group: "contact", description: "Physical campus address" },
+    { key: "hospital_address", value: "Bole Road, Addis Ababa, Ethiopia", group: "contact", description: "Hospital physical address" },
     { key: "working_hours", value: "24/7 Emergency & Inpatient Services", group: "general", description: "Operating schedule overview" },
   ];
 
   for (const s of settingsData) {
     await prisma.siteSetting.create({ data: s });
   }
-  console.log("✅ Seeded site settings.");
+  console.log(`✅ Seeded ${settingsData.length} site settings.`);
+
+  // ─── 14. Seed CMS Pages (§14) ───────────────────────────────────────────────
+  const pagesData = [
+    {
+      title: "About Medhen Beza Hospital",
+      slug: "about",
+      excerpt: "Dedicated to clinical excellence, compassionate patient recovery, and advanced medical practice in Addis Ababa.",
+      content: JSON.stringify({
+        hero: {
+          title: "About Medhen Beza Hospital",
+          supportingText: "Dedicated to clinical excellence, compassionate patient recovery, and advanced medical practice in Addis Ababa.",
+        },
+        introduction: {
+          eyebrow: "Our Story & Commitment",
+          title: "A modern healthcare institution built on trust and clinical expertise",
+          paragraphs: [
+            "Medhen Beza Hospital was founded with a singular purpose: to bring accessible, world-class specialized healthcare to patients and families across Addis Ababa and throughout Ethiopia.",
+            "From routine outpatient consultations to complex multi-stage surgical procedures, our hospital operates around the clock to ensure every patient receives dignity, clinical precision, and compassionate support.",
+            "We invest continuously in our medical workforce, international standards of clinical safety, and the latest diagnostic technologies.",
+          ],
+        },
+        missionVision: {
+          mission: "To deliver accessible, patient-centered clinical care of the highest standard, treating every individual with compassion, clinical integrity, and dignity.",
+          vision: "To be Ethiopia's most trusted hospital for specialized and emergency medicine, recognized across East Africa for clinical innovation, safety, and patient outcomes.",
+        },
+      }),
+      status: ContentStatus.PUBLISHED,
+      publishedAt: new Date(),
+    },
+    {
+      title: "Emergency Medical Services",
+      slug: "emergency",
+      excerpt: "Immediate emergency care and rapid trauma response available 24 hours a day, 365 days a year.",
+      content: "Full-service emergency and trauma care center equipped with rapid resuscitation suites, acute cardiac monitoring, and direct ambulance access.",
+      status: ContentStatus.PUBLISHED,
+      publishedAt: new Date(),
+    },
+    {
+      title: "Privacy Policy",
+      slug: "privacy",
+      excerpt: "Patient data confidentiality, health record protection, and digital privacy policy.",
+      content: "Medhen Beza Hospital maintains strict patient data confidentiality in accordance with medical ethics and applicable legal standards in Ethiopia.",
+      status: ContentStatus.PUBLISHED,
+      publishedAt: new Date(),
+    },
+    {
+      title: "Terms of Service",
+      slug: "terms",
+      excerpt: "Terms governing use of hospital website and appointment booking services.",
+      content: "By accessing the Medhen Beza Hospital portal, visitors and patients agree to comply with our institutional policies and digital communication guidelines.",
+      status: ContentStatus.PUBLISHED,
+      publishedAt: new Date(),
+    },
+  ];
+
+  for (const p of pagesData) {
+    await prisma.page.create({ data: p });
+  }
+  console.log(`✅ Seeded ${pagesData.length} CMS published pages.`);
 
   console.log("🎉 Database seeding completed successfully!");
 }

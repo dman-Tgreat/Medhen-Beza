@@ -378,18 +378,17 @@ function mapNews(news: any): NewsDetailData {
     id: news.id,
     title: news.title,
     slug: news.slug,
-    summary: news.excerpt || news.content?.slice(0, 160) || "",
+    summary: news.summary || news.excerpt || news.content?.slice(0, 160) || "",
     category: news.category?.name || "Hospital News",
     date: (news.publishedAt || news.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     readTime: `${Math.max(2, Math.ceil((news.content || "").split(" ").length / 180))} min read`,
     author: {
       name: news.authorName || news.createdBy?.name || "Medhen Beza Medical Editorial",
       role: "Medical Communications",
-      photo: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200",
     },
     contentParagraphs: (news.content || "").split("\n\n").filter(Boolean),
-    tags: ["Healthcare", "Addis Ababa", "Hospital"],
-    image: news.featuredImage || news.coverImage || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200",
+    tags: Array.isArray(news.tags) && news.tags.length > 0 ? news.tags : ["Healthcare", "Addis Ababa"],
+    image: news.featuredImage || news.coverImage || undefined,
     href: `/news/${news.slug}`,
     metaTitle: news.metaTitle,
     metaDescription: news.metaDescription,
@@ -451,28 +450,19 @@ function mapCareer(car: any): CareerDetailData {
     location: car.location || "Addis Ababa, Ethiopia",
     deadline: deadlineDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     postedDate: createdDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    overview: car.description || "Key clinical opportunity at Medhen Beza Hospital.",
-    responsibilities: [
+    overview: car.description || "Clinical opportunity at Medhen Beza Hospital.",
+    responsibilities: car.responsibilities && car.responsibilities.length > 0 ? car.responsibilities : [
       "Deliver compassionate, high-quality patient care in accordance with hospital clinical guidelines.",
       "Collaborate effectively with multidisciplinary medical teams and support staff.",
-      "Maintain accurate clinical documentation and adhere to infection control standards.",
     ],
-    requirements: car.requirements && car.requirements.length > 0
-      ? car.requirements
-      : [
-          "Relevant professional degree and valid Ethiopian medical/nursing license.",
-          "Demonstrated clinical competence and patient-centred communication skills.",
-        ],
-    qualifications: [
-      "Valid Professional Registration with the Ethiopian Ministry of Health.",
-      "BLS / ACLS certification preferred for acute clinical roles.",
-    ],
+    requirements: car.requirements && car.requirements.length > 0 ? car.requirements : [],
+    qualifications: car.qualifications && car.qualifications.length > 0 ? car.qualifications : [],
     benefits: [
-      "Competitive professional remuneration package",
-      "Comprehensive hospital medical coverage",
+      "Competitive hospital compensation package",
+      "Comprehensive medical coverage at Medhen Beza Hospital",
       "Continuous professional training & development",
     ],
-    contactEmail: "hr@medhenbeza.com",
+    contactEmail: car.department?.email || "careers@medhenbeza.com",
     href: `/careers/${car.slug}`,
   };
 }
@@ -521,16 +511,12 @@ function mapEvent(ev: any): EventDetailData {
     month: monthNames[eventDate.getMonth()],
     year: eventDate.getFullYear(),
     dateFormatted: eventDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
-    time: "9:00 AM - 1:00 PM",
-    location: ev.location || "Medhen Beza Hospital Auditorium",
+    time: "Event Date Scheduled",
+    location: ev.location || "Medhen Beza Hospital Campus",
     isPast: eventDate < new Date(),
     description: ev.description || "Hospital public medical event.",
-    fullDescription: [ev.description || "Join us for this special hospital event."],
-    agenda: [
-      { time: "09:00 AM", topic: "Opening Remarks & Registration" },
-      { time: "09:30 AM", topic: "Specialist Clinical Presentation" },
-      { time: "11:30 AM", topic: "Interactive Q&A Session & Free Screening" },
-    ],
+    fullDescription: [ev.description || "Special hospital event."],
+    agenda: [],
     registrationInfo: "Free attendance for community members and healthcare professionals.",
     image: ev.image || undefined,
     href: `/events/${ev.slug}`,
@@ -612,11 +598,11 @@ export async function getPublicGallery(): Promise<any[]> {
     });
     return items.map((g) => {
       const isVideo = g.type === "VIDEO";
-      // For videos use thumbnailUrl if available; for images use url directly.
-      // Passing an empty src to GalleryCard triggers its placeholder UI.
+      const fallbackThumb = isVideo ? getVideoThumbnailUrl(g.url) : null;
       const imageSrc = isVideo
-        ? (g.thumbnailUrl || "")
-        : (g.url || "");
+        ? (g.thumbnailUrl || fallbackThumb || "")
+        : (g.url || g.thumbnailUrl || "");
+
       return {
         id: g.id,
         title: g.title,
@@ -624,6 +610,9 @@ export async function getPublicGallery(): Promise<any[]> {
         category: g.album || "Facilities",
         type: isVideo ? "video" : "image",
         src: imageSrc,
+        url: g.url,
+        videoUrl: isVideo ? g.url : undefined,
+        embedUrl: isVideo ? getVideoEmbedUrl(g.url) : undefined,
         href: isVideo ? g.url : undefined,
         alt: g.altText || g.title,
       };
@@ -634,7 +623,7 @@ export async function getPublicGallery(): Promise<any[]> {
   }
 }
 
-// ─── 9. CMS Pages ───────────────────────────────────────────────────────────
+// ─── 9. CMS Pages & About Page ──────────────────────────────────────────────
 
 export async function getPublicPageBySlug(slug: string) {
   try {
@@ -648,6 +637,35 @@ export async function getPublicPageBySlug(slug: string) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicPageBySlug]", error);
     return null;
   }
+}
+
+export async function getPublicAboutPage(): Promise<AboutPageData> {
+  const dbPage = await getPublicPageBySlug("about");
+  const base = { ...MOCK_ABOUT_PAGE };
+
+  if (dbPage) {
+    if (dbPage.title) base.hero.title = dbPage.title;
+    if (dbPage.excerpt) base.hero.supportingText = dbPage.excerpt;
+
+    if (dbPage.content && dbPage.content.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(dbPage.content);
+        if (parsed.introduction) base.introduction = { ...base.introduction, ...parsed.introduction };
+        if (parsed.missionVision) base.missionVision = { ...base.missionVision, ...parsed.missionVision };
+        if (parsed.values) base.values = parsed.values;
+        if (parsed.leadership) base.leadership = parsed.leadership;
+        if (parsed.environment) base.environment = parsed.environment;
+        if (parsed.accreditations) base.accreditations = parsed.accreditations;
+        if (parsed.finalCta) base.finalCta = { ...base.finalCta, ...parsed.finalCta };
+      } catch (e) {
+        base.introduction.paragraphs = dbPage.content.split("\n\n").filter(Boolean);
+      }
+    } else if (dbPage.content) {
+      base.introduction.paragraphs = dbPage.content.split("\n\n").filter(Boolean);
+    }
+  }
+
+  return base;
 }
 
 // ─── 10. Facilities ─────────────────────────────────────────────────────────
