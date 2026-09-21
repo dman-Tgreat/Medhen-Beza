@@ -96,6 +96,18 @@ export default async function DepartmentDetailPage({
           <div className="lg:col-span-8 space-y-10">
             {/* Overview & Key Services */}
             <div className="bg-surface rounded-2xl border border-border p-6 sm:p-8 shadow-sm space-y-6">
+              {dept.image && (
+                <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-border">
+                  <Image
+                    src={dept.image}
+                    alt={dept.imageAlt || `${dept.name} Department`}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                  />
+                </div>
+              )}
               <h2 className="text-h3 font-bold text-text">Department Overview</h2>
               <p className="text-body text-text-muted leading-relaxed whitespace-pre-line">
                 {dept.longDescription || dept.description}

@@ -19,6 +19,7 @@
  */
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   UserSearch,
   LayoutGrid,
@@ -156,13 +157,23 @@ function HospitalIntro({ settings }: { settings: any }) {
     <Section>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Image side */}
-        <div className="relative rounded-lg overflow-hidden aspect-[4/3] bg-primary-light border border-border">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary-light via-secondary-light to-primary-light flex flex-col items-center justify-center gap-3 text-primary/40">
-            <Building2 className="w-20 h-20" strokeWidth={1} />
-            <p className="text-caption font-medium text-center px-6">
-              {settings.hospitalName} Modern Campus
-            </p>
-          </div>
+        <div className="relative rounded-lg overflow-hidden aspect-[4/3] bg-primary-light border border-border shadow-sm">
+          {settings.hospitalIntroImage ? (
+            <Image
+              src={settings.hospitalIntroImage}
+              alt={`${settings.hospitalName} Campus & Facilities`}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-light via-secondary-light to-primary-light flex flex-col items-center justify-center gap-3 text-primary/40">
+              <Building2 className="w-20 h-20" strokeWidth={1} />
+              <p className="text-caption font-medium text-center px-6">
+                {settings.hospitalName} Modern Campus
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Text side */}
@@ -295,6 +306,8 @@ export default async function HomePage() {
         }
         primaryCta={{ label: "Explore Services", href: "/services" }}
         secondaryCta={{ label: "Find a Doctor", href: "/doctors" }}
+        photoSrc={settings.heroImage}
+        photoAlt={`${settings.hospitalName} Medical Team`}
         stats={[
           { value: settings.statSpecialists || "50+", label: "Specialists" },
           { value: settings.statEmergency || "24 / 7", label: "Emergency" },

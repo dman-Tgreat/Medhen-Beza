@@ -249,7 +249,7 @@ export const MOCK_ABOUT_PAGE: AboutPageData = {
     title: "About Medhen Beza",
     supportingText:
       "Committed to clinical excellence, compassionate patient care, and modern medical standards for the Addis Ababa community and beyond.",
-    image: "",
+    image: "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1200&q=80",
     imageAlt: "Medhen Beza Hospital main medical facility",
   },
   introduction: {
@@ -260,7 +260,7 @@ export const MOCK_ABOUT_PAGE: AboutPageData = {
       "Our modern clinical campus brings together specialized physicians, experienced nursing teams, and advanced diagnostic infrastructure to deliver comprehensive healthcare across multiple medical disciplines.",
       "Guided by strong ethical commitments and evidence-based clinical practices, we strive to make every patient visit safe, dignified, and supportive from admission through recovery.",
     ],
-    photo: "",
+    photo: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1000&q=80",
     photoAlt: "Medical team and care providers at Medhen Beza Hospital",
     ctaLabel: "Contact Us",
     ctaHref: "/contact",
@@ -313,25 +313,25 @@ export const MOCK_ABOUT_PAGE: AboutPageData = {
     {
       name: "Dr. Kebede Tadesse",
       position: "Chief Executive Officer & Medical Director",
-      photo: "",
+      photo: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=800&q=80",
       photoAlt: "Dr. Kebede Tadesse — CEO & Medical Director",
     },
     {
       name: "Dr. Selamawit Bekele",
       position: "Head of Clinical Services & Senior Cardiologist",
-      photo: "",
+      photo: "https://images.unsplash.com/photo-1594824813520-a7d57f12e2c5?auto=format&fit=crop&w=800&q=80",
       photoAlt: "Dr. Selamawit Bekele — Head of Clinical Services",
     },
     {
       name: "Sister Bethlehem Worku",
       position: "Director of Nursing Operations",
-      photo: "",
+      photo: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80",
       photoAlt: "Sister Bethlehem Worku — Director of Nursing Operations",
     },
     {
       name: "Ato Dawit Alemu",
       position: "Chief Financial & Administrative Officer",
-      photo: "",
+      photo: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=800&q=80",
       photoAlt: "Ato Dawit Alemu — Chief Administrative Officer",
     },
   ],
@@ -343,26 +343,26 @@ export const MOCK_ABOUT_PAGE: AboutPageData = {
     featured: {
       name: "Inpatient Pavilion",
       category: "Inpatient Suites",
-      image: "",
+      image: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
       imageAlt: "Spacious private inpatient suite with electric bed and natural lighting",
     },
     supporting: [
       {
         name: "Surgical Suites",
         category: "Operating Theatres",
-        image: "",
+        image: "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=800&q=80",
         imageAlt: "Sterile surgical theatre with modern operating lighting and laparoscopic columns",
       },
       {
         name: "Diagnostic Tower",
         category: "Radiology & Labs",
-        image: "",
+        image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80",
         imageAlt: "Advanced digital CT scanner and automated diagnostic laboratory",
       },
       {
         name: "Outpatient Clinic",
         category: "Consultation Rooms",
-        image: "",
+        image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80",
         imageAlt: "Modern outpatient consultation room with digital physician workstation",
       },
     ],

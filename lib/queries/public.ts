@@ -38,11 +38,13 @@ export interface PublicSiteSettings {
   heroHeadline: string;
   heroHeadlineAccent: string;
   heroSupportingText: string;
+  heroImage?: string;
   statSpecialists: string;
   statEmergency: string;
   statDepartments: string;
   hospitalIntroTitle: string;
   hospitalIntroParagraphs: string[];
+  hospitalIntroImage?: string;
   emergencyGate: string;
   emergencyHours: string;
 }
@@ -83,6 +85,8 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
 
     const emergencyGate = map.get("emergency_gate") || "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road";
     const emergencyHours = map.get("emergency_hours") || "Open 24 Hours · 7 Days a Week · All Holidays";
+    const heroImage = map.get("hero_image") || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200";
+    const hospitalIntroImage = map.get("hospital_intro_image") || "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=1200";
 
     return {
       hospitalName,
@@ -99,11 +103,13 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
       heroHeadline,
       heroHeadlineAccent,
       heroSupportingText,
+      heroImage,
       statSpecialists,
       statEmergency,
       statDepartments,
       hospitalIntroTitle,
       hospitalIntroParagraphs,
+      hospitalIntroImage,
       emergencyGate,
       emergencyHours,
     };
@@ -124,6 +130,7 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
       heroHeadline: "Compassionate care.",
       heroHeadlineAccent: "Trusted healthcare.",
       heroSupportingText: "Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first.",
+      heroImage: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200",
       statSpecialists: "50+",
       statEmergency: "24/7",
       statDepartments: "15+",
@@ -133,6 +140,7 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
         "Our multidisciplinary teams of specialists work across cutting-edge diagnostic and surgical units to serve families across Ethiopia.",
         "Committed to continuous clinical excellence and modern standards of practice.",
       ],
+      hospitalIntroImage: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=1200",
       emergencyGate: "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road",
       emergencyHours: "Open 24 Hours · 7 Days a Week · All Holidays",
     };

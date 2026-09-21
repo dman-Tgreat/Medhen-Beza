@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   Calendar,
@@ -90,6 +91,18 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
           <div className="lg:col-span-8 space-y-10">
             {/* Overview Section */}
             <div className="bg-surface rounded-2xl border border-border p-6 sm:p-8 shadow-sm space-y-6">
+              {service.image && (
+                <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-border">
+                  <Image
+                    src={service.image}
+                    alt={service.name}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                  />
+                </div>
+              )}
               <h2 className="text-h3 font-bold text-text">Service Overview</h2>
               <p className="text-body text-text-muted leading-relaxed whitespace-pre-line">
                 {service.longDescription || service.description}
