@@ -316,6 +316,7 @@ export function HeroWithBackground({
 
 export interface PageHeroProps {
   eyebrow?: string;
+  badge?: string;
   /** The page title — rendered as <h1> */
   title: string;
   /** One supporting sentence */
@@ -331,11 +332,13 @@ export interface PageHeroProps {
  */
 export function PageHero({
   eyebrow,
+  badge,
   title,
   description,
   breadcrumbs = [],
   className,
 }: PageHeroProps) {
+  const displayEyebrow = eyebrow || badge;
   return (
     <section
       className={cn(
@@ -389,9 +392,9 @@ export function PageHero({
         )}
 
         {/* Eyebrow */}
-        {eyebrow && (
+        {displayEyebrow && (
           <p className="text-caption font-semibold uppercase tracking-widest text-secondary">
-            {eyebrow}
+            {displayEyebrow}
           </p>
         )}
 

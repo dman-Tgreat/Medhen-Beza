@@ -21,15 +21,13 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  Upload,
   Send,
   Save,
   Globe,
-  Image as ImageIcon,
   X,
   Plus,
-  Info,
 } from "lucide-react";
+import { MediaUploadField } from "./media-upload-field";
 
 export interface FormFieldConfig {
   name: string;
@@ -43,13 +41,18 @@ export interface FormFieldConfig {
     | "checkbox"
     | "tags"
     | "image"
-    | "date";
+    | "date"
+    | "email";
   placeholder?: string;
   options?: { label: string; value: string }[];
   required?: boolean;
   helperText?: string;
   section?: "general" | "content" | "media" | "seo";
   defaultValue?: any;
+  mediaKind?: "image" | "video" | ((values: Record<string, any>) => "image" | "video");
+  folder?: string;
+  aspectRatio?: number;
+  aspectLabel?: string;
 }
 
 interface ContentFormModalProps {
@@ -61,6 +64,7 @@ interface ContentFormModalProps {
   initialValues?: Record<string, any>;
   onSubmit: (values: Record<string, any>, actionType: "draft" | "submit" | "publish") => void;
   submitLabel?: string;
+  isLoading?: boolean;
 }
 
 export function ContentFormModal({
@@ -224,38 +228,15 @@ export function ContentFormModal({
             <label className="text-xs font-semibold text-text">
               {field.label} {field.required && <span className="text-emergency">*</span>}
             </label>
-            <div className="flex flex-col sm:flex-row items-start gap-3">
-              {val ? (
-                <div className="relative h-24 w-32 rounded-lg border border-border overflow-hidden bg-background shrink-0">
-                  <img src={val} alt="Preview" className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => handleChange(field.name, "")}
-                    className="absolute top-1 right-1 rounded-full bg-emergency text-white p-0.5 shadow-sm"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ) : (
-                <div className="h-24 w-32 rounded-lg border-2 border-dashed border-border bg-background flex flex-col items-center justify-center text-text-light shrink-0">
-                  <ImageIcon className="h-6 w-6 mb-1 text-text-muted" />
-                  <span className="text-[10px]">No image</span>
-                </div>
-              )}
-
-              <div className="flex-1 w-full space-y-2">
-                <Input
-                  type="text"
-                  value={val}
-                  onChange={(e) => handleChange(field.name, e.target.value)}
-                  placeholder="https://images.unsplash.com/... or paste image URL"
-                  className="text-xs h-9 bg-surface"
-                />
-                <p className="text-[11px] text-text-light">
-                  Paste asset URL or select from hospital media library.
-                </p>
-              </div>
-            </div>
+            <MediaUploadField
+              value={val}
+              onChange={(value) => handleChange(field.name, value)}
+              kind={typeof field.mediaKind === "function" ? field.mediaKind(formData) : field.mediaKind || "image"}
+              folder={field.folder || "content"}
+              helperText={field.helperText}
+              aspectRatio={field.aspectRatio}
+              aspectLabel={field.aspectLabel}
+            />
           </div>
         );
 

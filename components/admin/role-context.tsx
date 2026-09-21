@@ -1,15 +1,20 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useTransition } from "react";
 import { UserRoleType, AdminUser, MOCK_USERS, NavGroup } from "@/lib/admin/types";
+import { SessionUser } from "@/lib/auth/jwt";
+import { logoutAction } from "@/lib/actions/auth";
 
 interface AdminRoleContextType {
   currentRole: UserRoleType;
+  realUser: SessionUser | null;
   currentUser: AdminUser;
   setRole: (role: UserRoleType) => void;
+  resetRole: () => void;
   isLoggedIn: boolean;
-  login: (role?: UserRoleType) => void;
-  logout: () => void;
+  isSimulating: boolean;
+  canSimulate: boolean;
+  logout: () => Promise<void>;
   canAccessRoute: (pathname: string) => boolean;
   canApprove: boolean;
   canPublish: boolean;
@@ -19,8 +24,12 @@ interface AdminRoleContextType {
 
 const AdminRoleContext = createContext<AdminRoleContextType | undefined>(undefined);
 
-const ROLE_STORAGE_KEY = "medhen_admin_role";
-const AUTH_STORAGE_KEY = "medhen_admin_auth";
+const ROLE_SIMULATION_STORAGE_KEY = "medhen_admin_simulated_role";
+
+// Feature flag: Role simulation is enabled in dev or when explicitly enabled
+const IS_SIMULATION_ENABLED =
+  process.env.NEXT_PUBLIC_ENABLE_ROLE_SIMULATION === "true" ||
+  process.env.NODE_ENV !== "production";
 
 // Master navigation catalog with role-based visibility according to requirements
 const ALL_NAV_GROUPS: NavGroup[] = [
@@ -142,8 +151,6 @@ const ALL_NAV_GROUPS: NavGroup[] = [
         iconName: "CheckCircle2",
         badge: 3,
         badgeVariant: "primary",
-        // Hospital Director has full approval queue; Medical Director, HR, Content Staff see their submission statuses
-        // System Administrator has NO content-approval access per requirements
         roles: [
           "HOSPITAL_DIRECTOR",
           "MEDICAL_DIRECTOR",
@@ -202,56 +209,92 @@ const ALL_NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-export function AdminRoleProvider({ children }: { children: ReactNode }) {
-  const [currentRole, setCurrentRoleState] = useState<UserRoleType>("HOSPITAL_DIRECTOR");
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+const ROLE_DISPLAY_NAMES: Record<UserRoleType, string> = {
+  HOSPITAL_DIRECTOR: "Hospital Director",
+  MEDICAL_DIRECTOR: "Medical Director",
+  HR_STAFF: "HR Staff",
+  CONTENT_STAFF: "Content Staff / Editor",
+  SYSTEM_ADMIN: "System Administrator",
+};
+
+interface AdminRoleProviderProps {
+  children: ReactNode;
+  initialSession?: SessionUser | null;
+}
+
+export function AdminRoleProvider({ children, initialSession }: AdminRoleProviderProps) {
+  const [, startTransition] = useTransition();
+
+  // Primary authenticated user role from server session or fallback
+  const sessionPrimaryRole = (initialSession?.primaryRole as UserRoleType) || "HOSPITAL_DIRECTOR";
+
+  const [currentRole, setCurrentRoleState] = useState<UserRoleType>(sessionPrimaryRole);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    try {
-      const savedRole = localStorage.getItem(ROLE_STORAGE_KEY) as UserRoleType | null;
-      if (savedRole && MOCK_USERS[savedRole]) {
-        setCurrentRoleState(savedRole);
+    if (IS_SIMULATION_ENABLED) {
+      try {
+        const savedSimulatedRole = localStorage.getItem(ROLE_SIMULATION_STORAGE_KEY) as UserRoleType | null;
+        if (savedSimulatedRole && MOCK_USERS[savedSimulatedRole]) {
+          setCurrentRoleState(savedSimulatedRole);
+        } else {
+          setCurrentRoleState(sessionPrimaryRole);
+        }
+      } catch {
+        // storage disabled / private browsing
       }
-      const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (savedAuth !== null) {
-        setIsLoggedIn(savedAuth === "true");
-      }
-    } catch {
-      // Storage access may fail in private mode
+    } else {
+      setCurrentRoleState(sessionPrimaryRole);
     }
     setMounted(true);
-  }, []);
+  }, [sessionPrimaryRole]);
 
   const setRole = (role: UserRoleType) => {
+    if (!IS_SIMULATION_ENABLED) return;
     setCurrentRoleState(role);
     try {
-      localStorage.setItem(ROLE_STORAGE_KEY, role);
+      localStorage.setItem(ROLE_SIMULATION_STORAGE_KEY, role);
     } catch {
       // no-op
     }
   };
 
-  const login = (role: UserRoleType = "HOSPITAL_DIRECTOR") => {
-    setRole(role);
-    setIsLoggedIn(true);
+  const resetRole = () => {
+    setCurrentRoleState(sessionPrimaryRole);
     try {
-      localStorage.setItem(AUTH_STORAGE_KEY, "true");
+      localStorage.removeItem(ROLE_SIMULATION_STORAGE_KEY);
     } catch {
       // no-op
     }
   };
 
-  const logout = () => {
-    setIsLoggedIn(false);
+  const handleLogout = async () => {
     try {
-      localStorage.setItem(AUTH_STORAGE_KEY, "false");
+      localStorage.removeItem(ROLE_SIMULATION_STORAGE_KEY);
     } catch {
       // no-op
     }
+    startTransition(async () => {
+      await logoutAction();
+    });
   };
 
-  const currentUser = MOCK_USERS[currentRole] || MOCK_USERS.HOSPITAL_DIRECTOR;
+  const isSimulating = IS_SIMULATION_ENABLED && currentRole !== sessionPrimaryRole;
+
+  // Build the unified user object matching the current effective role
+  const currentUser: AdminUser = initialSession
+    ? {
+        id: initialSession.id,
+        name: initialSession.name,
+        email: initialSession.email,
+        role: currentRole,
+        roleTitle: ROLE_DISPLAY_NAMES[currentRole] || currentRole,
+        avatarUrl:
+          initialSession.avatarUrl ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(initialSession.name)}&background=008080&color=fff`,
+        isActive: true,
+      }
+    : MOCK_USERS[currentRole] || MOCK_USERS.HOSPITAL_DIRECTOR;
 
   // Filter navigation groups for the active role
   const navGroups: NavGroup[] = ALL_NAV_GROUPS.map((group) => ({
@@ -288,7 +331,6 @@ export function AdminRoleProvider({ children }: { children: ReactNode }) {
   const canPublish = currentRole === "HOSPITAL_DIRECTOR";
   const isSysAdmin = currentRole === "SYSTEM_ADMIN";
 
-  // Avoid flash before mount
   if (!mounted) {
     return null;
   }
@@ -297,11 +339,14 @@ export function AdminRoleProvider({ children }: { children: ReactNode }) {
     <AdminRoleContext.Provider
       value={{
         currentRole,
+        realUser: initialSession ?? null,
         currentUser,
         setRole,
-        isLoggedIn,
-        login,
-        logout,
+        resetRole,
+        isLoggedIn: !!initialSession,
+        isSimulating,
+        canSimulate: IS_SIMULATION_ENABLED,
+        logout: handleLogout,
         canAccessRoute,
         canApprove,
         canPublish,

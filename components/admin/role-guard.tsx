@@ -16,7 +16,7 @@ interface RoleGuardProps {
 
 export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
   const pathname = usePathname();
-  const { currentRole, setRole, canAccessRoute } = useAdminRole();
+  const { currentRole, setRole, canSimulate, canAccessRoute } = useAdminRole();
 
   const isAllowed = allowedRoles
     ? allowedRoles.includes(currentRole)
@@ -36,19 +36,19 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
             </Badge>
             <h2 className="text-h3 font-bold text-text">Unauthorized Module Access</h2>
             <p className="text-small text-text-muted max-w-lg mx-auto leading-relaxed">
-              Your current simulated role (<strong>{currentRole}</strong>) does not have access
-              to this section per the hospital CMS role-based permissions matrix.
+              Your active role (<strong>{currentRole}</strong>) does not have permission
+              to access this section per hospital governance and access policies.
             </p>
           </div>
 
           <div className="bg-background rounded-md p-4 border border-border text-xs text-text-light text-left space-y-2">
             <p className="font-semibold text-text">Access Rules for This Section:</p>
             {allowedRoles ? (
-              <p>Allowed roles: {allowedRoles.join(", ")}</p>
+              <p>Authorized roles: {allowedRoles.join(", ")}</p>
             ) : (
               <p>
-                Technical administration (System Admin) and content approval/publishing (Hospital Director)
-                are strictly separated to preserve hospital governance.
+                Technical administration (System Admin) and clinical/content approval
+                are strictly separated to ensure hospital compliance.
               </p>
             )}
           </div>
@@ -61,15 +61,17 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
               </Link>
             </Button>
 
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setRole("HOSPITAL_DIRECTOR")}
-              className="w-full sm:w-auto"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Switch to Hospital Director
-            </Button>
+            {canSimulate && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setRole("HOSPITAL_DIRECTOR")}
+                className="w-full sm:w-auto"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Simulate Hospital Director
+              </Button>
+            )}
           </div>
         </div>
       </div>
