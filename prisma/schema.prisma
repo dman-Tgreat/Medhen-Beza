@@ -120,6 +120,9 @@ model User {
   // Site Settings updates
   siteSettingsUpdated SiteSetting[]
 
+  // In-app Notifications
+  notifications Notification[]
+
   @@map("users")
 }
 
@@ -690,4 +693,37 @@ model AuditLog {
   @@index([contentType, contentId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ─── 9. Password Reset Tokens ───────────────────────────────────────────────────
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
+  @@map("password_reset_tokens")
+}
+
+// ─── 10. In-App Notifications ─────────────────────────────────────────────────
+
+model Notification {
+  id          String   @id @default(uuid())
+  recipientId String
+  recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  type        String   // SUBMITTED | APPROVED | REJECTED | PUBLISHED | ARCHIVED
+  title       String
+  message     String   @db.Text
+  contentType String   // Doctor | Department | Service | News | Gallery | Career | Event | Page | FAQ
+  contentId   String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([recipientId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
 }
