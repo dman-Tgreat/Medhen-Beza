@@ -11,10 +11,12 @@ export interface EmptyStateActionProps {
 }
 
 export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
-  icon?: React.ReactNode;
+  icon?: React.ReactNode | React.ComponentType<{ className?: string }>;
   title: string;
   description: string;
   action?: React.ReactNode | EmptyStateActionProps;
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
 export function EmptyState({
@@ -22,6 +24,8 @@ export function EmptyState({
   title,
   description,
   action,
+  actionLabel,
+  onAction,
   className,
   ...props
 }: EmptyStateProps) {
@@ -34,24 +38,30 @@ export function EmptyState({
       {...props}
     >
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-light text-primary mb-4">
-        {icon ? (
+        {React.isValidElement(icon) ? (
           icon
+        ) : typeof icon === "function" ? (
+          React.createElement(icon, { className: "h-7 w-7", "aria-hidden": "true" } as any)
         ) : (
           <FolderSearch className="h-7 w-7" aria-hidden="true" />
         )}
       </div>
       <h3 className="text-h4 font-semibold text-text mb-1">{title}</h3>
       <p className="max-w-md text-small text-text-muted mb-6">{description}</p>
-      {action && (
+      {(action || actionLabel) && (
         <div className="flex items-center justify-center">
           {React.isValidElement(action) ? (
             action
-          ) : typeof action === "object" && "label" in action ? (
+          ) : action && typeof action === "object" && "label" in action ? (
             <Button
               variant={action.variant || "primary"}
               onClick={action.onClick}
             >
               {action.label}
+            </Button>
+          ) : actionLabel ? (
+            <Button variant="primary" onClick={onAction}>
+              {actionLabel}
             </Button>
           ) : null}
         </div>
