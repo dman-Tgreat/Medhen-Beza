@@ -12,6 +12,7 @@ import {
   PhoneCall,
   ShieldCheck,
   Loader2,
+  Navigation,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -237,7 +238,10 @@ export function ContactFormClient({
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-text block">Hospital Location</span>
-                  <span className="text-text-muted">{settings?.address || HOSPITAL_INFO.address}</span>
+                  <span className="text-text-muted">{settings?.address || "H73F+R49, Adama, Ethiopia"}</span>
+                  <span className="text-xs text-primary font-mono block mt-1">
+                    Plus Code: H73F+R49, Adama
+                  </span>
                 </div>
               </div>
 
@@ -294,6 +298,41 @@ export function ContactFormClient({
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Hospital Campus Map Section */}
+      <div className="mt-8 bg-surface rounded-3xl border border-border p-6 sm:p-8 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
+              <MapPin className="h-4 w-4" />
+              Hospital Campus Location
+            </div>
+            <h3 className="text-h3 font-bold text-text">Campus Location & Interactive Map</h3>
+            <p className="text-small text-text-muted">
+              Location Plus Code: <span className="font-semibold text-text font-mono">H73F+R49, Adama</span> · {settings?.address || "H73F+R49, Adama, Ethiopia"}
+            </p>
+          </div>
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=H73F%2BR49%2C+Adama"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-dark shadow-sm transition-colors shrink-0"
+          >
+            <Navigation className="h-4 w-4" />
+            Open in Google Maps
+          </a>
+        </div>
+
+        <div className="relative aspect-[16/9] md:aspect-[21/8] rounded-2xl overflow-hidden border border-border bg-background shadow-inner">
+          <iframe
+            title="Hospital Campus Location - H73F+R49, Adama"
+            src="https://maps.google.com/maps?q=H73F%2BR49%2C+Adama&t=&z=16&ie=UTF8&iwloc=&output=embed"
+            className="w-full h-full border-0 absolute inset-0"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
         </div>
       </div>
     </div>

@@ -184,20 +184,30 @@ export default async function EmergencyPage() {
 
         {/* 5. Campus Emergency Gate Location & Map Guidance */}
         <section className="space-y-4">
-          <div className="space-y-1">
-            <h3 className="text-h3 font-bold text-text">
-              Emergency Entrance Directions
-            </h3>
-            <p className="text-small text-text-muted">
-              Follow the illuminated red emergency signage at {gateInfo}. Direct ramp access for ambulances and private emergency
-              vehicles.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <h3 className="text-h3 font-bold text-text">
+                Emergency Entrance & Map Navigation
+              </h3>
+              <p className="text-small text-text-muted">
+                Hospital Plus Code: <span className="font-semibold text-text font-mono">H73F+R49, Adama</span>. Direct ramp access for ambulances and private emergency vehicles.
+              </p>
+            </div>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=H73F%2BR49%2C+Adama"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border text-xs font-semibold text-primary hover:bg-primary-light transition-colors shrink-0"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              Open in Google Maps
+            </a>
           </div>
 
-          <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-xl overflow-hidden border border-border bg-surface shadow-xs flex items-center justify-center text-center p-6">
+          <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-xl overflow-hidden border border-border bg-surface shadow-xs">
             <iframe
-              title="Hospital Location Map"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126115.1154562092!2d38.7042646274472!3d8.9806034!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b85cef5ab402d%3A0x8467b6b037a24d49!2sAddis%20Ababa%2C%20Ethiopia!5e0!3m2!1sen!2set!4v1700000000000!5m2!1sen!2set"
+              title="Hospital Emergency Location - H73F+R49, Adama"
+              src="https://maps.google.com/maps?q=H73F%2BR49%2C+Adama&t=&z=16&ie=UTF8&iwloc=&output=embed"
               className="w-full h-full border-0 absolute inset-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

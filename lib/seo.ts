@@ -64,7 +64,7 @@ export function hospitalJsonLd(settings?: {
     address: {
       "@type": "PostalAddress",
       streetAddress: settings?.address || HOSPITAL_INFO.address,
-      addressLocality: settings?.city || "Addis Ababa",
+      addressLocality: settings?.city || "Adama",
       addressCountry: settings?.country || "ET",
     },
     openingHours: "Mo-Su 00:00-23:59",

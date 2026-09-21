@@ -4,13 +4,14 @@ export const HOSPITAL_INFO = {
   shortName: "Medhen Beza",
   tagline: "Compassionate Care, Advanced Medicine, Exceptional Service",
   description:
-    "Medhen Beza Hospital is a leading multi-specialty hospital in Addis Ababa, " +
+    "Medhen Beza Hospital is a leading multi-specialty hospital in Adama, " +
     "providing world-class healthcare with cutting-edge technology and compassionate clinical teams.",
   emergencyPhone: "+251 911 000 999",
   generalPhone: "+251 116 000 111",
   email: "info@medhenbeza.com",
-  location: "Addis Ababa, Ethiopia",
-  address: "Bole Road, Addis Ababa, Ethiopia",
+  location: "Adama, Ethiopia",
+  address: "H73F+R49, Adama, Ethiopia",
+  plusCode: "H73F+R49, Adama",
   hours: "24/7 Emergency & Inpatient Services",
 };
 
