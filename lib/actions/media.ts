@@ -47,6 +47,21 @@ export async function uploadMediaAction(formData: FormData) {
 
   try {
     const stored = await getStorageProvider().upload(file, resourceTypeFor(kind), folder);
+
+    // Safeguard uploadedById: resolve against PostgreSQL users table
+    let validUserId: string | null = null;
+    if (session?.id) {
+      const userRecord = await db.user.findFirst({
+        where: {
+          OR: [{ id: session.id }, { email: session.email }],
+        },
+        select: { id: true },
+      });
+      if (userRecord) {
+        validUserId = userRecord.id;
+      }
+    }
+
     const media = await db.media.create({
       data: {
         filename: stored.filename,
@@ -60,7 +75,7 @@ export async function uploadMediaAction(formData: FormData) {
         height: stored.height,
         altText,
         folder,
-        uploadedById: session.id,
+        uploadedById: validUserId,
       },
     });
     revalidatePath("/admin/media");

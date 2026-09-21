@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
 import {
   SESSION_COOKIE_NAME,
   SESSION_MAX_AGE_SECONDS,
@@ -40,14 +41,59 @@ export async function getSession(): Promise<SessionUser | null> {
     return null;
   }
 
-  return {
-    id: payload.id,
-    email: payload.email,
-    name: payload.name,
-    avatarUrl: payload.avatarUrl,
-    roles: payload.roles || [],
-    primaryRole: payload.primaryRole || payload.roles?.[0] || "CONTENT_STAFF",
-  };
+  // Ensure the user actually exists in the database.
+  // If the database was re-seeded or IDs changed, reconcile by email or ID:
+  try {
+    let dbUser = await db.user.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+        isActive: true,
+        userRoles: { include: { role: true } },
+      },
+    });
+
+    if (!dbUser && payload.email) {
+      dbUser = await db.user.findUnique({
+        where: { email: payload.email },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatarUrl: true,
+          isActive: true,
+          userRoles: { include: { role: true } },
+        },
+      });
+    }
+
+    if (!dbUser || !dbUser.isActive) {
+      return null;
+    }
+
+    const roles = dbUser.userRoles.map((ur) => ur.role.code);
+    return {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+      avatarUrl: dbUser.avatarUrl,
+      roles: roles.length > 0 ? roles : payload.roles || [],
+      primaryRole: roles[0] || payload.primaryRole || "CONTENT_STAFF",
+    };
+  } catch (err) {
+    // If DB check fails, fallback to payload attributes
+    return {
+      id: payload.id,
+      email: payload.email,
+      name: payload.name,
+      avatarUrl: payload.avatarUrl,
+      roles: payload.roles || [],
+      primaryRole: payload.primaryRole || payload.roles?.[0] || "CONTENT_STAFF",
+    };
+  }
 }
 
 /**
