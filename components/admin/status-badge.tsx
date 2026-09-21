@@ -78,7 +78,7 @@ export function StatusBadge({
         className
       )}
     >
-      {showIcon && <IconComponent className={cn(size === "sm" ? "h-3 w-3" : "h-3.5 w-3.5")} />}
+      {showIcon && <IconComponent className={cn(size === "sm" ? "h-3.5 w-3.5" : "h-4.5 w-4.5")} />}
       <span>{current.label}</span>
     </span>
   );

@@ -158,7 +158,7 @@ export function AdminTopbar({
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
         <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 min-h-[36px]">
           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-xs text-primary bg-primary-light border-primary/20">
-            <Shield className="h-3.5 w-3.5" />
+            <Shield className="h-5.5 w-5.5" />
           </div>
           <div className="flex flex-col text-left">
             <span className="text-[9px] uppercase tracking-wider text-text-light font-bold leading-none">Authenticated Role</span>
@@ -173,7 +173,7 @@ export function AdminTopbar({
           className="hidden md:inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text hover:bg-background hover:text-primary transition-colors"
         >
           <span>Public Site</span>
-          <ExternalLink className="h-3.5 w-3.5 text-text-light" />
+          <ExternalLink className="h-4.5 w-4.5 text-text-light" />
         </Link>
 
         {/* Notifications Icon */}
@@ -183,7 +183,7 @@ export function AdminTopbar({
               className="relative min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] sm:h-9 sm:w-9 flex items-center justify-center rounded-lg border border-border bg-surface text-text hover:bg-background transition-colors focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shrink-0"
               aria-label="View notifications"
             >
-              <Bell className="h-4 w-4" />
+              <Bell className="h-5 w-5" />
               {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 sm:top-1 sm:right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emergency text-[10px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}
             </button>
           </DropdownMenuTrigger>
@@ -214,7 +214,7 @@ export function AdminTopbar({
               <img
                 src={currentUser.avatarUrl}
                 alt={currentUser.name}
-                className="h-8 w-8 rounded-full object-cover border border-border"
+                className="h-10 w-10 rounded-full object-cover border border-border"
               />
             </button>
           </DropdownMenuTrigger>

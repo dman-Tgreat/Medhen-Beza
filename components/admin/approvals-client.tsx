@@ -182,19 +182,19 @@ export function ApprovalsClient({ pending, approved, rejected, published, curren
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-2 rounded-lg border border-border">
             <TabsList className="bg-background border border-border h-10 p-1">
               <TabsTrigger value="PENDING_APPROVAL" className="text-xs px-3">
-                <Clock className="h-3.5 w-3.5 mr-1.5 text-amber-600" />
+                <Clock className="h-4.5 w-4.5 mr-1.5 text-amber-600" />
                 Pending ({getCount("PENDING_APPROVAL")})
               </TabsTrigger>
               <TabsTrigger value="APPROVED" className="text-xs px-3">
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5 text-primary" />
+                <CheckCircle2 className="h-4.5 w-4.5 mr-1.5 text-primary" />
                 Approved ({getCount("APPROVED")})
               </TabsTrigger>
               <TabsTrigger value="REJECTED" className="text-xs px-3">
-                <XCircle className="h-3.5 w-3.5 mr-1.5 text-emergency" />
+                <XCircle className="h-4.5 w-4.5 mr-1.5 text-emergency" />
                 Rejected ({getCount("REJECTED")})
               </TabsTrigger>
               <TabsTrigger value="PUBLISHED" className="text-xs px-3">
-                <Globe className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                <Globe className="h-4.5 w-4.5 mr-1.5 text-emerald-600" />
                 Published ({getCount("PUBLISHED")})
               </TabsTrigger>
             </TabsList>
@@ -238,7 +238,7 @@ export function ApprovalsClient({ pending, approved, rejected, published, curren
                       <div className="space-y-1.5 min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="inline-flex items-center gap-1 rounded bg-background px-2 py-0.5 text-xs font-semibold text-text border border-border">
-                            <IconComponent className="h-3.5 w-3.5 text-primary" />
+                            <IconComponent className="h-4.5 w-4.5 text-primary" />
                             {item.contentType}
                           </span>
                           {item.groupLabel && (
@@ -255,7 +255,7 @@ export function ApprovalsClient({ pending, approved, rejected, published, curren
                       {/* Actions */}
                       <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <Button variant="outline" size="sm" onClick={() => setReviewModalItem(item)} className="text-xs bg-surface">
-                          <Eye className="h-3.5 w-3.5 text-text-muted" />
+                          <Eye className="h-4.5 w-4.5 text-text-muted" />
                           Review
                         </Button>
 
@@ -263,24 +263,24 @@ export function ApprovalsClient({ pending, approved, rejected, published, curren
                           <>
                             <Button variant="primary" size="sm" onClick={() => handleApprove(item)} disabled={isPending}
                               className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0">
-                              <CheckCircle2 className="h-3.5 w-3.5" /> Approve
+                              <CheckCircle2 className="h-4.5 w-4.5" /> Approve
                             </Button>
                             <Button variant="outline" size="sm" onClick={() => setRejectModalItem(item)} disabled={isPending}
                               className="text-xs text-emergency hover:bg-emergency-light">
-                              <XCircle className="h-3.5 w-3.5" /> Reject
+                              <XCircle className="h-4.5 w-4.5" /> Reject
                             </Button>
                           </>
                         )}
 
                         {canPublish && item.status === "APPROVED" && (
                           <Button variant="secondary" size="sm" onClick={() => handlePublish(item)} disabled={isPending} className="text-xs">
-                            <Globe className="h-3.5 w-3.5" /> Publish Now
+                            <Globe className="h-4.5 w-4.5" /> Publish Now
                           </Button>
                         )}
 
                         {canApprove && item.status === "PUBLISHED" && (
                           <Button variant="outline" size="sm" onClick={() => handleArchive(item)} disabled={isPending} className="text-xs text-text-muted">
-                            <Archive className="h-3.5 w-3.5" /> Archive
+                            <Archive className="h-4.5 w-4.5" /> Archive
                           </Button>
                         )}
 
@@ -296,7 +296,7 @@ export function ApprovalsClient({ pending, approved, rejected, published, curren
                     {/* Rejection Reason */}
                     {item.status === "REJECTED" && item.rejectionReason && (
                       <div className="rounded-md bg-emergency-light/60 border border-emergency/20 p-3 text-xs text-emergency-dark flex items-start gap-2">
-                        <AlertCircle className="h-4 w-4 text-emergency shrink-0 mt-0.5" />
+                        <AlertCircle className="h-4.5 w-4.5 text-emergency shrink-0 mt-0.5" />
                         <div>
                           <p className="font-semibold">Rejection Feedback / Required Changes:</p>
                           <p className="mt-0.5">{item.rejectionReason}</p>

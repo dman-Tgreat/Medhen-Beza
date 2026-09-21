@@ -11,10 +11,133 @@ import type {
   FacilityDetailData,
 } from "@/lib/mock-data";
 
+import { HOSPITAL_INFO } from "@/lib/constants";
+import { getVideoEmbedUrl, getVideoThumbnailUrl } from "@/lib/media/video";
+import type { AboutPageData } from "@/lib/mock-data";
+import { MOCK_ABOUT_PAGE } from "@/lib/mock-data";
+
 /**
  * Public Data Access Layer with Type-Safe Adapters
  * Strict security rule: Only content with ContentStatus.PUBLISHED is ever returned.
  */
+
+// ─── 0. Dynamic Site Settings ───────────────────────────────────────────────
+
+export interface PublicSiteSettings {
+  hospitalName: string;
+  shortName: string;
+  tagline: string;
+  description: string;
+  emergencyPhone: string;
+  generalPhone: string;
+  email: string;
+  location: string;
+  address: string;
+  hours: string;
+  heroEyebrow: string;
+  heroHeadline: string;
+  heroHeadlineAccent: string;
+  heroSupportingText: string;
+  statSpecialists: string;
+  statEmergency: string;
+  statDepartments: string;
+  hospitalIntroTitle: string;
+  hospitalIntroParagraphs: string[];
+  emergencyGate: string;
+  emergencyHours: string;
+}
+
+export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
+  try {
+    const rows = await db.siteSetting.findMany({
+      where: { isPublic: true },
+    });
+    const map = new Map<string, string>();
+    for (const r of rows) {
+      map.set(r.key, r.value);
+    }
+
+    const hospitalName = map.get("hospital_name") || HOSPITAL_INFO.name;
+    const shortName = map.get("short_name") || HOSPITAL_INFO.shortName;
+    const tagline = map.get("tagline") || HOSPITAL_INFO.tagline;
+    const description = map.get("description") || HOSPITAL_INFO.description;
+    const emergencyPhone = map.get("emergency_phone") || HOSPITAL_INFO.emergencyPhone;
+    const generalPhone = map.get("general_phone") || HOSPITAL_INFO.generalPhone;
+    const email = map.get("email") || HOSPITAL_INFO.email;
+    const location = map.get("location") || HOSPITAL_INFO.location;
+    const address = map.get("address") || HOSPITAL_INFO.address;
+    const hours = map.get("working_hours") || map.get("hours") || HOSPITAL_INFO.hours;
+
+    const heroEyebrow = map.get("hero_eyebrow") || "Leading Healthcare Excellence";
+    const heroHeadline = map.get("hero_headline") || "Compassionate care.";
+    const heroHeadlineAccent = map.get("hero_headline_accent") || "Trusted healthcare.";
+    const heroSupportingText = map.get("hero_supporting_text") || "Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first.";
+    const statSpecialists = map.get("stat_specialists") || "50+";
+    const statEmergency = map.get("stat_emergency") || "24/7";
+    const statDepartments = map.get("stat_departments") || "15+";
+
+    const hospitalIntroTitle = map.get("hospital_intro_title") || "Trusted care for every stage of life";
+    const rawIntro = map.get("hospital_intro_text") ||
+      "Medhen Beza Hospital provides patient-centred, modern clinical care in Addis Ababa, delivering healthcare with empathy, clinical precision, and dignity.\n\nOur multidisciplinary teams of specialists work across cutting-edge diagnostic and surgical units to serve families across Ethiopia.\n\nCommitted to continuous clinical excellence and modern standards of practice.";
+    const hospitalIntroParagraphs = rawIntro.split("\n\n").map((p) => p.trim()).filter(Boolean);
+
+    const emergencyGate = map.get("emergency_gate") || "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road";
+    const emergencyHours = map.get("emergency_hours") || "Open 24 Hours · 7 Days a Week · All Holidays";
+
+    return {
+      hospitalName,
+      shortName,
+      tagline,
+      description,
+      emergencyPhone,
+      generalPhone,
+      email,
+      location,
+      address,
+      hours,
+      heroEyebrow,
+      heroHeadline,
+      heroHeadlineAccent,
+      heroSupportingText,
+      statSpecialists,
+      statEmergency,
+      statDepartments,
+      hospitalIntroTitle,
+      hospitalIntroParagraphs,
+      emergencyGate,
+      emergencyHours,
+    };
+  } catch (error) {
+    console.error("[PUBLIC_QUERY_ERROR: getPublicSiteSettings]", error);
+    return {
+      hospitalName: HOSPITAL_INFO.name,
+      shortName: HOSPITAL_INFO.shortName,
+      tagline: HOSPITAL_INFO.tagline,
+      description: HOSPITAL_INFO.description,
+      emergencyPhone: HOSPITAL_INFO.emergencyPhone,
+      generalPhone: HOSPITAL_INFO.generalPhone,
+      email: HOSPITAL_INFO.email,
+      location: HOSPITAL_INFO.location,
+      address: HOSPITAL_INFO.address,
+      hours: HOSPITAL_INFO.hours,
+      heroEyebrow: "Leading Healthcare Excellence",
+      heroHeadline: "Compassionate care.",
+      heroHeadlineAccent: "Trusted healthcare.",
+      heroSupportingText: "Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first.",
+      statSpecialists: "50+",
+      statEmergency: "24/7",
+      statDepartments: "15+",
+      hospitalIntroTitle: "Trusted care for every stage of life",
+      hospitalIntroParagraphs: [
+        "Medhen Beza Hospital provides patient-centred, modern clinical care in Addis Ababa, delivering healthcare with empathy, clinical precision, and dignity.",
+        "Our multidisciplinary teams of specialists work across cutting-edge diagnostic and surgical units to serve families across Ethiopia.",
+        "Committed to continuous clinical excellence and modern standards of practice.",
+      ],
+      emergencyGate: "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road",
+      emergencyHours: "Open 24 Hours · 7 Days a Week · All Holidays",
+    };
+  }
+}
 
 // ─── 1. Doctors ─────────────────────────────────────────────────────────────
 
@@ -105,18 +228,22 @@ export async function getPublicRelatedDoctors(
 // ─── 2. Departments ─────────────────────────────────────────────────────────
 
 function mapDepartment(dept: any): DepartmentDetailData {
+  const leadDoctor = dept.doctors?.find((d: any) =>
+    /head|chief|director|lead/i.test(d.position || "")
+  ) || dept.doctors?.[0];
+
   return {
     id: dept.id,
     name: dept.name,
     slug: dept.slug,
     description: dept.description || "Comprehensive clinical unit equipped for specialized patient care.",
     longDescription: dept.description || "",
-    hours: dept.operatingHours || "24/7 Emergency & Inpatient Care",
-    phone: dept.phone || "+251 11 654 3000",
+    hours: dept.workingHours || "24/7 Emergency & Inpatient Care",
+    phone: dept.phone || "+251 116 000 111",
     email: dept.email || "info@medhenbeza.com",
     location: dept.location || "Main Hospital Complex",
-    headDoctorName: dept.headDoctor || "Senior Medical Director",
-    keyServices: dept.services?.map((s: any) => s.name) || [],
+    headDoctorName: leadDoctor?.fullName || "Consultant Specialist",
+    keyServices: dept.services?.map((s: any) => s.title || s.name) || [],
     href: `/departments/${dept.slug}`,
     image: dept.image || "",
     imageAlt: `${dept.name} department at Medhen Beza Hospital`,
@@ -133,6 +260,7 @@ export async function getPublicDepartments(): Promise<DepartmentDetailData[]> {
       where: { status: ContentStatus.PUBLISHED },
       include: {
         services: { where: { status: ContentStatus.PUBLISHED } },
+        doctors: { where: { status: ContentStatus.PUBLISHED } },
       },
       orderBy: [{ order: "asc" }, { name: "asc" }],
     });
@@ -166,25 +294,30 @@ export async function getPublicDepartmentBySlug(slug: string): Promise<Departmen
 // ─── 3. Services ────────────────────────────────────────────────────────────
 
 function mapService(srv: any): ServiceDetailData {
+  const rawFeatures = srv.additionalInfo || srv.content || "";
+  const extractedFeatures = rawFeatures
+    ? rawFeatures
+        .split("\n")
+        .map((l: string) => l.replace(/^[-*•]\s*/, "").trim())
+        .filter((l: string) => l.length > 5 && l.length < 120)
+        .slice(0, 4)
+    : [];
+
   return {
     id: srv.id,
     name: srv.title || srv.name,
     slug: srv.slug,
-    description: srv.summary || srv.description || "Specialized clinical service.",
-    longDescription: srv.description || srv.summary || "",
+    description: srv.description || srv.summary || "Specialized clinical service.",
+    longDescription: srv.content || srv.description || srv.summary || "",
     departmentSlug: srv.department?.slug || "general",
     departmentName: srv.department?.name || "General Medicine",
-    availability: srv.isEmergency ? "24/7 Emergency Available" : "Standard Clinical Hours",
-    features: [
-      "Board-certified physician oversight",
-      "Modern diagnostic & monitoring technology",
-      "Sterile infection-controlled clinical protocols",
+    availability: srv.availabilityInfo || "Standard Clinical Hours",
+    features: extractedFeatures.length > 0 ? extractedFeatures : [
+      "Specialist physician oversight",
+      "Modern diagnostic technology",
+      "Sterile clinical protocols",
     ],
-    procedures: [
-      "Comprehensive diagnostic evaluation",
-      "Targeted clinical intervention",
-      "Continuous inpatient or outpatient follow-up",
-    ],
+    procedures: [],
     relatedDoctorSlugs: srv.department?.doctors?.map((d: any) => d.slug) || [],
     href: `/services/${srv.slug}`,
     image: srv.image || undefined,

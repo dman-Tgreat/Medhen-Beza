@@ -309,7 +309,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               className="text-xs bg-surface"
               onClick={() => alert(`Batch submitted ${selectedIds.size} items for approval`)}
             >
-              <Send className="h-3 w-3 text-primary" />
+              <Send className="h-4.5 w-4.5 text-primary" />
               Submit Selected
             </Button>
             {canApprove && (
@@ -319,7 +319,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                 className="text-xs bg-surface text-emerald-700 hover:bg-emerald-50"
                 onClick={() => alert(`Approved ${selectedIds.size} items`)}
               >
-                <CheckCircle className="h-3 w-3 text-emerald-600" />
+                <CheckCircle className="h-4.5 w-4.5 text-emerald-600" />
                 Approve Selected
               </Button>
             )}
@@ -329,7 +329,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
               className="]text-xs text-emergency hover:bg-emergency-light"
               onClick={() => alert(`Deleted ${selectedIds.size} items`)}
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-4.5 w-4.5" />
               Delete Selected
             </Button>
           </div>
@@ -462,7 +462,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                                 onClick={() => onEdit(item)}
                                 className="cursor-pointer"
                               >
-                                <Edit2 className="h-3.5 w-3.5 mr-2 text-primary" />
+                                <Edit2 className="h-4 w-4 mr-2 text-primary" />
                                 Edit Record
                               </DropdownMenuItem>
                             )}
@@ -472,7 +472,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                                 onClick={() => onView(item)}
                                 className="cursor-pointer"
                               >
-                                <Eye className="h-3.5 w-3.5 mr-2 text-text-muted" />
+                                <Eye className="h-4.5 w-4.5 mr-2 text-text-muted" />
                                 View Preview
                               </DropdownMenuItem>
                             )}
@@ -483,7 +483,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                                 onClick={() => onSubmitForApproval(item)}
                                 className="cursor-pointer font-medium text-primary-dark"
                               >
-                                <Send className="h-3.5 w-3.5 mr-2 text-primary" />
+                                <Send className="h-4.5 w-4.5 mr-2 text-primary" />
                                 Submit for Approval
                               </DropdownMenuItem>
                             )}
@@ -494,7 +494,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                                 onClick={() => onApprove(item)}
                                 className="cursor-pointer text-emerald-700 font-medium"
                               >
-                                <CheckCircle className="h-3.5 w-3.5 mr-2 text-emerald-600" />
+                                <CheckCircle className="h-4.5 w-4.5 mr-2 text-emerald-600" />
                                 Approve Content
                               </DropdownMenuItem>
                             )}
@@ -504,7 +504,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                                 onClick={() => onReject(item)}
                                 className="cursor-pointer text-emergency"
                               >
-                                <XCircle className="h-3.5 w-3.5 mr-2" />
+                                <XCircle className="h-4.5 w-4.5 mr-2" />
                                 Reject Submission
                               </DropdownMenuItem>
                             )}
@@ -514,7 +514,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                                 onClick={() => onPublish(item)}
                                 className="cursor-pointer text-secondary-dark font-medium"
                               >
-                                <Globe className="h-3.5 w-3.5 mr-2" />
+                                <Globe className="h-4.5 w-4.5 mr-2" />
                                 Publish to Website
                               </DropdownMenuItem>
                             )}
@@ -533,7 +533,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                                         action.variant === "destructive" ? "text-emergency" : ""
                                       }`}
                                     >
-                                      {ActionIcon && <ActionIcon className="h-3.5 w-3.5 mr-2" />}
+                                      {ActionIcon && <ActionIcon className="h-4.5 w-4.5 mr-2" />}
                                       {action.label}
                                     </DropdownMenuItem>
                                   );
@@ -546,7 +546,7 @@ export function DataTable<T extends { id: string; status?: ContentStatusType | s
                                   onClick={() => onDelete(item)}
                                   className="cursor-pointer text-emergency focus:bg-emergency-light focus:text-emergency-dark"
                                 >
-                                  <Trash2 className="h-3.5 w-3.5 mr-2" />
+                                  <Trash2 className="h-4.5 w-4.5 mr-2" />
                                   Delete / Archive
                                 </DropdownMenuItem>
                               </>

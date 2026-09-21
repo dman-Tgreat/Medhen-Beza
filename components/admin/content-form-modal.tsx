@@ -275,7 +275,7 @@ export function ContentFormModal({
                     onClick={() => handleRemoveTag(field.name, tag)}
                     className="hover:text-emergency"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4.5 w-4.5" />
                   </button>
                 </span>
               ))}
@@ -306,7 +306,7 @@ export function ContentFormModal({
                 onClick={() => handleAddTag(field.name)}
                 className="text-xs shrink-0 min-h-[44px] sm:min-h-[36px] px-3"
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-4.5 w-4.5" />
                 Add
               </Button>
             </div>
@@ -357,7 +357,7 @@ export function ContentFormModal({
               onClick={() => handleSubmit("draft")}
               className="w-full sm:w-auto text-xs bg-surface justify-center min-h-[44px] sm:min-h-[36px]"
             >
-              <Save className="h-3.5 w-3.5" />
+              <Save className="h-4.5 w-4.5" />
               Save as Draft
             </Button>
 
@@ -368,7 +368,7 @@ export function ContentFormModal({
               onClick={() => handleSubmit("submit")}
               className="w-full sm:w-auto text-xs justify-center min-h-[44px] sm:min-h-[36px]"
             >
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-4.5 w-4.5" />
               Submit for Approval
             </Button>
 
@@ -380,7 +380,7 @@ export function ContentFormModal({
                 onClick={() => handleSubmit("publish")}
                 className="w-full sm:w-auto text-xs justify-center min-h-[44px] sm:min-h-[36px]"
               >
-                <Globe className="h-3.5 w-3.5" />
+                <Globe className="h-4.5 w-4.5" />
                 Save & Publish
               </Button>
             )}
