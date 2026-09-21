@@ -1,76 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DataTable, ColumnDef } from "@/components/admin/data-table";
 import { ContentFormModal, FormFieldConfig } from "@/components/admin/content-form-modal";
 import { RoleGuard } from "@/components/admin/role-guard";
 import { UserRoleType } from "@/lib/admin/types";
-import { Users, Shield, Key, Check, X, ShieldAlert } from "lucide-react";
+import { Users, Shield, Key, Check, X, ShieldAlert, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface StaffUserRecord {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRoleType;
-  roleTitle: string;
-  department: string;
-  isActive: boolean;
-  lastLogin: string;
-}
-
-const INITIAL_STAFF_USERS: StaffUserRecord[] = [
-  {
-    id: "usr-1",
-    name: "Dr. Samuel Bekele",
-    email: "director@medhenbeza.com",
-    role: "HOSPITAL_DIRECTOR",
-    roleTitle: "Hospital Director",
-    department: "Executive Leadership",
-    isActive: true,
-    lastLogin: "Today, 10:45 AM",
-  },
-  {
-    id: "usr-2",
-    name: "Dr. Bethlehem Tadesse",
-    email: "medical.director@medhenbeza.com",
-    role: "MEDICAL_DIRECTOR",
-    roleTitle: "Medical Director",
-    department: "Clinical Operations",
-    isActive: true,
-    lastLogin: "Today, 09:30 AM",
-  },
-  {
-    id: "usr-3",
-    name: "Hanna Worku",
-    email: "hr@medhenbeza.com",
-    role: "HR_STAFF",
-    roleTitle: "HR Staff",
-    department: "Human Resources",
-    isActive: true,
-    lastLogin: "Yesterday",
-  },
-  {
-    id: "usr-4",
-    name: "Abel Girma",
-    email: "content@medhenbeza.com",
-    role: "CONTENT_STAFF",
-    roleTitle: "Content Staff / Editor",
-    department: "Communications",
-    isActive: true,
-    lastLogin: "Sep 10, 2026",
-  },
-  {
-    id: "usr-5",
-    name: "Dawit Abebe",
-    email: "sysadmin@medhenbeza.com",
-    role: "SYSTEM_ADMIN",
-    roleTitle: "System Administrator",
-    department: "IT & Infrastructure",
-    isActive: true,
-    lastLogin: "Today, 07:15 AM",
-  },
-];
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  getAdminUsersAction,
+  saveAdminUserAction,
+  toggleAdminUserActiveAction,
+  deleteAdminUserAction,
+  type AdminUserItem,
+} from "@/lib/actions/users";
 
 const USER_FORM_FIELDS: FormFieldConfig[] = [
   {
@@ -88,13 +32,6 @@ const USER_FORM_FIELDS: FormFieldConfig[] = [
     required: true,
   },
   {
-    name: "department",
-    label: "Department",
-    type: "text",
-    placeholder: "e.g. Pediatrics or Nursing",
-    required: true,
-  },
-  {
     name: "role",
     label: "Assigned Role (RBAC)",
     type: "select",
@@ -107,14 +44,39 @@ const USER_FORM_FIELDS: FormFieldConfig[] = [
     ],
     required: true,
   },
+  {
+    name: "password",
+    label: "Account Password (Leave blank to keep current if editing)",
+    type: "text",
+    placeholder: "Minimum 6 characters",
+    required: false,
+  },
 ];
 
 export default function UsersAdminPage() {
-  const [users, setUsers] = useState<StaffUserRecord[]>(INITIAL_STAFF_USERS);
+  const [users, setUsers] = useState<AdminUserItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<StaffUserRecord | null>(null);
+  const [editingUser, setEditingUser] = useState<AdminUserItem | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  const columns: ColumnDef<StaffUserRecord>[] = [
+  const fetchUsers = async () => {
+    setLoading(true);
+    const res = await getAdminUsersAction();
+    if (res.data) {
+      setUsers(res.data);
+    } else if (res.error) {
+      setActionError(res.error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const columns: ColumnDef<AdminUserItem>[] = [
     {
       key: "name",
       header: "Staff Member",
@@ -136,7 +98,7 @@ export default function UsersAdminPage() {
       header: "Assigned Role",
       sortable: true,
       render: (item) => {
-        const badgeClasses: Record<UserRoleType, string> = {
+        const badgeClasses: Record<string, string> = {
           HOSPITAL_DIRECTOR: "bg-primary-light text-primary-dark border-primary/20",
           MEDICAL_DIRECTOR: "bg-secondary-light text-secondary-dark border-secondary/20",
           HR_STAFF: "bg-indigo-50 text-indigo-700 border-indigo-200",
@@ -145,20 +107,19 @@ export default function UsersAdminPage() {
         };
 
         return (
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-pill text-xs font-semibold border ${badgeClasses[item.role]}`}>
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-pill text-xs font-semibold border ${
+              badgeClasses[item.role] || "bg-slate-100 text-slate-700 border-slate-200"
+            }`}
+          >
             {item.roleTitle}
           </span>
         );
       },
     },
     {
-      key: "department",
-      header: "Department",
-      render: (item) => <span className="text-xs text-text">{item.department}</span>,
-    },
-    {
       key: "lastLogin",
-      header: "Last Login",
+      header: "Last Updated",
       render: (item) => <span className="text-xs text-text-muted font-mono">{item.lastLogin}</span>,
     },
     {
@@ -166,15 +127,21 @@ export default function UsersAdminPage() {
       header: "Status",
       render: (item) => (
         <button
-          onClick={() => {
-            setUsers((prev) =>
-              prev.map((u) => (u.id === item.id ? { ...u, isActive: !u.isActive } : u))
-            );
+          onClick={async () => {
+            setActionError(null);
+            const res = await toggleAdminUserActiveAction(item.id);
+            if (res.error) {
+              setActionError(res.error);
+            } else {
+              setUsers((prev) =>
+                prev.map((u) => (u.id === item.id ? { ...u, isActive: !u.isActive } : u))
+              );
+            }
           }}
           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-pill text-xs font-semibold border transition-colors ${
             item.isActive
-              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-              : "bg-slate-100 text-slate-500 border-slate-200"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
+              : "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200"
           }`}
         >
           {item.isActive ? "Active" : "Disabled"}
@@ -188,77 +155,103 @@ export default function UsersAdminPage() {
     setModalOpen(true);
   };
 
-  const handleEdit = (item: StaffUserRecord) => {
+  const handleEdit = (item: AdminUserItem) => {
     setEditingUser(item);
     setModalOpen(true);
   };
 
-  const handleDelete = (item: StaffUserRecord) => {
-    if (confirm(`Revoke administrative access for ${item.name}?`)) {
-      setUsers((prev) => prev.filter((u) => u.id !== item.id));
+  const handleDelete = async (item: AdminUserItem) => {
+    if (confirm(`Revoke administrative access and delete user ${item.name}?`)) {
+      setActionError(null);
+      const res = await deleteAdminUserAction(item.id);
+      if (res.error) {
+        setActionError(res.error);
+      } else {
+        setUsers((prev) => prev.filter((u) => u.id !== item.id));
+        setActionSuccess(`User ${item.name} removed successfully.`);
+        setTimeout(() => setActionSuccess(null), 3000);
+      }
     }
   };
 
-  const handleFormSubmit = (values: Record<string, any>) => {
-    const roleMap: Record<UserRoleType, string> = {
-      HOSPITAL_DIRECTOR: "Hospital Director",
-      MEDICAL_DIRECTOR: "Medical Director",
-      HR_STAFF: "HR Staff",
-      CONTENT_STAFF: "Content Staff / Editor",
-      SYSTEM_ADMIN: "System Administrator",
-    };
+  const handleFormSubmit = async (values: Record<string, any>) => {
+    setActionError(null);
+    const res = await saveAdminUserAction({
+      id: editingUser?.id,
+      name: values.name,
+      email: values.email,
+      roleCode: values.role,
+      password: values.password,
+    });
 
-    if (editingUser) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editingUser.id
-            ? {
-                ...u,
-                name: values.name || u.name,
-                email: values.email || u.email,
-                role: values.role || u.role,
-                roleTitle: roleMap[values.role as UserRoleType] || u.roleTitle,
-                department: values.department || u.department,
-              }
-            : u
-        )
-      );
-    } else {
-      const newUser: StaffUserRecord = {
-        id: `usr-${Date.now()}`,
-        name: values.name || "New Staff User",
-        email: values.email || "staff@medhenbeza.com",
-        role: values.role || "CONTENT_STAFF",
-        roleTitle: roleMap[values.role as UserRoleType] || "Content Staff",
-        department: values.department || "General Administration",
-        isActive: true,
-        lastLogin: "Never",
-      };
-      setUsers((prev) => [newUser, ...prev]);
+    if (res.error) {
+      setActionError(res.error);
+    } else if (res.data) {
+      const saved = res.data;
+      if (editingUser) {
+        setUsers((prev) => prev.map((u) => (u.id === saved.id ? saved : u)));
+        setActionSuccess(`User ${saved.name} updated successfully.`);
+      } else {
+        setUsers((prev) => [...prev, saved]);
+        setActionSuccess(`User ${saved.name} created successfully.`);
+      }
+      setTimeout(() => setActionSuccess(null), 3000);
+      setModalOpen(false);
     }
   };
 
   return (
     <RoleGuard allowedRoles={["HOSPITAL_DIRECTOR", "SYSTEM_ADMIN"]}>
       <div className="space-y-6">
-        <DataTable
-          title="Administrative CMS Staff Users"
-          description="Manage authorized hospital staff accounts, assigned administrative roles, and credential access."
-          data={users}
-          columns={columns}
-          searchPlaceholder="Search staff by name, email, department..."
-          onAddNew={handleAddNew}
-          addNewLabel="Create Staff User"
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        {actionError && (
+          <Alert variant="emergency">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Operation Failed</AlertTitle>
+            <AlertDescription>{actionError}</AlertDescription>
+          </Alert>
+        )}
+
+        {actionSuccess && (
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+            <Check className="h-4 w-4" />
+            {actionSuccess}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center min-h-[300px] gap-2">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-small text-text-muted">Loading administrative staff from PostgreSQL...</p>
+          </div>
+        ) : (
+          <DataTable
+            title="Administrative CMS Staff Users"
+            description="Manage authorized hospital staff accounts, assigned administrative roles, and credential access persisted directly in the database."
+            data={users}
+            columns={columns}
+            searchPlaceholder="Search staff by name, email, department..."
+            onAddNew={handleAddNew}
+            addNewLabel="Create Staff User"
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
 
         <ContentFormModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           title={editingUser ? `Edit Staff Account: ${editingUser.name}` : "Create Staff Account"}
           fields={USER_FORM_FIELDS}
-          initialValues={editingUser || {}}
+          initialValues={
+            editingUser
+              ? {
+                  name: editingUser.name,
+                  email: editingUser.email,
+                  role: editingUser.role,
+                  password: "",
+                }
+              : {}
+          }
           onSubmit={(values) => handleFormSubmit(values)}
         />
       </div>

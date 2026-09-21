@@ -1,57 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DataTable, ColumnDef } from "@/components/admin/data-table";
 import { ContentFormModal, FormFieldConfig } from "@/components/admin/content-form-modal";
 import { RoleGuard } from "@/components/admin/role-guard";
-import { ContentStatusType } from "@/lib/admin/types";
-import { Hotel, CheckCircle } from "lucide-react";
-
-interface FacilityRecord {
-  id: string;
-  name: string;
-  category: string;
-  capacity: string;
-  status: ContentStatusType;
-}
-
-const INITIAL_FACILITIES: FacilityRecord[] = [
-  {
-    id: "fac-1",
-    name: "Intensive Care Unit (ICU & CCU)",
-    category: "Critical Care",
-    capacity: "24 Beds with Dedicated Ventilators",
-    status: "PUBLISHED",
-  },
-  {
-    id: "fac-2",
-    name: "Advanced Diagnostic Imaging Suite (MRI / CT)",
-    category: "Radiology",
-    capacity: "3.0T MRI & 128-Slice CT",
-    status: "PUBLISHED",
-  },
-  {
-    id: "fac-3",
-    name: "Ultra-Clean Modular Operating Theaters",
-    category: "Surgical Suites",
-    capacity: "4 Laminar Flow Theaters",
-    status: "PUBLISHED",
-  },
-  {
-    id: "fac-4",
-    name: "Automated Clinical Pathology Laboratory",
-    category: "Diagnostics",
-    capacity: "24/7 Automated Blood & Tissue Testing",
-    status: "APPROVED",
-  },
-  {
-    id: "fac-5",
-    name: "Private Inpatient VIP Suites",
-    category: "Inpatient Rooms",
-    capacity: "16 Private Luxury Rooms",
-    status: "DRAFT",
-  },
-];
+import { Hotel, CheckCircle, Loader2, AlertCircle, Check } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  getAdminFacilitiesAction,
+  saveAdminFacilityAction,
+  deleteAdminFacilityAction,
+  type AdminFacilityItem,
+} from "@/lib/actions/facilities";
 
 const FACILITY_FORM_FIELDS: FormFieldConfig[] = [
   {
@@ -89,11 +49,29 @@ const FACILITY_FORM_FIELDS: FormFieldConfig[] = [
 ];
 
 export default function FacilitiesAdminPage() {
-  const [facilities, setFacilities] = useState<FacilityRecord[]>(INITIAL_FACILITIES);
+  const [facilities, setFacilities] = useState<AdminFacilityItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingFac, setEditingFac] = useState<FacilityRecord | null>(null);
+  const [editingFac, setEditingFac] = useState<AdminFacilityItem | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  const columns: ColumnDef<FacilityRecord>[] = [
+  const fetchFacilities = async () => {
+    setLoading(true);
+    const res = await getAdminFacilitiesAction();
+    if (res.data) {
+      setFacilities(res.data);
+    } else if (res.error) {
+      setActionError(res.error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchFacilities();
+  }, []);
+
+  const columns: ColumnDef<AdminFacilityItem>[] = [
     {
       key: "name",
       header: "Facility Wing",
@@ -134,69 +112,104 @@ export default function FacilitiesAdminPage() {
     setModalOpen(true);
   };
 
-  const handleEdit = (item: FacilityRecord) => {
+  const handleEdit = (item: AdminFacilityItem) => {
     setEditingFac(item);
     setModalOpen(true);
   };
 
-  const handleDelete = (item: FacilityRecord) => {
-    if (confirm(`Delete facility: ${item.name}?`)) {
-      setFacilities((prev) => prev.filter((f) => f.id !== item.id));
+  const handleDelete = async (item: AdminFacilityItem) => {
+    if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
+      setActionError(null);
+      const res = await deleteAdminFacilityAction(item.id);
+      if (res.error) {
+        setActionError(res.error);
+      } else {
+        setFacilities((prev) => prev.filter((f) => f.id !== item.id));
+        setActionSuccess(`Facility "${item.name}" deleted.`);
+        setTimeout(() => setActionSuccess(null), 3000);
+      }
     }
   };
 
-  const handleFormSubmit = (
-    values: Record<string, any>,
-    actionType: "draft" | "submit" | "publish"
-  ) => {
-    const statusMap: Record<string, ContentStatusType> = {
-      draft: "DRAFT",
-      submit: "PENDING_APPROVAL",
-      publish: "PUBLISHED",
-    };
+  const handleFormSubmit = async (values: Record<string, any>) => {
+    setActionError(null);
+    const res = await saveAdminFacilityAction({
+      id: editingFac?.id,
+      name: values.name,
+      category: values.category,
+      capacity: values.capacity,
+      description: values.description,
+    });
 
-    if (editingFac) {
-      setFacilities((prev) =>
-        prev.map((f) =>
-          f.id === editingFac.id
-            ? { ...f, ...values, status: statusMap[actionType] || f.status }
-            : f
-        )
-      );
-    } else {
-      const newFac: FacilityRecord = {
-        id: `fac-${Date.now()}`,
-        name: values.name || "New Facility",
-        category: values.category || "Critical Care",
-        capacity: values.capacity || "General Capacity",
-        status: statusMap[actionType],
-      };
-      setFacilities((prev) => [newFac, ...prev]);
+    if (res.error) {
+      setActionError(res.error);
+    } else if (res.data) {
+      const saved = res.data;
+      if (editingFac) {
+        setFacilities((prev) => prev.map((f) => (f.id === saved.id ? saved : f)));
+        setActionSuccess(`Facility "${saved.name}" updated successfully.`);
+      } else {
+        setFacilities((prev) => [saved, ...prev]);
+        setActionSuccess(`Facility "${saved.name}" created successfully.`);
+      }
+      setTimeout(() => setActionSuccess(null), 3000);
+      setModalOpen(false);
     }
   };
 
   return (
     <RoleGuard allowedRoles={["HOSPITAL_DIRECTOR", "CONTENT_STAFF"]}>
       <div className="space-y-6">
-        <DataTable
-          title="Hospital Facilities & Clinical Infrastructure"
-          description="Manage hospital wings, surgical suites, ICU capacity, and specialized equipment descriptions."
-          data={facilities}
-          columns={columns}
-          searchPlaceholder="Search facilities..."
-          onAddNew={handleAddNew}
-          addNewLabel="Add Facility"
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        {actionError && (
+          <Alert variant="emergency">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Facility Operation Failed</AlertTitle>
+            <AlertDescription>{actionError}</AlertDescription>
+          </Alert>
+        )}
+
+        {actionSuccess && (
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+            <Check className="h-4 w-4" />
+            {actionSuccess}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center min-h-[300px] gap-2">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-small text-text-muted">Loading hospital facilities from database...</p>
+          </div>
+        ) : (
+          <DataTable
+            title="Hospital Wings & Clinical Facilities"
+            description="Manage hospital infrastructure, critical care units, inpatient suites, and advanced diagnostic spaces."
+            data={facilities}
+            columns={columns}
+            searchPlaceholder="Search facilities by name, specs..."
+            onAddNew={handleAddNew}
+            addNewLabel="Add Facility Wing"
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
 
         <ContentFormModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          title={editingFac ? `Edit Facility: ${editingFac.name}` : "Add Facility"}
+          title={editingFac ? `Edit Facility: ${editingFac.name}` : "Add Clinical Facility"}
           fields={FACILITY_FORM_FIELDS}
-          initialValues={editingFac || {}}
-          onSubmit={handleFormSubmit}
+          initialValues={
+            editingFac
+              ? {
+                  name: editingFac.name,
+                  category: editingFac.category,
+                  capacity: editingFac.capacity,
+                  description: editingFac.description,
+                }
+              : {}
+          }
+          onSubmit={(values) => handleFormSubmit(values)}
         />
       </div>
     </RoleGuard>
