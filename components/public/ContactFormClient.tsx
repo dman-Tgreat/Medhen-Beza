@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HOSPITAL_INFO } from "@/lib/constants";
 import type { DepartmentDetailData } from "@/lib/mock-data";
+import type { PublicSiteSettings } from "@/lib/queries/public";
 import { submitContactMessageAction } from "@/lib/actions/contact";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -31,8 +32,10 @@ interface ContactFormData {
 
 export function ContactFormClient({
   departments,
+  settings,
 }: {
   departments: DepartmentDetailData[];
+  settings?: PublicSiteSettings;
 }) {
   const [formData, setFormData] = React.useState<ContactFormData>({
     fullName: "",
@@ -89,7 +92,7 @@ export function ContactFormClient({
               </div>
               <h3 className="text-h4 font-bold text-teal-900">Message Dispatched Successfully</h3>
               <p className="text-small text-teal-800 max-w-md mx-auto">
-                Thank you for contacting Medhen Beza Hospital. Our admissions & medical coordinator will review your request and reach out within 24 hours.
+                Thank you for contacting {settings?.hospitalName || "our hospital"}. Our admissions & medical coordinator will review your request and reach out within 24 hours.
               </p>
               <Button
                 variant="primary"
@@ -234,7 +237,7 @@ export function ContactFormClient({
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-text block">Hospital Location</span>
-                  <span className="text-text-muted">{HOSPITAL_INFO.address}</span>
+                  <span className="text-text-muted">{settings?.address || HOSPITAL_INFO.address}</span>
                 </div>
               </div>
 
@@ -242,8 +245,11 @@ export function ContactFormClient({
                 <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-text block">Main Helpdesk</span>
-                  <a href={`tel:${HOSPITAL_INFO.generalPhone}`} className="text-primary font-medium hover:underline">
-                    {HOSPITAL_INFO.generalPhone}
+                  <a
+                    href={`tel:${(settings?.generalPhone || HOSPITAL_INFO.generalPhone).replace(/\s/g, "")}`}
+                    className="text-primary font-medium hover:underline"
+                  >
+                    {settings?.generalPhone || HOSPITAL_INFO.generalPhone}
                   </a>
                 </div>
               </div>
@@ -252,8 +258,11 @@ export function ContactFormClient({
                 <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-text block">Inquiry Email</span>
-                  <a href={`mailto:${HOSPITAL_INFO.email}`} className="text-primary font-medium hover:underline">
-                    {HOSPITAL_INFO.email}
+                  <a
+                    href={`mailto:${settings?.email || HOSPITAL_INFO.email}`}
+                    className="text-primary font-medium hover:underline"
+                  >
+                    {settings?.email || HOSPITAL_INFO.email}
                   </a>
                 </div>
               </div>
@@ -262,7 +271,7 @@ export function ContactFormClient({
                 <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-text block">Outpatient Hours</span>
-                  <span className="text-text-muted">{HOSPITAL_INFO.hours}</span>
+                  <span className="text-text-muted">{settings?.hours || HOSPITAL_INFO.hours}</span>
                 </div>
               </div>
             </div>
@@ -277,10 +286,10 @@ export function ContactFormClient({
                   For immediate acute emergencies, call our dedicated triage desk directly:
                 </p>
                 <a
-                  href={`tel:${HOSPITAL_INFO.emergencyPhone}`}
+                  href={`tel:${(settings?.emergencyPhone || HOSPITAL_INFO.emergencyPhone).replace(/\s/g, "")}`}
                   className="inline-block text-base font-bold text-emergency hover:underline"
                 >
-                  {HOSPITAL_INFO.emergencyPhone}
+                  {settings?.emergencyPhone || HOSPITAL_INFO.emergencyPhone}
                 </a>
               </div>
             </div>

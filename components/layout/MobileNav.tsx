@@ -7,13 +7,15 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MOBILE_NAV_LINKS } from "@/lib/constants";
 import { EmergencyButton } from "@/components/ui/emergency-button";
+import type { PublicSiteSettings } from "@/lib/queries/public";
 
 interface MobileNavProps {
   isOpen: boolean;
   onClose: () => void;
+  settings?: PublicSiteSettings;
 }
 
-export function MobileNav({ isOpen, onClose }: MobileNavProps) {
+export function MobileNav({ isOpen, onClose, settings }: MobileNavProps) {
   const pathname = usePathname();
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
 
@@ -127,7 +129,11 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
           <p className="text-xs text-text-muted mb-3 font-medium uppercase tracking-wider">
             24/7 Emergency Care
           </p>
-          <EmergencyButton className="w-full justify-center" size="lg" />
+          <EmergencyButton
+            phone={settings?.emergencyPhone}
+            className="w-full justify-center"
+            size="lg"
+          />
         </div>
       </div>
     </>

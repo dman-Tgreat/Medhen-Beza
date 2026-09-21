@@ -2,18 +2,24 @@ import Link from "next/link";
 import { HeartPulse, Phone, Mail, MapPin, Clock } from "lucide-react";
 import { HOSPITAL_INFO, FOOTER_QUICK_LINKS, FOOTER_HOSPITAL_LINKS } from "@/lib/constants";
 import { EmergencyButton } from "@/components/ui/emergency-button";
+import type { PublicSiteSettings } from "@/lib/queries/public";
 
 // ─── Footer Logo ──────────────────────────────────────────────────────────────
-function FooterLogo() {
+function FooterLogo({ hospitalName = "Medhen Beza Hospital" }: { hospitalName?: string }) {
+  const hasHospital = hospitalName.toLowerCase().includes("hospital");
+  const mainName = hasHospital
+    ? hospitalName.replace(/hospital/i, "").trim()
+    : hospitalName;
+
   return (
     <div className="flex items-center gap-3">
       <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shrink-0">
         <HeartPulse className="w-5 h-5" aria-hidden />
       </div>
       <div className="flex flex-col leading-none">
-        <span className="font-bold text-base text-white">Medhen Beza</span>
+        <span className="font-bold text-base text-white">{mainName || hospitalName}</span>
         <span className="text-[10px] font-semibold text-primary-light tracking-[0.12em] uppercase">
-          Hospital
+          {hasHospital ? "Hospital" : "Medical Care"}
         </span>
       </div>
     </div>
@@ -68,8 +74,15 @@ function ContactRow({
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
-export function Footer() {
+export function Footer({ settings }: { settings?: PublicSiteSettings }) {
   const year = new Date().getFullYear();
+  const hospitalName = settings?.hospitalName || HOSPITAL_INFO.name;
+  const description = settings?.description || HOSPITAL_INFO.description;
+  const address = settings?.address || HOSPITAL_INFO.address;
+  const generalPhone = settings?.generalPhone || HOSPITAL_INFO.generalPhone;
+  const email = settings?.email || HOSPITAL_INFO.email;
+  const hours = settings?.hours || HOSPITAL_INFO.hours;
+  const emergencyPhone = settings?.emergencyPhone || HOSPITAL_INFO.emergencyPhone;
 
   return (
     <footer className="bg-slate-900 text-slate-300" aria-label="Site footer">
@@ -79,9 +92,9 @@ export function Footer() {
 
           {/* Col 1 — Brand */}
           <div className="sm:col-span-2 lg:col-span-1 space-y-4">
-            <FooterLogo />
+            <FooterLogo hospitalName={hospitalName} />
             <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
-              {HOSPITAL_INFO.description}
+              {description}
             </p>
           </div>
 
@@ -101,24 +114,24 @@ export function Footer() {
           <div>
             <ColHeading>Contact</ColHeading>
             <div className="flex flex-col gap-3">
-              <ContactRow icon={MapPin}>{HOSPITAL_INFO.address}</ContactRow>
+              <ContactRow icon={MapPin}>{address}</ContactRow>
               <ContactRow icon={Phone}>
                 <a
-                  href={`tel:${HOSPITAL_INFO.generalPhone.replace(/\s/g, "")}`}
+                  href={`tel:${generalPhone.replace(/\s/g, "")}`}
                   className="hover:text-white transition-colors"
                 >
-                  {HOSPITAL_INFO.generalPhone}
+                  {generalPhone}
                 </a>
               </ContactRow>
               <ContactRow icon={Mail}>
                 <a
-                  href={`mailto:${HOSPITAL_INFO.email}`}
+                  href={`mailto:${email}`}
                   className="hover:text-white transition-colors"
                 >
-                  {HOSPITAL_INFO.email}
+                  {email}
                 </a>
               </ContactRow>
-              <ContactRow icon={Clock}>{HOSPITAL_INFO.hours}</ContactRow>
+              <ContactRow icon={Clock}>{hours}</ContactRow>
             </div>
           </div>
 
@@ -129,7 +142,11 @@ export function Footer() {
               <p className="text-sm text-slate-300 leading-snug">
                 Our 24/7 emergency team is always ready. Call or come in — we&apos;re here.
               </p>
-              <EmergencyButton className="w-full justify-center" size="default" />
+              <EmergencyButton
+                phone={emergencyPhone}
+                className="w-full justify-center"
+                size="default"
+              />
             </div>
           </div>
         </div>
@@ -138,7 +155,7 @@ export function Footer() {
       {/* Divider */}
       <div className="border-t border-slate-800">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <span>© {year} {HOSPITAL_INFO.name}. All rights reserved.</span>
+          <span>© {year} {hospitalName}. All rights reserved.</span>
           <div className="flex items-center gap-4">
             <Link
               href="/privacy"

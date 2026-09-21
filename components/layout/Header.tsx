@@ -18,24 +18,31 @@ import {
 } from "@/lib/constants";
 import { EmergencyButton } from "@/components/ui/emergency-button";
 import { MobileNav } from "@/components/layout/MobileNav";
+import type { PublicSiteSettings } from "@/lib/queries/public";
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
-function Logo() {
+function Logo({ hospitalName = "Medhen Beza Hospital" }: { hospitalName?: string }) {
+  // If name has "Hospital", separate it for the subtitle styling
+  const hasHospital = hospitalName.toLowerCase().includes("hospital");
+  const mainName = hasHospital
+    ? hospitalName.replace(/hospital/i, "").trim()
+    : hospitalName;
+
   return (
     <Link
       href="/"
       className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
-      aria-label="Medhen Beza Hospital — home"
+      aria-label={`${hospitalName} — home`}
     >
       <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-cta group-hover:bg-primary-dark transition-colors">
         <HeartPulse className="w-5 h-5" aria-hidden />
       </div>
       <div className="flex flex-col leading-none">
         <span className="font-extrabold text-lg tracking-tight text-text">
-          Medhen Beza
+          {mainName || hospitalName}
         </span>
         <span className="text-[10px] font-semibold text-primary tracking-[0.12em] uppercase">
-          Hospital
+          {hasHospital ? "Hospital" : "Medical Care"}
         </span>
       </div>
     </Link>
@@ -126,7 +133,7 @@ function MoreDropdown({ pathname }: { pathname: string }) {
 }
 
 // ─── Header ──────────────────────────────────────────────────────────────────
-export function Header() {
+export function Header({ settings }: { settings?: PublicSiteSettings }) {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -152,7 +159,7 @@ export function Header() {
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[72px] lg:h-[80px]">
             {/* Logo — always visible */}
-            <Logo />
+            <Logo hospitalName={settings?.hospitalName} />
 
             {/* Desktop nav — hidden on mobile */}
             <nav
@@ -179,6 +186,7 @@ export function Header() {
             <div className="flex items-center gap-3">
               {/* Emergency button — always visible on desktop, hidden on mobile (accessible in drawer) */}
               <EmergencyButton
+                phone={settings?.emergencyPhone}
                 className="hidden lg:inline-flex"
                 size="default"
               />
@@ -214,6 +222,7 @@ export function Header() {
       <MobileNav
         isOpen={isMobileNavOpen}
         onClose={closeMobileNav}
+        settings={settings}
       />
     </>
   );
