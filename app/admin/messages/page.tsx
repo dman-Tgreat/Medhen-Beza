@@ -1,232 +1,73 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import { Check, Mail, Archive } from "lucide-react";
 import { DataTable, ColumnDef } from "@/components/admin/data-table";
 import { RoleGuard } from "@/components/admin/role-guard";
-import { Mail, Phone, Calendar, Check, CornerDownLeft, Eye, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getContactMessagesAction, updateContactMessageStatusAction, type AdminContactMessage } from "@/lib/actions/messages";
 
-interface MessageRecord {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  subject: string;
-  message: string;
-  date: string;
-  status: "UNREAD" | "READ" | "REPLIED" | "ARCHIVED";
+type MessageStatus = AdminContactMessage["status"];
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
-const INITIAL_MESSAGES: MessageRecord[] = [
-  {
-    id: "msg-1",
-    name: "Almaz Kebede",
-    email: "almaz.k@example.com",
-    phone: "+251 911 234567",
-    subject: "Inquiry about pediatric cardiologist clinic schedule",
-    message: "Good morning, I would like to know which days Dr. Meron Haile is available for outpatient pediatric consultations and whether prior echocardiogram reports should be brought along.",
-    date: "Today, 08:30 AM",
-    status: "UNREAD",
-  },
-  {
-    id: "msg-2",
-    name: "Tewodros Assefa",
-    email: "tewodros.a@example.com",
-    phone: "+251 922 345678",
-    subject: "Insurance Coverage for Laparoscopic Gallbladder Surgery",
-    message: "Does Medhen Beza Hospital have direct billing agreements with United Insurance or MedNet for elective laparoscopic surgery?",
-    date: "Yesterday, 04:15 PM",
-    status: "UNREAD",
-  },
-  {
-    id: "msg-3",
-    name: "Bethelhem Yilma",
-    email: "bethelhem.y@example.com",
-    phone: "+251 933 456789",
-    subject: "Maternity Ward Delivery Packages & Private Room Reservation",
-    message: "Kindly provide details on normal vs cesarean delivery packages and how early we should reserve a private room.",
-    date: "Sep 09, 2026",
-    status: "READ",
-  },
-  {
-    id: "msg-4",
-    name: "Dr. Kifle Tadesse",
-    email: "kifle.t@example.com",
-    phone: "+251 944 567890",
-    subject: "Physician Referral: Complex Spine Case",
-    message: "Referring a 45-year-old male patient with lumbar disc herniation for evaluation by your neurosurgery team.",
-    date: "Sep 08, 2026",
-    status: "REPLIED",
-  },
-];
-
 export default function MessagesAdminPage() {
-  const [messages, setMessages] = useState<MessageRecord[]>(INITIAL_MESSAGES);
-  const [viewingMessage, setViewingMessage] = useState<MessageRecord | null>(null);
-  const [replyText, setReplyText] = useState("");
+  const [messages, setMessages] = useState<AdminContactMessage[]>([]);
+  const [viewingMessage, setViewingMessage] = useState<AdminContactMessage | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const columns: ColumnDef<MessageRecord>[] = [
-    {
-      key: "name",
-      header: "Patient / Sender",
-      sortable: true,
-      render: (item) => (
-        <div className="flex items-center gap-2.5">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-lg border shrink-0 ${
-            item.status === "UNREAD"
-              ? "bg-emergency-light text-emergency border-emergency/20"
-              : "bg-background text-text-muted border-border"
-          }`}>
-            <Mail className="h-4 w-4" />
-          </div>
-          <div className="flex flex-col">
-            <span className={`text-text ${item.status === "UNREAD" ? "font-bold" : "font-semibold"}`}>
-              {item.name}
-            </span>
-            <span className="text-[11px] text-text-muted">{item.email}</span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "subject",
-      header: "Subject / Inquiry",
-      render: (item) => (
-        <div className="flex flex-col max-w-xs sm:max-w-md">
-          <span className={`text-xs truncate ${item.status === "UNREAD" ? "font-semibold text-text" : "text-text"}`}>
-            {item.subject}
-          </span>
-          <span className="text-[11px] text-text-muted truncate">{item.message}</span>
-        </div>
-      ),
-    },
-    {
-      key: "date",
-      header: "Received",
-      sortable: true,
-      render: (item) => <span className="text-xs text-text-muted font-mono">{item.date}</span>,
-    },
-    {
-      key: "status",
-      header: "Status",
-      sortable: true,
-      render: (item) => {
-        const badgeClasses = {
-          UNREAD: "bg-emergency-light text-emergency-dark border-emergency/20 font-bold",
-          READ: "bg-slate-100 text-slate-700 border-slate-200",
-          REPLIED: "bg-emerald-50 text-emerald-800 border-emerald-200 font-medium",
-          ARCHIVED: "bg-slate-50 text-slate-500 border-slate-200",
-        }[item.status];
+  const loadMessages = async () => {
+    const result = await getContactMessagesAction();
+    if (result.error) setError(result.error);
+    else setMessages(result.data || []);
+  };
 
-        return (
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-pill text-xs border ${badgeClasses}`}>
-            {item.status}
-          </span>
-        );
-      },
-    },
-  ];
+  useEffect(() => { void loadMessages(); }, []);
 
-  const handleOpenMessage = (msg: MessageRecord) => {
-    setViewingMessage(msg);
-    if (msg.status === "UNREAD") {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === msg.id ? { ...m, status: "READ" } : m))
-      );
+  const updateStatus = async (id: string, status: MessageStatus) => {
+    const result = await updateContactMessageStatusAction(id, status);
+    if (result.error) setError(result.error);
+    else {
+      setMessages((current) => current.map((message) => message.id === id ? { ...message, status } : message));
+      setViewingMessage((current) => current?.id === id ? { ...current, status } : current);
     }
   };
 
-  const handleSendReply = () => {
-    if (!viewingMessage) return;
-    alert(`Reply sent to ${viewingMessage.email}!`);
-    setMessages((prev) =>
-      prev.map((m) => (m.id === viewingMessage.id ? { ...m, status: "REPLIED" } : m))
-    );
-    setViewingMessage(null);
-    setReplyText("");
+  const handleOpen = async (message: AdminContactMessage) => {
+    setViewingMessage(message);
+    if (message.status === "UNREAD") await updateStatus(message.id, "READ");
   };
+
+  const columns: ColumnDef<AdminContactMessage>[] = [
+    {
+      key: "name",
+      header: "Sender",
+      sortable: true,
+      render: (item) => <div className="flex items-center gap-2.5"><div className={`flex h-8 w-8 items-center justify-center rounded-lg border ${item.status === "UNREAD" ? "bg-emergency-light text-emergency border-emergency/20" : "bg-background text-text-muted border-border"}`}><Mail className="h-4 w-4" /></div><div><div className={item.status === "UNREAD" ? "font-bold text-text" : "font-semibold text-text"}>{item.name}</div><div className="text-[11px] text-text-muted">{item.email}</div></div></div>,
+    },
+    { key: "subject", header: "Subject / Inquiry", render: (item) => <div className="max-w-md"><div className="truncate text-xs font-medium text-text">{item.subject}</div><div className="truncate text-[11px] text-text-muted">{item.message}</div></div> },
+    { key: "date", header: "Received", sortable: true, render: (item) => <span className="text-xs text-text-muted">{formatDate(item.date)}</span> },
+    { key: "status", header: "Status", sortable: true, render: (item) => <span className={`inline-flex rounded-pill border px-2 py-0.5 text-xs ${item.status === "UNREAD" ? "border-emergency/20 bg-emergency-light font-bold text-emergency-dark" : item.status === "REPLIED" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-border bg-background text-text-muted"}`}>{item.status === "REPLIED" ? "HANDLED" : item.status}</span> },
+  ];
 
   return (
     <RoleGuard allowedRoles={["HOSPITAL_DIRECTOR", "CONTENT_STAFF"]}>
       <div className="space-y-6">
-        <DataTable
-          title="Patient Contact Form Messages"
-          description="Inbound patient consultations, general inquiries, and specialist clinic questions submitted via public site."
-          data={messages}
-          columns={columns}
-          searchPlaceholder="Search messages by sender name, subject, email..."
-          onView={handleOpenMessage}
-          onDelete={(item) => {
-            if (confirm(`Delete message from ${item.name}?`)) {
-              setMessages((prev) => prev.filter((m) => m.id !== item.id));
-            }
-          }}
-        />
+        {error && <div className="rounded-lg border border-emergency/30 bg-emergency-light p-3 text-sm text-emergency">{error}</div>}
+        <DataTable title="Patient Contact Form Messages" description="Live inquiries submitted through the public contact form." data={messages} columns={columns} searchPlaceholder="Search sender, subject, email, or message..." onView={handleOpen} onDelete={(item) => void updateStatus(item.id, "ARCHIVED")} />
 
-        {/* View & Reply Dialog */}
-        {viewingMessage && (
-          <Dialog open={!!viewingMessage} onOpenChange={() => setViewingMessage(null)}>
-            <DialogContent className="max-w-lg bg-surface p-6">
-              <DialogHeader>
-                <DialogTitle className="text-base font-bold text-text">
-                  {viewingMessage.subject}
-                </DialogTitle>
-                <DialogDescription className="text-xs text-text-muted">
-                  From {viewingMessage.name} • {viewingMessage.date}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-4 my-3 text-xs">
-                <div className="flex items-center justify-between p-2.5 bg-background rounded-md border border-border">
-                  <div>
-                    <span className="text-text-light block text-[11px]">Email Address</span>
-                    <span className="font-semibold text-text">{viewingMessage.email}</span>
-                  </div>
-                  <div>
-                    <span className="text-text-light block text-[11px]">Phone Number</span>
-                    <span className="font-semibold text-text font-mono">{viewingMessage.phone}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-text">Patient Message:</label>
-                  <p className="bg-background p-3 rounded-md border border-border text-text leading-relaxed">
-                    {viewingMessage.message}
-                  </p>
-                </div>
-
-                <div className="space-y-1.5 pt-2">
-                  <label className="font-semibold text-text">Draft Hospital Reply:</label>
-                  <textarea
-                    rows={4}
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Type official hospital response..."
-                    className="w-full rounded-md border border-border bg-background p-2.5 text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
-
-              <DialogFooter className="gap-2 pt-2">
-                <Button variant="ghost" size="sm" onClick={() => setViewingMessage(null)} className="text-xs">
-                  Close
-                </Button>
-                <Button variant="primary" size="sm" onClick={handleSendReply} className="text-xs">
-                  <CornerDownLeft className="h-3.5 w-3.5" />
-                  Send Email Reply
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+        <Dialog open={!!viewingMessage} onOpenChange={(open) => { if (!open) setViewingMessage(null); }}>
+          <DialogContent className="max-w-lg bg-surface p-6">
+            {viewingMessage && <>
+              <DialogHeader><DialogTitle className="text-base font-bold text-text">{viewingMessage.subject}</DialogTitle><DialogDescription className="text-xs text-text-muted">From {viewingMessage.name} • {formatDate(viewingMessage.date)}</DialogDescription></DialogHeader>
+              <div className="my-3 space-y-4 text-xs"><div className="grid grid-cols-1 gap-2 rounded-md border border-border bg-background p-3 sm:grid-cols-2"><div><span className="block text-[11px] text-text-light">Email</span><a href={`mailto:${viewingMessage.email}`} className="font-semibold text-primary">{viewingMessage.email}</a></div><div><span className="block text-[11px] text-text-light">Phone</span><span className="font-semibold text-text">{viewingMessage.phone}</span></div></div><div><label className="font-semibold text-text">Message</label><p className="mt-1 whitespace-pre-wrap rounded-md border border-border bg-background p-3 leading-relaxed text-text">{viewingMessage.message}</p></div></div>
+              <DialogFooter className="gap-2"><Button variant="ghost" size="sm" onClick={() => setViewingMessage(null)}>Close</Button>{viewingMessage.status !== "REPLIED" && viewingMessage.status !== "ARCHIVED" && <Button variant="outline" size="sm" onClick={() => void updateStatus(viewingMessage.id, "REPLIED")}><Check className="mr-1 h-3.5 w-3.5" />Mark Handled</Button>}{viewingMessage.status !== "ARCHIVED" && <Button variant="outline" size="sm" className="text-emergency" onClick={() => void updateStatus(viewingMessage.id, "ARCHIVED")}><Archive className="mr-1 h-3.5 w-3.5" />Archive</Button>}</DialogFooter>
+            </>}
+          </DialogContent>
+        </Dialog>
       </div>
     </RoleGuard>
   );

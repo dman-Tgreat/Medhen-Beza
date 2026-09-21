@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAdminRole } from "@/components/admin/role-context";
 import { StatusBadge } from "@/components/admin/status-badge";
@@ -16,24 +16,39 @@ import {
   Plus,
   Users,
   AlertCircle,
-  Check,
-  X,
   History,
   HardDrive,
   FileCheck,
   TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getDashboardSummaryAction } from "@/lib/actions/dashboard";
+
+type DashboardData = {
+  pendingCount: number;
+  doctors: number;
+  careers: number;
+  news: number;
+  pendingApprovals: { id: string; title: string; type: string; author: string; date: string; status: string }[];
+  recentActivities: { id: string; user: string; action: string; entity: string; time: string }[];
+};
 
 export default function AdminDashboardPage() {
   const { currentRole, currentUser, canApprove, isSysAdmin } = useAdminRole();
+  const [liveData, setLiveData] = useState<DashboardData | null>(null);
+
+  useEffect(() => {
+    getDashboardSummaryAction().then((result) => {
+      if (result.success) setLiveData(result.data);
+    });
+  }, []);
 
   // Mock metric counters
   const stats = [
     {
       title: "Pending Approvals",
-      value: "4",
-      change: "+2 today",
+      value: liveData ? String(liveData.pendingCount) : "—",
+      change: "Live pending submissions",
       icon: Clock,
       href: "/admin/approvals",
       alert: currentRole === "HOSPITAL_DIRECTOR",
@@ -41,24 +56,24 @@ export default function AdminDashboardPage() {
     },
     {
       title: "Doctor Profiles",
-      value: "28",
-      change: "24 Published",
+      value: liveData ? String(liveData.doctors) : "—",
+      change: "Published profiles",
       icon: Stethoscope,
       href: "/admin/content/doctors",
       color: "text-primary bg-primary-light border-primary/20",
     },
     {
       title: "Active Vacancies",
-      value: "6",
-      change: "3 expiring soon",
+      value: liveData ? String(liveData.careers) : "—",
+      change: "Published vacancies",
       icon: Briefcase,
       href: "/admin/content/careers",
       color: "text-indigo-700 bg-indigo-50 border-indigo-200",
     },
     {
       title: "News & Articles",
-      value: "18",
-      change: "2 in draft",
+      value: liveData ? String(liveData.news) : "—",
+      change: "Published articles",
       icon: Newspaper,
       href: "/admin/content/news",
       color: "text-secondary-dark bg-secondary-light border-secondary/20",
@@ -81,73 +96,8 @@ export default function AdminDashboardPage() {
     },
   ];
 
-  // Mock pending approvals
-  const pendingApprovals = [
-    {
-      id: "app-1",
-      title: "Dr. Meron Haile — Senior Cardiologist Profile",
-      type: "Doctor Profile",
-      author: "Dr. Bethlehem Tadesse (Medical Director)",
-      date: "Today at 10:45 AM",
-      status: "PENDING_APPROVAL",
-    },
-    {
-      id: "app-2",
-      title: "Head of Intensive Care Unit (ICU) Nurse Vacancy",
-      type: "Career Opportunity",
-      author: "Hanna Worku (HR Staff)",
-      date: "Today at 09:15 AM",
-      status: "PENDING_APPROVAL",
-    },
-    {
-      id: "app-3",
-      title: "Launch of Medhen Beza Advanced MRI Imaging Suite",
-      type: "News & Press",
-      author: "Abel Girma (Content Staff)",
-      date: "Yesterday",
-      status: "PENDING_APPROVAL",
-    },
-    {
-      id: "app-4",
-      title: "Minimally Invasive Laparoscopic Surgery Service",
-      type: "Clinical Service",
-      author: "Dr. Bethlehem Tadesse (Medical Director)",
-      date: "Sep 09, 2026",
-      status: "PENDING_APPROVAL",
-    },
-  ];
-
-  // Mock audit logs
-  const recentActivities = [
-    {
-      id: "log-1",
-      user: "Dr. Samuel Bekele",
-      action: "PUBLISHED",
-      entity: "Doctor Profile (Dr. Dawit Mengistu)",
-      time: "25 minutes ago",
-    },
-    {
-      id: "log-2",
-      user: "Hanna Worku",
-      action: "SUBMITTED",
-      entity: "Job Vacancy #14 (ICU Nurse)",
-      time: "1 hour ago",
-    },
-    {
-      id: "log-3",
-      user: "Abel Girma",
-      action: "CREATED",
-      entity: "Gallery Album (New Ultrasound Wing)",
-      time: "3 hours ago",
-    },
-    {
-      id: "log-4",
-      user: "Dawit Abebe",
-      action: "UPDATED",
-      entity: "Emergency Contact Phone Config",
-      time: "5 hours ago",
-    },
-  ];
+  const pendingApprovals = liveData?.pendingApprovals ?? [];
+  const recentActivities = liveData?.recentActivities ?? [];
 
   return (
     <div className="space-y-6">
@@ -303,28 +253,10 @@ export default function AdminDashboardPage() {
                       </p>
                     </div>
 
-                    {/* Quick action buttons for Hospital Director */}
-                    {canApprove ? (
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 w-full sm:w-auto shrink-0">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full sm:w-auto text-xs text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 min-h-[38px] justify-center"
-                          onClick={() => alert(`Approved: ${item.title}`)}
-                        >
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
-                          Approve
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full sm:w-auto text-xs text-emergency hover:bg-emergency-light min-h-[38px] justify-center"
-                          onClick={() => alert(`Rejected: ${item.title}`)}
-                        >
-                          <X className="h-3.5 w-3.5" />
-                          Reject
-                        </Button>
-                      </div>
+                    {canApprove && item.status === "PENDING_APPROVAL" ? (
+                      <Button asChild variant="outline" size="sm" className="w-full sm:w-auto min-h-[38px] text-xs bg-surface justify-center shrink-0">
+                        <Link href="/admin/approvals">Review</Link>
+                      </Button>
                     ) : (
                       <Button asChild variant="outline" size="sm" className="w-full sm:w-auto min-h-[38px] sm:min-h-[32px] sm:h-8 text-xs bg-surface justify-center shrink-0">
                         <Link href="/admin/approvals">

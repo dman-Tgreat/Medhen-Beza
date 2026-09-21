@@ -2,6 +2,7 @@ import React from "react";
 import { getSession } from "@/lib/auth/session";
 import { AdminRoleProvider } from "@/components/admin/role-context";
 import { AdminLayoutShell } from "@/components/admin/admin-layout-shell";
+import { getAdminUserNotifications } from "@/lib/queries/admin";
 
 export default async function AdminRootLayout({
   children,
@@ -10,9 +11,27 @@ export default async function AdminRootLayout({
 }) {
   const session = await getSession();
 
+  // Fetch notifications for the current user (null-safe)
+  const notifications = session
+    ? await getAdminUserNotifications(session.id)
+    : [];
+
+  const serializedNotifications = notifications.map((n) => ({
+    id: n.id,
+    type: n.type,
+    title: n.title,
+    message: n.message,
+    contentType: n.contentType,
+    contentId: n.contentId,
+    isRead: n.isRead,
+    createdAt: n.createdAt.toISOString(),
+  }));
+
   return (
     <AdminRoleProvider initialSession={session}>
-      <AdminLayoutShell>{children}</AdminLayoutShell>
+      <AdminLayoutShell initialNotifications={serializedNotifications}>
+        {children}
+      </AdminLayoutShell>
     </AdminRoleProvider>
   );
 }
