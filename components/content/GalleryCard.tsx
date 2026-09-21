@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { Search, Play, Image as ImageIcon } from "lucide-react";
 import { CardRoot, CardImageSlot } from "./Card";
@@ -33,8 +35,8 @@ export interface GalleryCardProps {
  *            "VIDEO" pill badge in top-right corner.
  *            Duration badge in bottom-right corner.
  *
- * At a glance, video cards read as "video" instantly — the amber tint, play circle,
- * and label make them unmistakably different from image cards.
+ * If `src` is empty (e.g. a video without a separate thumbnail), a styled
+ * placeholder is shown instead of crashing next/image.
  */
 export function GalleryCard({ data, onClick, className }: GalleryCardProps) {
   const isVideo = data.type === "video";
@@ -48,7 +50,6 @@ export function GalleryCard({ data, onClick, className }: GalleryCardProps) {
     <CardRoot
       className={cn(
         "group cursor-pointer select-none",
-        // Video cards always have an amber accent border
         isVideo && "border-amber-200",
         className
       )}
@@ -64,21 +65,35 @@ export function GalleryCard({ data, onClick, className }: GalleryCardProps) {
       aria-label={isVideo ? `Play video: ${data.alt}` : `View image: ${data.alt}`}
     >
       <CardImageSlot aspect="aspect-square">
-        {/* Thumbnail */}
-        <Image
-          src={data.src}
-          alt={data.alt}
-          fill
-          className={cn(
-            "object-cover transition-transform duration-500",
-            isVideo
-              ? // Video: slight scale on hover only
-                "group-hover:scale-[1.02]"
-              : // Image: bigger scale on hover
-                "group-hover:scale-[1.06]"
-          )}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-        />
+        {/* Thumbnail — only rendered when a valid src URL exists */}
+        {data.src ? (
+          <Image
+            src={data.src}
+            alt={data.alt}
+            fill
+            className={cn(
+              "object-cover transition-transform duration-500",
+              isVideo ? "group-hover:scale-[1.02]" : "group-hover:scale-[1.06]"
+            )}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
+        ) : (
+          /* Placeholder gradient when no thumbnail is available */
+          <div
+            className={cn(
+              "absolute inset-0 flex items-center justify-center",
+              isVideo
+                ? "bg-gradient-to-br from-amber-900/80 via-amber-700/60 to-amber-900/80"
+                : "bg-gradient-to-br from-primary-light via-secondary-light to-primary-light"
+            )}
+          >
+            {isVideo ? (
+              <Play className="w-10 h-10 text-white/70" aria-hidden />
+            ) : (
+              <ImageIcon className="w-10 h-10 text-primary/40" aria-hidden />
+            )}
+          </div>
+        )}
 
         {isVideo ? (
           /* ── Video overlay — always visible ── */
@@ -158,3 +173,5 @@ export function GalleryCard({ data, onClick, className }: GalleryCardProps) {
     </CardRoot>
   );
 }
+
+

@@ -25,14 +25,18 @@ export interface DoctorCardProps {
  * Portrait uses a circular clip; falls back to a silhouette icon.
  */
 export function DoctorCard({ data, className }: DoctorCardProps) {
+  const validPhoto = data.photo && (data.photo.startsWith("/") || /^https?:\/\//i.test(data.photo))
+    ? data.photo
+    : null;
+
   return (
     <CardRoot className={cn("group items-center text-center pt-6", className)}>
       <CardBody className="items-center">
         {/* Portrait */}
         <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary-light bg-primary-light shrink-0">
-          {data.photo ? (
+          {validPhoto ? (
             <Image
-              src={data.photo}
+              src={validPhoto}
               alt={`Dr. ${data.name}`}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"

@@ -1,10 +1,12 @@
-import type { LucideIcon } from "lucide-react";
+"use client";
+
+import { Stethoscope, type LucideIcon } from "lucide-react";
 import { CardRoot, CardBody, CardLink } from "./Card";
 import { cn } from "@/lib/utils";
 
 export interface ServiceCardData {
-  /** A Lucide icon component */
-  icon: LucideIcon;
+  /** A Lucide icon component — optional; defaults to Stethoscope when omitted */
+  icon?: LucideIcon;
   /** Service name */
   name: string;
   /** One-to-two sentence description */
@@ -21,9 +23,10 @@ export interface ServiceCardProps {
 /**
  * ServiceCard — icon swatch → name → short description → "Learn more →" link.
  * No image; the icon carries the visual identity of the service.
+ * `icon` defaults to Stethoscope when not provided (e.g. from DB data).
  */
 export function ServiceCard({ data, className }: ServiceCardProps) {
-  const Icon = data.icon;
+  const Icon = data.icon ?? Stethoscope;
 
   return (
     <CardRoot className={cn("group", className)}>
