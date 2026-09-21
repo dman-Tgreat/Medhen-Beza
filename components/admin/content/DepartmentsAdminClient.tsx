@@ -7,7 +7,7 @@ import { ContentFormModal, FormFieldConfig } from "@/components/admin/content-fo
 import { RoleGuard } from "@/components/admin/role-guard";
 import { ContentStatusType } from "@/lib/admin/types";
 import { saveDepartmentAction, deleteDepartmentAction, updateDepartmentStatusAction } from "@/lib/actions/content";
-import { Building2 } from "lucide-react";
+import { Activity, Building2 } from "lucide-react";
 
 interface DepartmentRecord {
   id: string;
@@ -249,6 +249,14 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
           onSubmitForApproval={handleSubmitForApproval}
           onApprove={handleApprove}
           onPublish={handlePublish}
+          extraActions={[
+            {
+              label: "Add Service to Department",
+              icon: Activity,
+              variant: "primary",
+              onClick: (dept) => router.push(`/admin/content/services?departmentId=${dept.id}`),
+            },
+          ]}
         />
 
         <ContentFormModal

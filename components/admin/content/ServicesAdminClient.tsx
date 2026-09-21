@@ -24,9 +24,10 @@ interface ServiceRecord {
 interface ServicesAdminClientProps {
   initialServices: any[];
   departments: Array<{ id: string; name: string }>;
+  initialDepartmentId?: string;
 }
 
-export function ServicesAdminClient({ initialServices, departments }: ServicesAdminClientProps) {
+export function ServicesAdminClient({ initialServices, departments, initialDepartmentId }: ServicesAdminClientProps) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ServiceRecord | null>(null);
@@ -244,7 +245,7 @@ export function ServicesAdminClient({ initialServices, departments }: ServicesAd
                   ...editingService,
                   isEmergency: editingService.isEmergency ? "true" : "false",
                 }
-              : { departmentId: departments[0]?.id, isEmergency: "false" }
+              : { departmentId: initialDepartmentId || departments[0]?.id, isEmergency: "false" }
           }
           onSubmit={handleFormSubmit}
           isLoading={isSubmitting}

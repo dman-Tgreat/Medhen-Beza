@@ -177,6 +177,22 @@ export function ContentFormModal({
           </div>
         );
 
+      case "checkbox":
+        return (
+          <label key={field.name} className="flex items-start gap-2.5 rounded-md border border-border bg-background p-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={Boolean(val)}
+              onChange={(e) => handleChange(field.name, e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <span className="space-y-0.5">
+              <span className="block text-xs font-semibold text-text">{field.label}</span>
+              {field.helperText && <span className="block text-[11px] text-text-light">{field.helperText}</span>}
+            </span>
+          </label>
+        );
+
       case "textarea":
         return (
           <div key={field.name} className="space-y-1.5">

@@ -78,8 +78,10 @@ function canSubmit(session: { id: string; roles: string[] }, record: WorkflowRec
   return !record.createdById || record.createdById === session.id;
 }
 
-function canReview(session: { id: string; roles: string[] }, record: WorkflowRecord) {
-  return isDirector(session) && record.submittedById !== session.id && record.createdById !== session.id;
+function canReview(session: { roles: string[] }) {
+  // The Hospital Director is the final authority and may approve their own
+  // submissions. Other roles never receive review authority.
+  return isDirector(session);
 }
 
 function transitionData(config: ReturnType<typeof configFor>, nextStatus: ContentStatus, sessionId: string, reason?: string) {
@@ -112,7 +114,7 @@ async function transition(contentType: ContentType, contentId: string, nextStatu
       if (!canSubmit(session, current, normalizedType)) return { success: false, error: "Forbidden: your role cannot submit this content or you are not its owner." };
       if (current.status !== ContentStatus.DRAFT && current.status !== ContentStatus.REJECTED) return { success: false, error: `Cannot submit content in ${current.status} status.` };
     } else {
-      if (!canReview(session, current)) return { success: false, error: "Forbidden: only the Hospital Director can perform this review action, and self-approval is not allowed." };
+      if (!canReview(session)) return { success: false, error: "Forbidden: only the Hospital Director can perform this review action." };
       const expected = nextStatus === ContentStatus.APPROVED || nextStatus === ContentStatus.REJECTED ? ContentStatus.PENDING_APPROVAL : nextStatus === ContentStatus.PUBLISHED ? ContentStatus.APPROVED : ContentStatus.PUBLISHED;
       if (current.status !== expected) return { success: false, error: `Cannot ${action.toLowerCase()} content in ${current.status} status.` };
       if (nextStatus === ContentStatus.REJECTED && (!reason || reason.trim().length < 10)) return { success: false, error: "A rejection reason of at least 10 characters is required." };

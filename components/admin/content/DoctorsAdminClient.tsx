@@ -22,6 +22,10 @@ interface DoctorRecord {
   profilePhoto?: string;
   languages: string[];
   biography?: string;
+  qualifications: string[];
+  areasOfExpertise: string[];
+  availability?: string;
+  isFeatured: boolean;
 }
 
 interface DoctorsAdminClientProps {
@@ -49,6 +53,10 @@ export function DoctorsAdminClient({ initialDoctors, departments }: DoctorsAdmin
     profilePhoto: doc.profilePhoto || undefined,
     languages: doc.languages || ["Amharic", "English"],
     biography: doc.biography || "",
+    qualifications: doc.qualifications || [],
+    areasOfExpertise: doc.areasOfExpertise || [],
+    availability: doc.availability || "",
+    isFeatured: Boolean(doc.isFeatured),
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -104,6 +112,29 @@ export function DoctorsAdminClient({ initialDoctors, departments }: DoctorsAdmin
       name: "languages",
       label: "Languages Spoken",
       type: "tags",
+    },
+    {
+      name: "qualifications",
+      label: "Qualifications & Fellowships",
+      type: "tags",
+      helperText: "Add degrees, board certifications, and fellowships one at a time.",
+    },
+    {
+      name: "areasOfExpertise",
+      label: "Areas of Clinical Expertise",
+      type: "tags",
+      helperText: "Add the procedures or clinical focus areas shown on the public profile.",
+    },
+    {
+      name: "availability",
+      label: "Consultation Availability",
+      type: "text",
+      placeholder: "e.g. Monday - Friday: 9:00 AM - 5:00 PM",
+    },
+    {
+      name: "isFeatured",
+      label: "Feature this doctor in directory highlights",
+      type: "checkbox",
     },
   ];
 
@@ -230,6 +261,10 @@ export function DoctorsAdminClient({ initialDoctors, departments }: DoctorsAdmin
         biography: values.biography,
         languages: values.languages,
         profilePhoto: values.profilePhoto,
+        qualifications: values.qualifications,
+        areasOfExpertise: values.areasOfExpertise,
+        availability: values.availability,
+        isFeatured: Boolean(values.isFeatured),
       },
       actionType
     );
