@@ -122,19 +122,19 @@ export function AuditLogsClient({ logs, users }: Props) {
         <span className="text-xs font-semibold text-text-muted">Filter:</span>
 
         <select value={contentTypeFilter} onChange={(e) => setContentTypeFilter(e.target.value)}
-          className="h-8 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary">
+          className="h-10 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary">
           <option value="ALL">All Content Types</option>
           {CONTENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
 
         <select value={userFilter} onChange={(e) => setUserFilter(e.target.value)}
-          className="h-8 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary">
+          className="h-10 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary">
           <option value="ALL">All Users</option>
           {users.map((user) => <option key={user.id} value={user.email}>{user.name}</option>)}
         </select>
 
         <select value={actionFilter} onChange={(e) => setActionFilter(e.target.value)}
-          className="h-8 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary">
+          className="h-10 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary">
           <option value="ALL">All Actions</option>
           {allActions.map((a) => <option key={a} value={a}>{a.replace(/_/g, " ")}</option>)}
         </select>
@@ -142,13 +142,13 @@ export function AuditLogsClient({ logs, users }: Props) {
         <div className="flex items-center gap-1">
           <label className="text-xs text-text-muted">From:</label>
           <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-            className="h-8 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary" />
+            className="h-10 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
 
         <div className="flex items-center gap-1">
           <label className="text-xs text-text-muted">To:</label>
           <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-            className="h-8 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary" />
+            className="h-10 rounded border border-border bg-background px-2 text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
 
         <button onClick={() => { setUserFilter("ALL"); setContentTypeFilter("ALL"); setActionFilter("ALL"); setDateFrom(""); setDateTo(""); }}

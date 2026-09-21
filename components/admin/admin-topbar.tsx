@@ -136,7 +136,7 @@ export function AdminTopbar({
             title={isCollapsed ? "Expand sidebar (256px)" : "Collapse sidebar to rail (64px)"}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <Menu className="h-4 w-4" />
+            <Menu className="h-4.5 w-4.5" />
           </button>
         )}
 
