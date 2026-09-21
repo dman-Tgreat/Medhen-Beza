@@ -20,18 +20,21 @@ import { ContactInfo } from "@/components/content/ContactInfo";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import {
-  getDepartmentBySlug,
-  getServicesByDepartment,
-  getDoctorsByDepartment,
-  MOCK_DEPARTMENTS_DETAILED,
-} from "@/lib/mock-data";
+  getPublicDepartmentBySlug,
+  getPublicDepartments,
+  getPublicServices,
+  getPublicDoctors,
+} from "@/lib/queries/public";
+import { contentMetadata, absoluteUrl, hospitalReference } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 interface DepartmentPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return MOCK_DEPARTMENTS_DETAILED.map((dept) => ({
+  const departments = await getPublicDepartments();
+  return departments.map((dept) => ({
     slug: dept.slug,
   }));
 }
@@ -40,7 +43,7 @@ export async function generateMetadata({
   params,
 }: DepartmentPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const dept = getDepartmentBySlug(slug);
+  const dept = await getPublicDepartmentBySlug(slug);
 
   if (!dept) {
     return {
@@ -48,216 +51,175 @@ export async function generateMetadata({
     };
   }
 
-  return {
-    title: `${dept.name} Department | Medhen Beza Hospital`,
-    description: dept.description,
-  };
+  return contentMetadata({ title: dept.metaTitle || `${dept.name} Department`, description: dept.metaDescription || dept.description, path: `/departments/${dept.slug}`, canonicalUrl: dept.canonicalUrl, image: dept.ogImage || dept.image });
 }
 
 export default async function DepartmentDetailPage({
   params,
 }: DepartmentPageProps) {
   const { slug } = await params;
-  const dept = getDepartmentBySlug(slug);
+  const dept = await getPublicDepartmentBySlug(slug);
 
   if (!dept) {
     notFound();
   }
 
-  const departmentServices = getServicesByDepartment(dept.slug);
-  const departmentDoctors = getDoctorsByDepartment(dept.slug);
+  const [allServices, allDoctors] = await Promise.all([
+    getPublicServices(),
+    getPublicDoctors(),
+  ]);
+
+  const departmentServices = allServices.filter(
+    (s) => s.departmentSlug === dept.slug
+  );
+  const departmentDoctors = allDoctors.filter(
+    (d) => d.departmentSlug === dept.slug
+  );
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* 1. PageHero */}
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "MedicalOrganization", name: `${dept.name} Department`, description: dept.description, url: absoluteUrl(`/departments/${dept.slug}`), image: dept.image ? absoluteUrl(dept.image) : undefined, medicalSpecialty: dept.name, parentOrganization: hospitalReference() }} />
       <PageHero
-        eyebrow="Clinical Department"
-        title={dept.name}
+        title={`${dept.name} Department`}
         description={dept.description}
+        badge="Clinical Department"
         breadcrumbs={[
+          { label: "Home", href: "/" },
           { label: "Departments", href: "/departments" },
-          { label: dept.name },
+          { label: dept.name, href: `/departments/${dept.slug}` },
         ]}
       />
 
-      <main className="layout-container pt-12 space-y-16">
-        {/* 2. Department Overview Banner & Visual Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Main Info */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="space-y-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-caption font-semibold bg-secondary-light text-secondary uppercase tracking-wider">
-                <Building2 className="w-3.5 h-3.5" aria-hidden />
-                Department Overview
-              </span>
-              <h2 className="text-h2 font-bold tracking-tight text-text">
-                Dedicated Care & Advanced Infrastructure
-              </h2>
-              <p className="text-body text-text-muted leading-relaxed">
-                {dept.longDescription}
+      <div className="container mx-auto px-4 -mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left / Main Column */}
+          <div className="lg:col-span-8 space-y-10">
+            {/* Overview & Key Services */}
+            <div className="bg-surface rounded-2xl border border-border p-6 sm:p-8 shadow-sm space-y-6">
+              <h2 className="text-h3 font-bold text-text">Department Overview</h2>
+              <p className="text-body text-text-muted leading-relaxed whitespace-pre-line">
+                {dept.longDescription || dept.description}
               </p>
+
+              {dept.keyServices && dept.keyServices.length > 0 && (
+                <div className="border-t border-border pt-6 space-y-3">
+                  <h3 className="text-h4 font-bold text-text">Core Specializations</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {dept.keyServices.map((srv, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 p-3 rounded-xl bg-background border border-border text-small font-medium text-text"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                        <span>{srv}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Department Head / Leadership note */}
-            <div className="flex items-center gap-4 p-4 rounded-lg bg-surface border border-border">
-              <div className="min-w-0 pl-2">
-                <p className="text-caption font-semibold uppercase tracking-wider text-text-muted">
-                  Department Head & Lead Specialist
-                </p>
-                <p className="text-small font-bold text-text">
-                  {dept.headDoctorName}
-                </p>
+            {/* Department Clinical Services */}
+            {departmentServices.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-h3 font-bold text-text">
+                    Services Provided in {dept.name}
+                  </h3>
+                  <Link
+                    href="/services"
+                    className="text-small font-semibold text-primary hover:underline flex items-center gap-1"
+                  >
+                    All Services <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {departmentServices.map((srv) => (
+                    <ServiceCard key={srv.slug} data={srv} />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Department Staff & Doctors */}
+            {departmentDoctors.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-h3 font-bold text-text">
+                    Department Physicians & Specialists
+                  </h3>
+                  <Link
+                    href="/doctors"
+                    className="text-small font-semibold text-primary hover:underline flex items-center gap-1"
+                  >
+                    Doctors Directory <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 gap-6">
+                  {departmentDoctors.map((doc) => (
+                    <DoctorCard key={doc.slug} data={doc} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Department Location & Fast Action Card */}
-          <div className="lg:col-span-4 rounded-lg bg-surface border border-border p-6 space-y-6 shadow-xs">
-            <h3 className="text-h4 font-bold text-text border-b border-border pb-3">
-              Department Location
-            </h3>
+          {/* Right Sidebar: Contact, Hours, Location */}
+          <div className="lg:col-span-4">
+            <div className="bg-surface rounded-2xl border border-border p-6 shadow-sm sticky top-24 space-y-6">
+              <h3 className="text-h4 font-bold text-text">Unit Information</h3>
 
-            <div className="space-y-3 text-small">
-              <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-text">Campus Location</p>
-                  <p className="text-text-muted">{dept.location}</p>
+              <div className="space-y-4 text-small">
+                <div className="flex items-start gap-3">
+                  <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-text block">Working Hours</span>
+                    <span className="text-text-muted">{dept.hours}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-text block">Location</span>
+                    <span className="text-text-muted">{dept.location}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <PhoneCall className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-text block">Direct Line</span>
+                    <a
+                      href={`tel:${dept.phone}`}
+                      className="text-primary hover:underline font-medium"
+                    >
+                      {dept.phone}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Users className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-text block">Department Lead</span>
+                    <span className="text-text-muted">{dept.headDoctorName}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-text">Clinical Hours</p>
-                  <p className="text-text-muted">{dept.hours}</p>
-                </div>
+              <div className="border-t border-border pt-4 space-y-2">
+                <Button asChild variant="primary" className="w-full">
+                  <Link href="/contact">Inquire with Department</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={`tel:${dept.phone}`}>Call Department</Link>
+                </Button>
               </div>
-            </div>
-
-            <div className="pt-2 border-t border-border space-y-2.5">
-              <Button asChild size="lg" className="w-full">
-                <Link href="/contact" className="gap-2 justify-center">
-                  <Calendar className="w-4 h-4" />
-                  Request Consultation
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
-
-        {/* ── Sub-Section 1: Services Offered (ServiceCard row) ── */}
-        <ScrollReveal>
-          <section className="space-y-6 pt-10 border-t border-border">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-              <div>
-                <span className="inline-flex items-center gap-1 text-caption font-bold text-secondary uppercase tracking-widest">
-                  <Stethoscope className="w-3.5 h-3.5" />
-                  Clinical Offerings
-                </span>
-                <h3 className="text-h2 font-bold text-text tracking-tight mt-1">
-                  Services in {dept.name}
-                </h3>
-                <p className="text-small text-text-muted max-w-2xl mt-1">
-                  Specialized treatments, screenings, and therapeutic programs
-                  offered by this department.
-                </p>
-              </div>
-              <Link
-                href="/services"
-                className="inline-flex items-center gap-1 text-small font-semibold text-primary hover:text-primary-dark transition-colors group shrink-0"
-              >
-                <span>All services directory</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-
-            {departmentServices.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {departmentServices.map((service) => (
-                  <ServiceCard key={service.slug} data={service} />
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 rounded-lg bg-surface border border-border text-center text-text-muted text-small">
-                Clinical services for this department are scheduled directly
-                through the general medical directory.
-              </div>
-            )}
-          </section>
-        </ScrollReveal>
-
-        {/* ── Sub-Section 2: Doctors in this Department (DoctorCard row) ── */}
-        <ScrollReveal>
-          <section className="space-y-6 pt-10 border-t border-border">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-              <div>
-                <span className="inline-flex items-center gap-1 text-caption font-bold text-primary uppercase tracking-widest">
-                  <Users className="w-3.5 h-3.5" />
-                  Medical Faculty
-                </span>
-                <h3 className="text-h2 font-bold text-text tracking-tight mt-1">
-                  Specialists & Physicians
-                </h3>
-                <p className="text-small text-text-muted max-w-2xl mt-1">
-                  Our team of consultant physicians and surgeons in the {dept.name}{" "}
-                  Department.
-                </p>
-              </div>
-              <Link
-                href="/doctors"
-                className="inline-flex items-center gap-1 text-small font-semibold text-primary hover:text-primary-dark transition-colors group shrink-0"
-              >
-                <span>Find all doctors</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-
-            {departmentDoctors.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {departmentDoctors.map((doctor) => (
-                  <DoctorCard key={doctor.slug} data={doctor} />
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 rounded-lg bg-surface border border-border text-center text-text-muted text-small">
-                Physicians from our multidisciplinary team provide rotational
-                coverage for this department.
-              </div>
-            )}
-          </section>
-        </ScrollReveal>
-
-        {/* ── Sub-Section 3: Contact & Working Hours Specific to Department ── */}
-        <ScrollReveal>
-          <section className="space-y-6 pt-10 border-t border-border">
-            <div className="rounded-lg bg-surface border border-border p-8 lg:p-10 space-y-6">
-              <div className="max-w-xl space-y-2">
-                <span className="text-caption font-semibold uppercase tracking-widest text-secondary">
-                  Direct Department Inquiries
-                </span>
-                <h3 className="text-h3 font-bold text-text tracking-tight">
-                  Contact {dept.name} Department Directly
-                </h3>
-                <p className="text-small text-text-muted leading-relaxed">
-                  For department appointment confirmations, direct doctor inquiries,
-                  or ward visiting hours, contact this department&apos;s direct desk.
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-border">
-                <ContactInfo
-                  address={dept.location}
-                  phone={dept.phone}
-                  email={dept.email}
-                  hours={dept.hours}
-                  emergency="+251 911 000 999 (24/7 Emergency Dispatch)"
-                />
-              </div>
-            </div>
-          </section>
-        </ScrollReveal>
-      </main>
+      </div>
     </div>
   );
 }

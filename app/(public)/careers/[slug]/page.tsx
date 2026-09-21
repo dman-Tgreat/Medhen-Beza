@@ -10,20 +10,19 @@ import {
   Mail,
   CheckCircle2,
   ArrowLeft,
-  AlertCircle,
-  Gift,
   GraduationCap,
 } from "lucide-react";
 import { PageHero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/button";
-import { getCareerBySlug, MOCK_CAREERS_DETAILED } from "@/lib/mock-data";
+import { getPublicCareerBySlug, getPublicCareers } from "@/lib/queries/public";
 
 interface CareerPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return MOCK_CAREERS_DETAILED.map((career) => ({
+  const careers = await getPublicCareers();
+  return careers.map((career) => ({
     slug: career.slug,
   }));
 }
@@ -32,7 +31,7 @@ export async function generateMetadata({
   params,
 }: CareerPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const career = getCareerBySlug(slug);
+  const career = await getPublicCareerBySlug(slug);
 
   if (!career) {
     return {
@@ -48,7 +47,7 @@ export async function generateMetadata({
 
 export default async function CareerDetailPage({ params }: CareerPageProps) {
   const { slug } = await params;
-  const career = getCareerBySlug(slug);
+  const career = await getPublicCareerBySlug(slug);
 
   if (!career) {
     notFound();
@@ -56,179 +55,132 @@ export default async function CareerDetailPage({ params }: CareerPageProps) {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* 1. PageHero */}
       <PageHero
-        eyebrow="Career Opening"
         title={career.position}
-        description={`${career.department} · ${career.type} · ${career.location}`}
+        description={`${career.department} · ${career.type}`}
+        badge="Job Opening"
         breadcrumbs={[
+          { label: "Home", href: "/" },
           { label: "Careers", href: "/careers" },
-          { label: career.position },
+          { label: career.position, href: `/careers/${career.slug}` },
         ]}
       />
 
-      <main className="layout-container pt-10 space-y-12 max-w-4xl mx-auto">
-        {/* 2. Visually Prominent Application Deadline Alert Block */}
-        <div className="rounded-xl border-2 border-primary/30 bg-primary-light/50 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xs">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-primary">
-              <Calendar className="w-4 h-4" />
-              Application Deadline
-            </div>
-            <h2 className="text-h2 font-black text-text">
-              {career.deadline}
-            </h2>
-            <p className="text-small text-text-muted">
-              Posted: {career.postedDate} · Early applications are reviewed on
-              a rolling basis.
-            </p>
-          </div>
+      <div className="container mx-auto px-4 -mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Main Column */}
+          <div className="lg:col-span-8 space-y-8">
+            <div className="bg-surface rounded-2xl border border-border p-6 sm:p-8 shadow-sm space-y-6">
+              <h2 className="text-h3 font-bold text-text">Position Overview</h2>
+              <p className="text-body text-text-muted leading-relaxed whitespace-pre-line">
+                {career.overview}
+              </p>
 
-          <Button asChild size="lg" className="shrink-0 font-bold">
-            <a href={`mailto:${career.contactEmail}?subject=Application for ${encodeURIComponent(career.position)}`}>
-              <Mail className="w-4 h-4" />
-              Apply via Email
-            </a>
-          </Button>
-        </div>
-
-        {/* 3. Job Overview */}
-        <section className="space-y-4">
-          <h3 className="text-h3 font-bold text-text">Position Overview</h3>
-          <p className="text-body text-text-muted leading-relaxed">
-            {career.overview}
-          </p>
-        </section>
-
-        {/* 4. Responsibilities */}
-        {career.responsibilities && career.responsibilities.length > 0 && (
-          <section className="space-y-4 pt-4 border-t border-border">
-            <h3 className="text-h3 font-bold text-text">
-              Key Duties & Responsibilities
-            </h3>
-            <ul className="space-y-3">
-              {career.responsibilities.map((resp, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-start gap-3 text-body text-text-muted"
-                >
-                  <CheckCircle2 className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                  <span>{resp}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* 5. Requirements & Qualifications */}
-        {career.requirements && career.requirements.length > 0 && (
-          <section className="space-y-4 pt-4 border-t border-border">
-            <h3 className="text-h3 font-bold text-text">
-              Requirements & Experience
-            </h3>
-            <ul className="space-y-3">
-              {career.requirements.map((req, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-start gap-3 text-body text-text-muted"
-                >
-                  <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                  <span>{req}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* 6. Education & Certifications */}
-        {career.qualifications && career.qualifications.length > 0 && (
-          <section className="space-y-4 pt-4 border-t border-border">
-            <h3 className="text-h3 font-bold text-text">
-              Required Qualifications
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {career.qualifications.map((qual, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 rounded-md bg-surface border border-border flex items-center gap-3"
-                >
-                  <GraduationCap className="w-5 h-5 text-secondary shrink-0" />
-                  <span className="text-small font-semibold text-text">
-                    {qual}
-                  </span>
+              {career.responsibilities && career.responsibilities.length > 0 && (
+                <div className="border-t border-border pt-6 space-y-3">
+                  <h3 className="text-h4 font-bold text-text">Key Responsibilities</h3>
+                  <div className="space-y-2">
+                    {career.responsibilities.map((resp, idx) => (
+                      <div key={idx} className="flex items-start gap-2.5 text-small text-text">
+                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <span>{resp}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
+              )}
 
-        {/* 7. What We Offer (Benefits) */}
-        {career.benefits && career.benefits.length > 0 && (
-          <section className="space-y-4 pt-4 border-t border-border">
-            <h3 className="text-h3 font-bold text-text">What We Offer</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {career.benefits.map((benefit, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 rounded-md bg-surface border border-border flex items-center gap-3"
-                >
-                  <Gift className="w-5 h-5 text-primary shrink-0" />
-                  <span className="text-small font-medium text-text">
-                    {benefit}
-                  </span>
+              {career.requirements && career.requirements.length > 0 && (
+                <div className="border-t border-border pt-6 space-y-3">
+                  <h3 className="text-h4 font-bold text-text">Candidate Requirements</h3>
+                  <div className="space-y-2">
+                    {career.requirements.map((req, idx) => (
+                      <div key={idx} className="flex items-start gap-2.5 text-small text-text">
+                        <CheckCircle2 className="h-4 w-4 text-secondary shrink-0 mt-0.5" />
+                        <span>{req}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
+
+              {career.qualifications && career.qualifications.length > 0 && (
+                <div className="border-t border-border pt-6 space-y-3">
+                  <h3 className="text-h4 font-bold text-text flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5 text-primary" />
+                    Required Qualifications
+                  </h3>
+                  <div className="space-y-2">
+                    {career.qualifications.map((q, idx) => (
+                      <div key={idx} className="flex items-start gap-2.5 text-small text-text">
+                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <span>{q}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </section>
-        )}
 
-        {/* 8. Application Instructions Box */}
-        <section className="rounded-xl bg-surface border border-border p-6 sm:p-8 space-y-4">
-          <div className="flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-secondary">
-            <Mail className="w-4 h-4" />
-            How to Apply
-          </div>
-          <h3 className="text-h3 font-bold text-text">
-            Application Instructions
-          </h3>
-          <p className="text-body text-text-muted leading-relaxed">
-            Interested candidates should submit their updated Curriculum Vitae
-            (CV), cover letter, and copies of professional licenses/credentials
-            by email. Please include the job title (
-            <strong>&ldquo;{career.position}&rdquo;</strong>) in the subject
-            line of your email.
-          </p>
-
-          <div className="p-4 rounded-md bg-background border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="text-caption font-semibold uppercase tracking-wider text-text-muted">
-                Send Applications To
-              </p>
-              <p className="text-body font-bold text-primary">
-                {career.contactEmail}
-              </p>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/careers" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" /> Back to All Vacancies
+                </Link>
+              </Button>
             </div>
-
-            <Button asChild size="default">
-              <a
-                href={`mailto:${career.contactEmail}?subject=Application: ${encodeURIComponent(career.position)}`}
-              >
-                Send CV to {career.contactEmail}
-              </a>
-            </Button>
           </div>
-        </section>
 
-        {/* Back Link */}
-        <div className="pt-4">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/careers" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Back to all open positions
-            </Link>
-          </Button>
+          {/* Sidebar */}
+          <div className="lg:col-span-4">
+            <div className="bg-surface rounded-2xl border border-border p-6 shadow-sm sticky top-24 space-y-6">
+              <h3 className="text-h4 font-bold text-text">Vacancy Summary</h3>
+
+              <div className="space-y-4 text-small">
+                <div className="flex items-start gap-3">
+                  <Briefcase className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-text block">Employment Type</span>
+                    <span className="text-text-muted">{career.type}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Building2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-text block">Department</span>
+                    <span className="text-text-muted">{career.department}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-text block">Location</span>
+                    <span className="text-text-muted">{career.location}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-5 w-5 text-emergency shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-text block">Application Deadline</span>
+                    <span className="font-bold text-emergency">{career.deadline}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-4 space-y-2">
+                <Button asChild variant="primary" className="w-full">
+                  <Link href="mailto:careers@medhenbeza.com?subject=Application for position">
+                    Apply via Email
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

@@ -15,21 +15,16 @@
  *  11. Emergency / Contact CTA
  *  12. Footer (layout)
  *
- * Every CMS-driven section pulls from lib/mock-data.ts.
- * Swapping in real data later = one-file change.
+ * All CMS content is fetched from the database via public queries (only PUBLISHED status).
  */
 
-"use client";
-
 import Link from "next/link";
-import Image from "next/image";
 import {
   UserSearch,
   LayoutGrid,
   Building2,
   PhoneCall,
   ArrowRight,
-  Phone,
   Mail,
 } from "lucide-react";
 
@@ -39,24 +34,22 @@ import { ServiceCard } from "@/components/content/ServiceCard";
 import { DepartmentCard } from "@/components/content/DepartmentCard";
 import { DoctorCard } from "@/components/content/DoctorCard";
 import { FacilityCard } from "@/components/content/FacilityCard";
-import { NewsCard } from "@/components/content/NewsCard";
-import { EventCard } from "@/components/content/EventCard";
 import { GalleryCard } from "@/components/content/GalleryCard";
-import { Button } from "@/components/ui/button";
-import { EmergencyButton } from "@/components/ui/emergency-button";
+import { NewsAndEventsSection } from "@/components/public/NewsAndEventsSection";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { HOSPITAL_INFO } from "@/lib/constants";
 import {
-  MOCK_SERVICES,
-  MOCK_DEPARTMENTS,
-  MOCK_DOCTORS,
-  MOCK_FACILITIES,
-  MOCK_NEWS,
-  MOCK_EVENTS,
-  MOCK_GALLERY,
-} from "@/lib/mock-data";
+  getPublicServices,
+  getPublicDepartments,
+  getPublicDoctors,
+  getPublicNews,
+  getPublicEvents,
+  getPublicGallery,
+  getPublicFacilities,
+} from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { hospitalJsonLd } from "@/lib/seo";
 
 // ─── Section wrapper — consistent vertical rhythm ─────────────────────────────
 function Section({
@@ -156,7 +149,6 @@ function HospitalIntro() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Image side */}
         <div className="relative rounded-lg overflow-hidden aspect-[4/3] bg-primary-light border border-border">
-          {/* ↓ Replace with a real hospital exterior photo ↓ */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary-light via-secondary-light to-primary-light flex flex-col items-center justify-center gap-3 text-primary/40">
             <Building2 className="w-20 h-20" strokeWidth={1} />
             <p className="text-caption font-medium text-center px-6">
@@ -171,23 +163,20 @@ function HospitalIntro() {
             About Us
           </p>
           <h2 className="text-h2 font-bold tracking-tight text-text">
-            {/* ↓ PLACEHOLDER — replace with client's real hospital name / intro heading ↓ */}
-            [Placeholder] Trusted care for every stage of life
+            Trusted care for every stage of life
           </h2>
 
-          {/* ↓ PLACEHOLDER — 2-3 sentences of intro copy from the client ↓ */}
           <div className="space-y-3 text-body text-text-muted leading-relaxed border-l-4 border-primary-light pl-4">
             <p>
-              [Placeholder intro sentence 1 — describe who the hospital is, e.g.
-              founding year, mission, patient-centred values.]
+              Medhen Beza Hospital provides patient-centred, modern clinical care in Addis Ababa,
+              delivering healthcare with empathy, clinical precision, and dignity.
             </p>
             <p>
-              [Placeholder intro sentence 2 — highlight specialties, community
-              reach, or accreditation status.]
+              Our multidisciplinary teams of specialists work across cutting-edge diagnostic
+              and surgical units to serve families across Ethiopia.
             </p>
             <p>
-              [Placeholder intro sentence 3 — vision statement or patient
-              commitment.]
+              Committed to continuous clinical excellence and modern standards of practice.
             </p>
           </div>
 
@@ -208,15 +197,15 @@ function HospitalIntro() {
 }
 
 // ─── 8. Facilities showcase ───────────────────────────────────────────────────
-function FacilitiesShowcase() {
-  const [featured, ...supporting] = MOCK_FACILITIES;
+function FacilitiesShowcase({ facilities }: { facilities: any[] }) {
+  const [featured, ...supporting] = facilities;
 
   return (
     <Section tinted>
       <SectionHeader
         eyebrow="Our Facilities"
         title="State-of-the-art care environment"
-        description="[Placeholder] Our campus is designed to deliver the best clinical experience — from modern inpatient suites to cutting-edge diagnostic technology."
+        description="Our campus is designed to deliver the best clinical experience — from modern inpatient suites to cutting-edge diagnostic technology."
         viewAllHref="/facilities"
         viewAllLabel="Explore Facilities"
         align="left"
@@ -225,75 +214,16 @@ function FacilitiesShowcase() {
       <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Featured — spans 2 cols on desktop */}
         <div className="lg:col-span-2">
-          <FacilityCard data={featured} className="h-full" />
+          {featured && <FacilityCard data={featured} className="h-full" />}
         </div>
 
         {/* Supporting — stacked */}
         <div className="flex flex-col gap-4">
           {supporting.map((f) => (
-            <FacilityCard key={f.href} data={f} />
+            <FacilityCard key={f.href || f.id} data={f} />
           ))}
         </div>
       </div>
-    </Section>
-  );
-}
-
-// ─── 9. News & Events combined ────────────────────────────────────────────────
-function NewsAndEvents() {
-  const allItems = [
-    ...MOCK_NEWS.map((n) => ({ type: "news" as const, data: n })),
-    ...MOCK_EVENTS.map((e) => ({ type: "event" as const, data: e })),
-  ];
-
-  return (
-    <Section>
-      <SectionHeader
-        eyebrow="What's Happening"
-        title="News & Events"
-        description="Stay up to date with the latest from our hospital — health insights, upcoming community events, and important announcements."
-      />
-
-      <Tabs defaultValue="all" className="mt-10">
-        <div className="flex justify-center mb-8">
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="news">News</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
-          </TabsList>
-        </div>
-
-        {/* All */}
-        <TabsContent value="all">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allItems.slice(0, 6).map((item, i) =>
-              item.type === "news" ? (
-                <NewsCard key={`news-${i}`} data={item.data as typeof MOCK_NEWS[0]} />
-              ) : (
-                <EventCard key={`event-${i}`} data={item.data as typeof MOCK_EVENTS[0]} />
-              )
-            )}
-          </div>
-        </TabsContent>
-
-        {/* News only */}
-        <TabsContent value="news">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {MOCK_NEWS.map((n, i) => (
-              <NewsCard key={i} data={n} />
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* Events only */}
-        <TabsContent value="events">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {MOCK_EVENTS.map((e, i) => (
-              <EventCard key={i} data={e} />
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
     </Section>
   );
 }
@@ -316,43 +246,51 @@ function EmergencyCTA() {
 
         {/* CTA buttons */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto">
-          <Button asChild size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90">
-            <Link href="/contact">
-              <Mail className="w-5 h-5" aria-hidden />
-              Contact Us
-            </Link>
-          </Button>
-          <EmergencyButton
-            phone={HOSPITAL_INFO.emergencyPhone}
-            label="Emergency Line"
-            size="lg"
-            className="w-full sm:w-auto"
-          />
+          <Link
+            href="/contact"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-small font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer select-none h-12 sm:h-14 px-6 text-body w-full sm:w-auto bg-white text-primary hover:bg-white/90"
+          >
+            <Mail className="w-5 h-5" aria-hidden />
+            Contact Us
+          </Link>
+          <a
+            href={`tel:${HOSPITAL_INFO.emergencyPhone.replace(/\s/g, "")}`}
+            aria-label={`Call emergency line: ${HOSPITAL_INFO.emergencyPhone}`}
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-small font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer select-none h-12 sm:h-14 px-6 text-body w-full sm:w-auto bg-emergency text-white hover:bg-emergency/90 tracking-wide"
+          >
+            <PhoneCall className="w-4 h-4 shrink-0" aria-hidden />
+            <span>🚨 Emergency Line</span>
+            <span className="font-normal opacity-90 tracking-tight">{HOSPITAL_INFO.emergencyPhone}</span>
+          </a>
         </div>
       </div>
     </section>
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-export default function HomePage() {
+// ─── Page Component (Server Component) ────────────────────────────────────────
+export default async function HomePage() {
+  const [services, departments, doctors, news, events, gallery, facilities] = await Promise.all([
+    getPublicServices(),
+    getPublicDepartments(),
+    getPublicDoctors(),
+    getPublicNews(),
+    getPublicEvents(),
+    getPublicGallery(),
+    getPublicFacilities(),
+  ]);
+
   return (
     <>
+      <JsonLd data={hospitalJsonLd()} />
       {/* ── 2. Hero ─────────────────────────────────────────────── */}
-      {/*
-        The Hero component accepts real-hospital-photo via `photoSrc`.
-        When no photoSrc is provided it shows a labelled placeholder slot.
-        CTAs are "Explore Services" → /services and "Find a Doctor" → /doctors
-        per the spec. All copy below is clearly-marked placeholder text.
-      */}
       <Hero
-        eyebrow="[Placeholder eyebrow — e.g. 'Leading Healthcare Excellence']"
+        eyebrow="Leading Healthcare Excellence"
         headline="Compassionate care."
         headlineAccent="Trusted healthcare."
-        supportingText="[Placeholder supporting text — replace with the client's real marketing copy. Example: 'Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first.']"
+        supportingText="Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first."
         primaryCta={{ label: "Explore Services", href: "/services" }}
         secondaryCta={{ label: "Find a Doctor", href: "/doctors" }}
-        /* photoSrc="/images/hospital-hero.jpg" ← Uncomment and add real photo */
         stats={[
           { value: "50+", label: "Specialists" },
           { value: "24 / 7", label: "Emergency" },
@@ -376,15 +314,19 @@ export default function HomePage() {
           <SectionHeader
             eyebrow="What We Offer"
             title="Our Medical Services"
-            description="[Placeholder] From routine check-ups to complex surgical procedures, our specialists deliver expert care across a full spectrum of medical disciplines."
+            description="From routine check-ups to complex surgical procedures, our specialists deliver expert care across a full spectrum of medical disciplines."
             viewAllHref="/services"
             viewAllLabel="View All Services"
           />
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Cap at 6 cards — additional services live at /services */}
-            {MOCK_SERVICES.slice(0, 6).map((s) => (
+            {services.slice(0, 6).map((s) => (
               <ServiceCard key={s.href} data={s} />
             ))}
+            {services.length === 0 && (
+              <div className="col-span-full py-10 text-center text-text-muted">
+                No medical services currently listed.
+              </div>
+            )}
           </div>
         </Section>
       </ScrollReveal>
@@ -395,14 +337,19 @@ export default function HomePage() {
           <SectionHeader
             eyebrow="Clinical Units"
             title="Our Departments"
-            description="[Placeholder] Each department is staffed by board-certified specialists supported by modern diagnostic and treatment technology."
+            description="Each department is staffed by board-certified specialists supported by modern diagnostic and treatment technology."
             viewAllHref="/departments"
             viewAllLabel="Explore Departments"
           />
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {MOCK_DEPARTMENTS.map((d) => (
+            {departments.map((d) => (
               <DepartmentCard key={d.href} data={d} />
             ))}
+            {departments.length === 0 && (
+              <div className="col-span-full py-10 text-center text-text-muted">
+                No departments currently listed.
+              </div>
+            )}
           </div>
         </Section>
       </ScrollReveal>
@@ -413,27 +360,31 @@ export default function HomePage() {
           <SectionHeader
             eyebrow="Meet the Team"
             title="Our Doctors"
-            description="[Placeholder] Our medical team combines years of clinical experience with a genuine commitment to patient-centred care."
+            description="Our medical team combines years of clinical experience with a genuine commitment to patient-centred care."
             viewAllHref="/doctors"
             viewAllLabel="Meet All Doctors"
           />
-          {/* 4 doctor cards — no appointment button per spec (Phase 2) */}
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {MOCK_DOCTORS.map((d) => (
+            {doctors.slice(0, 4).map((d) => (
               <DoctorCard key={d.href} data={d} />
             ))}
+            {doctors.length === 0 && (
+              <div className="col-span-full py-10 text-center text-text-muted">
+                No doctors currently listed.
+              </div>
+            )}
           </div>
         </Section>
       </ScrollReveal>
 
       {/* ── 8. Facilities ─────────────────────────────────────────── */}
       <ScrollReveal>
-        <FacilitiesShowcase />
+        <FacilitiesShowcase facilities={facilities} />
       </ScrollReveal>
 
       {/* ── 9. News & Events ─────────────────────────────────────── */}
       <ScrollReveal>
-        <NewsAndEvents />
+        <NewsAndEventsSection news={news} events={events} />
       </ScrollReveal>
 
       {/* ── 10. Gallery ──────────────────────────────────────────── */}
@@ -442,15 +393,19 @@ export default function HomePage() {
           <SectionHeader
             eyebrow="Photo & Video"
             title="Gallery"
-            description="[Placeholder] A glimpse of our facilities, events, and the people who make Medhen Beza Hospital what it is."
+            description="A glimpse of our facilities, events, and the people who make Medhen Beza Hospital what it is."
             viewAllHref="/gallery"
             viewAllLabel="View Gallery"
           />
-          {/* Mixed grid — image + video cards. Video cards have amber tint + play icon. */}
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {MOCK_GALLERY.map((g, i) => (
+            {gallery.slice(0, 8).map((g, i) => (
               <GalleryCard key={i} data={g} />
             ))}
+            {gallery.length === 0 && (
+              <div className="col-span-full py-10 text-center text-text-muted">
+                No gallery media currently published.
+              </div>
+            )}
           </div>
         </Section>
       </ScrollReveal>

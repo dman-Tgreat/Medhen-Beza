@@ -30,6 +30,7 @@ import { SectionHeader } from "@/components/sections/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { MOCK_ABOUT_PAGE, type AboutPageData } from "@/lib/mock-data";
+import { getPublicPageBySlug } from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -492,8 +493,14 @@ function FinalCTA({ data }: { data: AboutPageData["finalCta"] }) {
 }
 
 // ─── Main Page Component ─────────────────────────────────────────────────────
-export default function AboutPage() {
+export default async function AboutPage() {
+  const dbPage = await getPublicPageBySlug("about");
   const data = MOCK_ABOUT_PAGE;
+
+  if (dbPage) {
+    if (dbPage.title) data.hero.title = dbPage.title;
+    if (dbPage.excerpt) data.hero.supportingText = dbPage.excerpt;
+  }
 
   return (
     <>
