@@ -209,7 +209,10 @@ function HospitalIntro({ settings }: { settings: any }) {
 
 // ─── 8. Facilities showcase ───────────────────────────────────────────────────
 function FacilitiesShowcase({ facilities }: { facilities: any[] }) {
-  const [featured, ...supporting] = facilities;
+  if (!facilities || facilities.length === 0) return null;
+
+  const [featured, ...allSupporting] = facilities;
+  const supporting = allSupporting.slice(0, 2);
 
   return (
     <Section tinted>
@@ -222,18 +225,33 @@ function FacilitiesShowcase({ facilities }: { facilities: any[] }) {
         align="left"
       />
 
-      <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Featured — spans 2 cols on desktop */}
-        <div className="lg:col-span-2">
-          {featured && <FacilityCard data={featured} className="h-full" />}
+      <div
+        className={cn(
+          "mt-10 grid gap-4",
+          supporting.length === 0
+            ? "grid-cols-1"
+            : supporting.length === 1
+            ? "grid-cols-1 lg:grid-cols-2"
+            : "grid-cols-1 lg:grid-cols-3"
+        )}
+      >
+        {/* Featured — spans 2 cols on desktop when paired with 2 supporting items */}
+        <div
+          className={cn(
+            supporting.length >= 2 ? "lg:col-span-2" : "col-span-1"
+          )}
+        >
+          {featured && <FacilityCard data={featured} featured className="h-full" />}
         </div>
 
-        {/* Supporting — stacked */}
-        <div className="flex flex-col gap-4">
-          {supporting.map((f) => (
-            <FacilityCard key={f.href || f.id} data={f} />
-          ))}
-        </div>
+        {/* Supporting — stacked on the right */}
+        {supporting.length > 0 && (
+          <div className="flex flex-col gap-4">
+            {supporting.map((f) => (
+              <FacilityCard key={f.href || f.id} data={f} />
+            ))}
+          </div>
+        )}
       </div>
     </Section>
   );
