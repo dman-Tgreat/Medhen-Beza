@@ -2,19 +2,31 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { DataTable, ColumnDef } from "@/components/admin/data-table";
-import { ContentFormModal, FormFieldConfig } from "@/components/admin/content-form-modal";
+import { DataTable, ColumnDef, DataTableAction } from "@/components/admin/data-table";
 import { RoleGuard } from "@/components/admin/role-guard";
 import { ContentStatusType } from "@/lib/admin/types";
 import { savePageAction, deletePageAction, updatePageStatusAction } from "@/lib/actions/content";
-import { FileText, ExternalLink } from "lucide-react";
+import { AboutPageVisualEditorModal } from "./AboutPageVisualEditorModal";
+import { StandardPageEditorModal } from "./StandardPageEditorModal";
+import {
+  FileText,
+  ExternalLink,
+  Sparkles,
+  Users,
+  Building2,
+  ShieldCheck,
+  CheckCircle2,
+  Plus,
+} from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface PageRecord {
   id: string;
   title: string;
   slug: string;
   content: string;
+  excerpt?: string;
   seoTitle?: string;
   seoDescription?: string;
   lastUpdated: string;
@@ -27,7 +39,8 @@ interface PagesAdminClientProps {
 
 export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
   const router = useRouter();
-  const [modalOpen, setModalOpen] = useState(false);
+  const [standardModalOpen, setStandardModalOpen] = useState(false);
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<PageRecord | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -37,65 +50,58 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
     title: p.title,
     slug: p.slug.startsWith("/") ? p.slug : `/${p.slug}`,
     content: p.content || "",
-    seoTitle: p.seoTitle || "",
-    seoDescription: p.seoDescription || "",
+    excerpt: p.excerpt || "",
+    seoTitle: p.metaTitle || p.seoTitle || "",
+    seoDescription: p.metaDescription || p.seoDescription || "",
     lastUpdated: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "—",
     status: p.status as ContentStatusType,
   }));
 
-  const formFields: FormFieldConfig[] = [
-    {
-      name: "title",
-      label: "Page Title",
-      type: "text",
-      placeholder: "e.g. Quality and Patient Safety Charter",
-      required: true,
-    },
-    {
-      name: "slug",
-      label: "URL Slug / Route Path",
-      type: "text",
-      placeholder: "quality-charter",
-      required: true,
-    },
-    {
-      name: "content",
-      label: "Page Content Body (HTML / Markdown)",
-      type: "textarea",
-      placeholder: "Enter full page content...",
-      required: true,
-    },
-    {
-      name: "seoTitle",
-      label: "SEO Meta Title",
-      type: "text",
-      placeholder: "Optional search engine title",
-    },
-    {
-      name: "seoDescription",
-      label: "SEO Meta Description",
-      type: "textarea",
-      placeholder: "Optional search engine description",
-    },
-  ];
+  const aboutPageRecord = formattedPages.find(
+    (p) => p.slug === "/about" || p.slug === "about"
+  );
 
   const columns: ColumnDef<PageRecord>[] = [
     {
       key: "title",
       header: "Page Name",
       sortable: true,
-      render: (item) => (
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary-light text-secondary-dark border border-secondary/20 shrink-0">
-            <FileText className="h-4 w-4" />
+      render: (item) => {
+        const isAbout = item.slug === "/about" || item.slug === "about";
+        return (
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 border ${
+                isAbout
+                  ? "bg-primary-light text-primary border-primary/30"
+                  : "bg-secondary-light text-secondary-dark border-secondary/20"
+              }`}
+            >
+              {isAbout ? <Sparkles className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-text">{item.title}</span>
+                {isAbout && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    Visual Builder
+                  </span>
+                )}
+              </div>
+              {item.excerpt && (
+                <span className="text-xs text-text-muted line-clamp-1 max-w-md">
+                  {item.excerpt}
+                </span>
+              )}
+            </div>
           </div>
-          <span className="font-semibold text-text">{item.title}</span>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: "slug",
-      header: "URL Path",
+      header: "Public URL",
       sortable: true,
       render: (item) => (
         <Link
@@ -121,16 +127,33 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
     },
   ];
 
+  const extraActions: DataTableAction<PageRecord>[] = [
+    {
+      label: "Visual Page Builder",
+      icon: Sparkles,
+      onClick: (item) => {
+        setEditingPage(item);
+        setErrorMessage(null);
+        setAboutModalOpen(true);
+      },
+      show: (item) => item.slug === "/about" || item.slug === "about",
+    },
+  ];
+
   const handleAddNew = () => {
     setEditingPage(null);
     setErrorMessage(null);
-    setModalOpen(true);
+    setStandardModalOpen(true);
   };
 
   const handleEdit = (item: PageRecord) => {
     setEditingPage(item);
     setErrorMessage(null);
-    setModalOpen(true);
+    if (item.slug === "/about" || item.slug === "about") {
+      setAboutModalOpen(true);
+    } else {
+      setStandardModalOpen(true);
+    }
   };
 
   const handleDelete = async (item: PageRecord) => {
@@ -159,8 +182,16 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
     else router.refresh();
   };
 
-  const handleFormSubmit = async (
-    values: Record<string, any>,
+  const handleSavePage = async (
+    data: {
+      id?: string;
+      title: string;
+      slug: string;
+      content: string;
+      excerpt?: string;
+      seoTitle?: string;
+      seoDescription?: string;
+    },
     actionType: "draft" | "submit" | "publish"
   ) => {
     setIsSubmitting(true);
@@ -168,11 +199,13 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
 
     const res = await savePageAction(
       {
-        id: editingPage?.id,
-        title: values.title,
-        slug: values.slug,
-        content: values.content,
-        excerpt: values.excerpt,
+        id: data.id || editingPage?.id,
+        title: data.title,
+        slug: data.slug,
+        content: data.content,
+        excerpt: data.excerpt,
+        metaTitle: data.seoTitle,
+        metaDescription: data.seoDescription,
       },
       actionType
     );
@@ -183,7 +216,9 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
       setErrorMessage(res.error);
       alert(res.error);
     } else {
-      setModalOpen(false);
+      setAboutModalOpen(false);
+      setStandardModalOpen(false);
+      setEditingPage(null);
       router.refresh();
     }
   };
@@ -197,6 +232,54 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
           </div>
         )}
 
+        {/* Featured Visual Editor Spotlight Card */}
+        <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-primary-light/40 via-surface to-secondary-light/30 p-5 sm:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className="space-y-1.5 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs">
+                <Sparkles className="h-3.5 w-3.5" />
+              </span>
+              <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                Visual Page Builder Available
+              </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-text">
+              About Us Page & Leadership Management
+            </h3>
+            <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
+              Easily update hospital story paragraphs, upload campus photos, add or reorder executive leadership team members (with doctor portrait photos), edit core principles, and showcase hospital facilities without writing any code.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
+            <Button
+              type="button"
+              onClick={() => {
+                setEditingPage(aboutPageRecord || null);
+                setAboutModalOpen(true);
+              }}
+              className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary-dark text-white font-semibold text-xs h-10 px-5 shadow-xs"
+            >
+              <Sparkles className="h-4 w-4" />
+              Launch About Page Visual Editor
+            </Button>
+            {aboutPageRecord && (
+              <Button
+                type="button"
+                variant="outline"
+                asChild
+                className="h-10 text-xs gap-1.5 border-border bg-surface"
+              >
+                <Link href="/about" target="_blank">
+                  View Live
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* CMS Pages Table */}
         <DataTable
           title="CMS Static Pages & Policy Documents"
           description="Manage standalone informational pages, patient charter, clinical disclaimers, and terms."
@@ -210,16 +293,30 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
           onSubmitForApproval={handleSubmitForApproval}
           onApprove={handleApprove}
           onPublish={handlePublish}
+          extraActions={extraActions}
         />
 
-        <ContentFormModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          title={editingPage ? `Edit Page: ${editingPage.title}` : "Create CMS Page"}
-          description="Content team drafts require Hospital Director approval before publishing."
-          fields={formFields}
-          initialValues={editingPage || {}}
-          onSubmit={handleFormSubmit}
+        {/* Specialized About Page Visual Editor */}
+        <AboutPageVisualEditorModal
+          isOpen={aboutModalOpen}
+          onClose={() => {
+            setAboutModalOpen(false);
+            setEditingPage(null);
+          }}
+          initialPage={editingPage || aboutPageRecord}
+          onSubmit={handleSavePage}
+          isLoading={isSubmitting}
+        />
+
+        {/* Standard Page Document Editor */}
+        <StandardPageEditorModal
+          isOpen={standardModalOpen}
+          onClose={() => {
+            setStandardModalOpen(false);
+            setEditingPage(null);
+          }}
+          initialPage={editingPage}
+          onSubmit={handleSavePage}
           isLoading={isSubmitting}
         />
       </div>

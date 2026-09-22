@@ -181,8 +181,8 @@ import { HOSPITAL_INFO } from "@/lib/constants";
 
 export const CONTACT_INFO_DEFAULTS: ContactInfoData = {
   address: HOSPITAL_INFO.address,
-  phone: HOSPITAL_INFO.phone.main,
+  phone: HOSPITAL_INFO.generalPhone,
   email: HOSPITAL_INFO.email,
-  hours: HOSPITAL_INFO.hours.visiting,
-  emergency: HOSPITAL_INFO.phone.emergency,
+  hours: HOSPITAL_INFO.hours,
+  emergency: HOSPITAL_INFO.emergencyPhone,
 };

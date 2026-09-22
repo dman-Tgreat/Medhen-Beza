@@ -15,6 +15,37 @@ import { HOSPITAL_INFO } from "@/lib/constants";
 import { getVideoEmbedUrl, getVideoThumbnailUrl } from "@/lib/media/video";
 import type { AboutPageData } from "@/lib/mock-data";
 import { MOCK_ABOUT_PAGE } from "@/lib/mock-data";
+import {
+  Heart,
+  Award,
+  ShieldCheck,
+  Users,
+  HeartHandshake,
+  UserCheck,
+  Sparkles,
+  Stethoscope,
+  Activity,
+  CheckCircle2,
+} from "lucide-react";
+
+export const ABOUT_VALUE_ICONS: Record<string, any> = {
+  Heart,
+  Award,
+  ShieldCheck,
+  Users,
+  HeartHandshake,
+  UserCheck,
+  Sparkles,
+  Stethoscope,
+  Activity,
+  CheckCircle2,
+};
+
+function resolveValueIcon(icon: any) {
+  if (typeof icon === "function" || typeof icon === "object") return icon;
+  if (typeof icon === "string" && ABOUT_VALUE_ICONS[icon]) return ABOUT_VALUE_ICONS[icon];
+  return ShieldCheck;
+}
 
 /**
  * Public Data Access Layer with Type-Safe Adapters
@@ -311,6 +342,11 @@ function mapDepartment(dept: any): DepartmentDetailData {
     /head|chief|director|lead/i.test(d.position || "")
   ) || dept.doctors?.[0];
 
+  const specializations =
+    Array.isArray(dept.specializations) && dept.specializations.length > 0
+      ? dept.specializations
+      : dept.services?.map((s: any) => s.title || s.name) || [];
+
   return {
     id: dept.id,
     name: dept.name,
@@ -321,8 +357,8 @@ function mapDepartment(dept: any): DepartmentDetailData {
     phone: dept.phone || "+251 116 000 111",
     email: dept.email || "info@medhenbeza.com",
     location: dept.location || "Main Hospital Complex",
-    headDoctorName: leadDoctor?.fullName || "Consultant Specialist",
-    keyServices: dept.services?.map((s: any) => s.title || s.name) || [],
+    headDoctorName: dept.headDoctor || leadDoctor?.fullName || "Consultant Specialist",
+    keyServices: specializations,
     href: `/departments/${dept.slug}`,
     image: dept.image || "",
     imageAlt: `${dept.name} department at Medhen Beza Hospital`,
@@ -373,14 +409,23 @@ export async function getPublicDepartmentBySlug(slug: string): Promise<Departmen
 // ─── 3. Services ────────────────────────────────────────────────────────────
 
 function mapService(srv: any): ServiceDetailData {
-  const rawFeatures = srv.additionalInfo || srv.content || "";
-  const extractedFeatures = rawFeatures
-    ? rawFeatures
-        .split("\n")
-        .map((l: string) => l.replace(/^[-*•]\s*/, "").trim())
-        .filter((l: string) => l.length > 5 && l.length < 120)
-        .slice(0, 4)
-    : [];
+  let extractedFeatures: string[] = [];
+  if (srv.additionalInfo) {
+    extractedFeatures = srv.additionalInfo
+      .split("\n")
+      .map((l: string) => l.replace(/^[-*•]\s*/, "").trim())
+      .filter((l: string) => l.length > 2 && l.length < 150)
+      .slice(0, 8);
+  }
+  if (extractedFeatures.length === 0 && srv.content) {
+    extractedFeatures = srv.content
+      .split("\n")
+      .map((l: string) => l.trim())
+      .filter((l: string) => /^[-*•]/.test(l))
+      .map((l: string) => l.replace(/^[-*•]\s*/, "").trim())
+      .filter((l: string) => l.length > 2 && l.length < 150)
+      .slice(0, 8);
+  }
 
   return {
     id: srv.id,
@@ -706,9 +751,10 @@ export async function getPublicGallery(): Promise<any[]> {
 
 export async function getPublicPageBySlug(slug: string) {
   try {
+    const cleanSlug = slug.replace(/^\/+/, "");
     return await db.page.findFirst({
       where: {
-        slug,
+        OR: [{ slug: cleanSlug }, { slug: `/${cleanSlug}` }],
         status: ContentStatus.PUBLISHED,
       },
     });
@@ -769,13 +815,59 @@ export async function getPublicAboutPage(): Promise<AboutPageData> {
     if (dbPage.content && dbPage.content.trim().startsWith("{")) {
       try {
         const parsed = JSON.parse(dbPage.content);
-        if (parsed.introduction) base.introduction = { ...base.introduction, ...parsed.introduction };
-        if (parsed.missionVision) base.missionVision = { ...base.missionVision, ...parsed.missionVision };
-        if (parsed.values) base.values = parsed.values;
-        if (parsed.leadership) base.leadership = parsed.leadership;
-        if (parsed.environment) base.environment = parsed.environment;
-        if (parsed.accreditations) base.accreditations = parsed.accreditations;
-        if (parsed.finalCta) base.finalCta = { ...base.finalCta, ...parsed.finalCta };
+        if (parsed.hero) {
+          if (parsed.hero.title) base.hero.title = parsed.hero.title;
+          if (parsed.hero.supportingText) base.hero.supportingText = parsed.hero.supportingText;
+          if (parsed.hero.image) base.hero.image = parsed.hero.image;
+          if (parsed.hero.imageAlt) base.hero.imageAlt = parsed.hero.imageAlt;
+        }
+        if (parsed.introduction) {
+          base.introduction = {
+            ...base.introduction,
+            ...parsed.introduction,
+            paragraphs: Array.isArray(parsed.introduction.paragraphs) && parsed.introduction.paragraphs.length > 0
+              ? parsed.introduction.paragraphs
+              : base.introduction.paragraphs,
+          };
+        }
+        if (parsed.missionVision) {
+          base.missionVision = {
+            mission: { ...base.missionVision.mission, ...(parsed.missionVision?.mission || {}) },
+            vision: { ...base.missionVision.vision, ...(parsed.missionVision?.vision || {}) },
+          };
+        }
+        if (Array.isArray(parsed.values) && parsed.values.length > 0) {
+          base.values = parsed.values.map((v: any) => ({
+            label: v.label || "Value",
+            description: v.description || "",
+            icon: resolveValueIcon(v.icon),
+          }));
+        }
+        if (Array.isArray(parsed.leadership) && parsed.leadership.length > 0) {
+          base.leadership = parsed.leadership.map((l: any) => ({
+            name: l.name || "Director",
+            position: l.position || "Leadership",
+            photo: l.photo || undefined,
+            photoAlt: l.photoAlt || l.name || "Leadership photo",
+          }));
+        }
+        if (parsed.environment) {
+          base.environment = {
+            eyebrow: parsed.environment.eyebrow || base.environment.eyebrow,
+            title: parsed.environment.title || base.environment.title,
+            description: parsed.environment.description || base.environment.description,
+            featured: parsed.environment.featured ? { ...base.environment.featured, ...parsed.environment.featured } : base.environment.featured,
+            supporting: Array.isArray(parsed.environment.supporting) && parsed.environment.supporting.length > 0
+              ? parsed.environment.supporting
+              : base.environment.supporting,
+          };
+        }
+        if (Array.isArray(parsed.accreditations)) {
+          base.accreditations = parsed.accreditations;
+        }
+        if (parsed.finalCta) {
+          base.finalCta = { ...base.finalCta, ...parsed.finalCta };
+        }
       } catch (e) {
         base.introduction.paragraphs = dbPage.content.split("\n\n").filter(Boolean);
       }

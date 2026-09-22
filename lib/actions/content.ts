@@ -286,6 +286,8 @@ export async function saveDepartmentAction(
     email?: string;
     location?: string;
     workingHours?: string;
+    headDoctor?: string;
+    specializations?: string[];
     image?: string;
     icon?: string;
     isFeatured?: boolean;
@@ -317,6 +319,8 @@ export async function saveDepartmentAction(
           email: data.email,
           location: data.location,
           workingHours: data.workingHours,
+          headDoctor: data.headDoctor,
+          specializations: data.specializations || [],
           image: data.image,
           icon: data.icon,
           isFeatured: data.isFeatured || false,
@@ -344,6 +348,8 @@ export async function saveDepartmentAction(
           email: data.email,
           location: data.location,
           workingHours: data.workingHours,
+          headDoctor: data.headDoctor,
+          specializations: data.specializations || [],
           image: data.image,
           icon: data.icon,
           isFeatured: data.isFeatured || false,
@@ -396,6 +402,7 @@ export async function saveServiceAction(
     departmentId?: string;
     departmentName?: string;
     availabilityInfo?: string;
+    additionalInfo?: string;
     image?: string;
     icon?: string;
     isFeatured?: boolean;
@@ -439,6 +446,7 @@ export async function saveServiceAction(
           description: data.description,
           content: data.content,
           availabilityInfo: data.availabilityInfo,
+          additionalInfo: data.additionalInfo,
           image: data.image,
           icon: data.icon,
           departmentId,
@@ -465,6 +473,7 @@ export async function saveServiceAction(
           description: data.description,
           content: data.content,
           availabilityInfo: data.availabilityInfo,
+          additionalInfo: data.additionalInfo,
           image: data.image,
           icon: data.icon,
           departmentId,
@@ -479,6 +488,7 @@ export async function saveServiceAction(
 
       revalidatePath("/admin/content/services");
       revalidatePath("/services");
+      revalidatePath(`/services/${slug}`);
       const workflow = await finalizeSave(actionType, "Service", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };
@@ -1008,6 +1018,8 @@ export async function savePageAction(
     excerpt?: string;
     slug?: string;
     regenerateSlug?: boolean;
+    metaTitle?: string;
+    metaDescription?: string;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult> {
@@ -1020,9 +1032,14 @@ export async function savePageAction(
       targetStatus
     );
 
+    const inputSlug = (data.slug || "").replace(/^\/+/, "").trim();
+
     if (data.id && !data.id.startsWith("page-new-")) {
       const existing = await db.page.findUnique({ where: { id: data.id }, select: { slug: true } });
-      const slug = data.regenerateSlug ? await uniqueSlug("page", data.slug || data.title, data.id) : existing?.slug || await uniqueSlug("page", data.title);
+      const slug = data.regenerateSlug
+        ? await uniqueSlug("page", inputSlug || data.title, data.id)
+        : existing?.slug || (inputSlug ? inputSlug : await uniqueSlug("page", data.title));
+
       const updated = await db.page.update({
         where: { id: data.id },
         data: {
@@ -1030,24 +1047,32 @@ export async function savePageAction(
           slug,
           content: data.content,
           excerpt: data.excerpt,
+          metaTitle: data.metaTitle,
+          metaDescription: data.metaDescription,
           status: targetStatus,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
       revalidatePath("/admin/content/pages");
+      revalidatePath("/admin/approvals");
       revalidatePath(`/${slug}`);
+      if (slug === "about") revalidatePath("/about");
+      revalidatePath("/");
+
       const workflow = await finalizeSave(actionType, "Page", updated.id);
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
     } else {
-      const slug = await uniqueSlug("page", data.slug || data.title);
+      const slug = inputSlug ? inputSlug : await uniqueSlug("page", data.title);
       const created = await db.page.create({
         data: {
           title: data.title,
           slug,
           content: data.content,
           excerpt: data.excerpt,
+          metaTitle: data.metaTitle,
+          metaDescription: data.metaDescription,
           status: targetStatus,
           createdById: session.id,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
@@ -1055,7 +1080,11 @@ export async function savePageAction(
       });
 
       revalidatePath("/admin/content/pages");
+      revalidatePath("/admin/approvals");
       revalidatePath(`/${slug}`);
+      if (slug === "about") revalidatePath("/about");
+      revalidatePath("/");
+
       const workflow = await finalizeSave(actionType, "Page", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };

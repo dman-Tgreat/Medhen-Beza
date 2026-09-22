@@ -30,14 +30,20 @@ import { SectionHeader } from "@/components/sections/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { AboutPageData } from "@/lib/mock-data";
-import { getPublicAboutPage, getPublicSiteSettings } from "@/lib/queries/public";
+import { getPublicAboutPage, getPublicPageBySlug, getPublicSiteSettings } from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getPublicSiteSettings();
+  const [settings, dbPage] = await Promise.all([
+    getPublicSiteSettings(),
+    getPublicPageBySlug("about"),
+  ]);
   return {
-    title: "About Us",
-    description: `Learn about ${settings.hospitalName} — our story, mission, vision, core values, leadership team, clinical environment, and accreditations.`,
+    title: dbPage?.metaTitle || "About Us",
+    description:
+      dbPage?.metaDescription ||
+      dbPage?.excerpt ||
+      `Learn about ${settings.hospitalName} — our story, mission, vision, core values, leadership team, clinical environment, and accreditations.`,
   };
 }
 

@@ -72,6 +72,7 @@ export function hospitalJsonLd(settings?: {
   };
 }
 
-export function hospitalReference(settings?: { hospitalName?: string }) {
-  return { "@type": "Hospital", name: settings?.hospitalName || HOSPITAL_INFO.name, url: SITE_URL };
+export function hospitalReference(settings?: { hospitalName?: string } | string) {
+  const name = typeof settings === "string" ? settings : settings?.hospitalName || HOSPITAL_INFO.name;
+  return { "@type": "Hospital", name, url: SITE_URL };
 }

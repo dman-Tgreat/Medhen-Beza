@@ -143,6 +143,11 @@ async function transition(contentType: ContentType, contentId: string, nextStatu
     revalidatePath("/admin/approvals");
     revalidatePath(config.adminPath);
     revalidatePath(config.publicPath);
+    if (normalizedType === "Page" && (current as any).slug) {
+      const pageSlug = String((current as any).slug).replace(/^\/+/, "");
+      revalidatePath(`/${pageSlug}`);
+      if (pageSlug === "about") revalidatePath("/about");
+    }
     return { success: true };
   } catch (error) {
     console.error(`[WORKFLOW_${action}_ERROR]`, error);
