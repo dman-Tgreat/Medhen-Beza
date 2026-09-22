@@ -85,8 +85,11 @@ export interface FacilityDetailData extends FacilityCardData {
   tagline: string;
   description: string;
   longDescription: string;
+  category?: string;
   location: string;
   capacity?: string;
+  hours?: string;
+  phone?: string;
   features: string[];
   galleryImages: { src: string; alt: string; caption?: string }[];
 }
@@ -433,8 +436,11 @@ export interface FacilityDetailData extends FacilityCardData {
   tagline: string;
   description: string;
   longDescription: string;
+  category?: string;
   location: string;
   capacity?: string;
+  hours?: string;
+  phone?: string;
   features: string[];
   galleryImages: { src: string; alt: string; caption?: string }[];
 }

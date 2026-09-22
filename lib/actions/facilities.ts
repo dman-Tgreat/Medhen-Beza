@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
-import { ContentStatus, MediaType } from "@prisma/client";
+import { ContentStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export interface ActionResult<T = any> {
@@ -14,11 +14,39 @@ export interface ActionResult<T = any> {
 export interface AdminFacilityItem {
   id: string;
   name: string;
+  slug?: string;
+  tagline?: string;
   category: string;
-  capacity: string;
+  capacity?: string;
+  location?: string;
+  hours?: string;
+  phone?: string;
+  features: string[];
   description?: string;
+  image?: string;
+  order?: number;
   status: ContentStatus;
-  url?: string;
+}
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\W-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+async function uniqueFacilitySlug(name: string, currentId?: string): Promise<string> {
+  const base = slugify(name);
+  let slug = base;
+  let counter = 1;
+  while (true) {
+    const existing = await db.facility.findUnique({ where: { slug }, select: { id: true } });
+    if (!existing || existing.id === currentId) {
+      return slug;
+    }
+    slug = `${base}-${counter++}`;
+  }
 }
 
 export async function getAdminFacilitiesAction(): Promise<ActionResult<AdminFacilityItem[]>> {
@@ -28,31 +56,26 @@ export async function getAdminFacilitiesAction(): Promise<ActionResult<AdminFaci
   }
 
   try {
-    const items = await db.gallery.findMany({
-      where: {
-        album: { equals: "Facilities", mode: "insensitive" },
-      },
+    const items = await db.facility.findMany({
       orderBy: [{ order: "asc" }, { createdAt: "desc" }],
     });
 
-    const mapped: AdminFacilityItem[] = items.map((g) => {
-      const parts = (g.altText || "").split(":");
-      const category = parts.length > 1 ? parts[0].trim() : "Clinical Unit";
-      const capacity =
-        parts.length > 1
-          ? parts.slice(1).join(":").trim()
-          : (g.altText || "Standard Inpatient & Surgical Capacity");
-
-      return {
-        id: g.id,
-        name: g.title,
-        category,
-        capacity,
-        description: g.description || "",
-        status: g.status,
-        url: g.url,
-      };
-    });
+    const mapped: AdminFacilityItem[] = items.map((f) => ({
+      id: f.id,
+      name: f.name,
+      slug: f.slug,
+      tagline: f.tagline || "",
+      category: f.category || "Clinical Unit",
+      capacity: f.capacity || "",
+      location: f.location || "",
+      hours: f.hours || "",
+      phone: f.phone || "",
+      features: f.features || [],
+      description: f.description || "",
+      image: f.image || undefined,
+      order: f.order,
+      status: f.status,
+    }));
 
     return { success: true, data: mapped };
   } catch (err: any) {
@@ -60,21 +83,32 @@ export async function getAdminFacilitiesAction(): Promise<ActionResult<AdminFaci
   }
 }
 
-export async function saveAdminFacilityAction(data: {
-  id?: string;
-  name: string;
-  category: string;
-  capacity?: string;
-  description?: string;
-  status?: ContentStatus;
-}): Promise<ActionResult<AdminFacilityItem>> {
+export async function saveAdminFacilityAction(
+  data: {
+    id?: string;
+    name: string;
+    slug?: string;
+    tagline?: string;
+    category: string;
+    capacity?: string;
+    location?: string;
+    hours?: string;
+    phone?: string;
+    features?: string[];
+    description?: string;
+    image?: string;
+    order?: number;
+    status?: ContentStatus;
+  },
+  actionType: "draft" | "submit" | "publish" = "draft"
+): Promise<ActionResult<AdminFacilityItem>> {
   const session = await getSession();
   if (!session) {
     return { error: "Unauthorized: You must be logged in to manage facilities." };
   }
 
   const isAuthorized = session.roles.some((r) =>
-    ["HOSPITAL_DIRECTOR", "CONTENT_STAFF"].includes(r)
+    ["HOSPITAL_DIRECTOR", "MEDICAL_DIRECTOR", "CONTENT_STAFF"].includes(r)
   );
 
   if (!isAuthorized) {
@@ -82,73 +116,125 @@ export async function saveAdminFacilityAction(data: {
   }
 
   try {
-    const isDirector = session.roles.includes("HOSPITAL_DIRECTOR");
-    const targetStatus = isDirector
-      ? (data.status || ContentStatus.PUBLISHED)
-      : ContentStatus.PENDING_APPROVAL;
+    const isDirector = session.roles.some((r) =>
+      ["HOSPITAL_DIRECTOR", "MEDICAL_DIRECTOR"].includes(r)
+    );
 
-    const formattedAlt = `${data.category}: ${data.capacity || "Standard Capacity"}`;
+    let targetStatus: ContentStatus = ContentStatus.DRAFT;
+    if (actionType === "publish") {
+      targetStatus = isDirector ? ContentStatus.PUBLISHED : ContentStatus.PENDING_APPROVAL;
+    } else if (actionType === "submit") {
+      targetStatus = ContentStatus.PENDING_APPROVAL;
+    } else if (data.status) {
+      targetStatus = data.status;
+    }
+
+    const cleanCategory = (data.category || "").trim() || "Clinical Unit";
+    const cleanFeatures = Array.isArray(data.features)
+      ? data.features.map((f) => f.trim()).filter(Boolean)
+      : [];
 
     if (data.id && !data.id.startsWith("fac-new-")) {
-      const updated = await db.gallery.update({
+      const existing = await db.facility.findUnique({ where: { id: data.id } });
+      const slug = data.slug || existing?.slug || (await uniqueFacilitySlug(data.name, data.id));
+
+      const updated = await db.facility.update({
         where: { id: data.id },
         data: {
-          title: data.name,
-          altText: formattedAlt,
+          name: data.name,
+          slug,
+          tagline: data.tagline,
           description: data.description || "",
-          album: "Facilities",
+          category: cleanCategory,
+          capacity: data.capacity,
+          location: data.location,
+          hours: data.hours,
+          phone: data.phone,
+          features: cleanFeatures,
+          image: data.image,
+          order: Number(data.order) || 0,
           status: targetStatus,
           publishedById: targetStatus === ContentStatus.PUBLISHED ? session.id : undefined,
           publishedAt: targetStatus === ContentStatus.PUBLISHED ? new Date() : undefined,
+          submittedById: targetStatus === ContentStatus.PENDING_APPROVAL ? session.id : undefined,
+          submittedAt: targetStatus === ContentStatus.PENDING_APPROVAL ? new Date() : undefined,
         },
       });
 
       revalidatePath("/admin/content/facilities");
       revalidatePath("/facilities");
+      revalidatePath(`/facilities/${slug}`);
+      revalidatePath(`/facilities/${updated.id}`);
       revalidatePath("/");
 
       return {
         success: true,
         data: {
           id: updated.id,
-          name: updated.title,
-          category: data.category,
-          capacity: data.capacity || "",
+          name: updated.name,
+          slug: updated.slug,
+          tagline: updated.tagline || "",
+          category: updated.category,
+          capacity: updated.capacity || "",
+          location: updated.location || "",
+          hours: updated.hours || "",
+          phone: updated.phone || "",
+          features: updated.features,
           description: updated.description || "",
+          image: updated.image || undefined,
+          order: updated.order,
           status: updated.status,
-          url: updated.url,
         },
       };
     } else {
-      const created = await db.gallery.create({
+      const slug = await uniqueFacilitySlug(data.name);
+
+      const created = await db.facility.create({
         data: {
-          title: data.name,
-          altText: formattedAlt,
+          name: data.name,
+          slug,
+          tagline: data.tagline,
           description: data.description || "",
-          album: "Facilities",
-          type: MediaType.IMAGE,
-          url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+          category: cleanCategory,
+          capacity: data.capacity,
+          location: data.location,
+          hours: data.hours,
+          phone: data.phone,
+          features: cleanFeatures,
+          image: data.image || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+          order: Number(data.order) || 0,
           status: targetStatus,
           createdById: session.id,
           publishedById: targetStatus === ContentStatus.PUBLISHED ? session.id : undefined,
           publishedAt: targetStatus === ContentStatus.PUBLISHED ? new Date() : undefined,
+          submittedById: targetStatus === ContentStatus.PENDING_APPROVAL ? session.id : undefined,
+          submittedAt: targetStatus === ContentStatus.PENDING_APPROVAL ? new Date() : undefined,
         },
       });
 
       revalidatePath("/admin/content/facilities");
       revalidatePath("/facilities");
+      revalidatePath(`/facilities/${slug}`);
+      revalidatePath(`/facilities/${created.id}`);
       revalidatePath("/");
 
       return {
         success: true,
         data: {
           id: created.id,
-          name: created.title,
-          category: data.category,
-          capacity: data.capacity || "",
+          name: created.name,
+          slug: created.slug,
+          tagline: created.tagline || "",
+          category: created.category,
+          capacity: created.capacity || "",
+          location: created.location || "",
+          hours: created.hours || "",
+          phone: created.phone || "",
+          features: created.features,
           description: created.description || "",
+          image: created.image || undefined,
+          order: created.order,
           status: created.status,
-          url: created.url,
         },
       };
     }
@@ -162,17 +248,61 @@ export async function deleteAdminFacilityAction(id: string): Promise<ActionResul
   if (!session) return { error: "Unauthorized." };
 
   const isAuthorized = session.roles.some((r) =>
-    ["HOSPITAL_DIRECTOR", "CONTENT_STAFF"].includes(r)
+    ["HOSPITAL_DIRECTOR", "MEDICAL_DIRECTOR", "CONTENT_STAFF"].includes(r)
   );
   if (!isAuthorized) return { error: "Forbidden: Insufficient permissions." };
 
   try {
-    await db.gallery.delete({ where: { id } });
+    const existing = await db.facility.findUnique({ where: { id }, select: { slug: true } });
+    await db.facility.delete({ where: { id } });
+
     revalidatePath("/admin/content/facilities");
     revalidatePath("/facilities");
+    if (existing?.slug) revalidatePath(`/facilities/${existing.slug}`);
+    revalidatePath(`/facilities/${id}`);
     revalidatePath("/");
+
     return { success: true };
   } catch (err: any) {
     return { error: err.message || "Failed to delete facility." };
+  }
+}
+
+export async function updateFacilityStatusAction(
+  id: string,
+  newStatus: ContentStatus
+): Promise<ActionResult> {
+  const session = await getSession();
+  if (!session) return { error: "Unauthorized." };
+
+  const isDirector = session.roles.some((r) =>
+    ["HOSPITAL_DIRECTOR", "MEDICAL_DIRECTOR"].includes(r)
+  );
+
+  if (newStatus === ContentStatus.PUBLISHED && !isDirector) {
+    return { error: "Forbidden: Publishing requires Director approval." };
+  }
+
+  try {
+    const updated = await db.facility.update({
+      where: { id },
+      data: {
+        status: newStatus,
+        publishedById: newStatus === ContentStatus.PUBLISHED ? session.id : undefined,
+        publishedAt: newStatus === ContentStatus.PUBLISHED ? new Date() : undefined,
+        approvedById: newStatus === ContentStatus.APPROVED ? session.id : undefined,
+        approvedAt: newStatus === ContentStatus.APPROVED ? new Date() : undefined,
+      },
+    });
+
+    revalidatePath("/admin/content/facilities");
+    revalidatePath("/facilities");
+    revalidatePath(`/facilities/${updated.slug}`);
+    revalidatePath(`/facilities/${updated.id}`);
+    revalidatePath("/");
+
+    return { success: true, data: updated };
+  } catch (err: any) {
+    return { error: err.message || "Failed to update facility status." };
   }
 }

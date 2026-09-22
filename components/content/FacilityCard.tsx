@@ -9,6 +9,8 @@ export interface FacilityCardData {
   imageAlt?: string;
   name: string;
   description?: string;
+  category?: string;
+  capacity?: string;
   location?: string;
   /** Route to the facility detail page */
   href: string;
@@ -25,6 +27,13 @@ export interface FacilityCardProps {
  * When featured=true, renders a full-bleed visual showcase card filling parent height.
  * When featured=false (default), renders a compact card with image and explore link.
  */
+function isValidImageUrl(url?: string): boolean {
+  if (!url || typeof url !== "string") return false;
+  const trimmed = url.trim();
+  if (trimmed.includes("youtube.com/watch") || trimmed.includes("youtu.be/")) return false;
+  return trimmed.startsWith("/") || trimmed.startsWith("http://") || trimmed.startsWith("https://");
+}
+
 export function FacilityCard({ data, className, featured = false }: FacilityCardProps) {
   if (featured) {
     return (
@@ -36,7 +45,7 @@ export function FacilityCard({ data, className, featured = false }: FacilityCard
         )}
       >
         {/* Full-bleed background image */}
-        {data.image ? (
+        {data.image && isValidImageUrl(data.image) ? (
           <Image
             src={data.image}
             alt={data.imageAlt ?? data.name}
@@ -65,7 +74,7 @@ export function FacilityCard({ data, className, featured = false }: FacilityCard
         <div className="relative z-20 p-6 sm:p-8 space-y-3 text-white pointer-events-none">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-caption font-bold uppercase tracking-wider text-white">
             <Building2 className="w-3.5 h-3.5 text-secondary-light" />
-            {data.location || "Featured Facility"}
+            {data.category || data.location || "Featured Facility"}
           </div>
 
           <h3 className="text-h3 sm:text-h2 font-bold text-white leading-tight">
@@ -93,7 +102,7 @@ export function FacilityCard({ data, className, featured = false }: FacilityCard
     <CardRoot className={cn("group", className)}>
       {/* Image */}
       <CardImageSlot aspect="aspect-[4/3]">
-        {data.image ? (
+        {data.image && isValidImageUrl(data.image) ? (
           <Image
             src={data.image}
             alt={data.imageAlt ?? data.name}
@@ -107,8 +116,13 @@ export function FacilityCard({ data, className, featured = false }: FacilityCard
           </div>
         )}
 
-        {/* Bottom gradient + floating name */}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-text/80 via-text/30 to-transparent px-4 pt-8 pb-3">
+        {/* Bottom gradient + floating name & category */}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-text/85 via-text/30 to-transparent px-4 pt-8 pb-3 space-y-1">
+          {data.category && (
+            <span className="inline-block rounded-full bg-primary/80 backdrop-blur-xs px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+              {data.category}
+            </span>
+          )}
           <h3 className="text-h4 font-bold text-white leading-snug drop-shadow">
             {data.name}
           </h3>
