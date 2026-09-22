@@ -13,6 +13,7 @@ interface DepartmentRecord {
   id: string;
   name: string;
   headDoctor: string;
+  specializations: string[];
   description?: string;
   image?: string;
   doctorsCount: number;
@@ -38,7 +39,8 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
   const formattedDepartments: DepartmentRecord[] = initialDepartments.map((dept) => ({
     id: dept.id,
     name: dept.name,
-    headDoctor: dept.headDoctor || "Assigned Specialist",
+    headDoctor: dept.headDoctor || "",
+    specializations: dept.specializations || [],
     description: dept.description || "",
     image: dept.image || undefined,
     doctorsCount: dept._count?.doctors || 0,
@@ -46,7 +48,7 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
     phone: dept.phone || "+251 11 654 3000",
     email: dept.email || "",
     location: dept.location || "Main Building",
-    operatingHours: dept.operatingHours || "24/7",
+    operatingHours: dept.operatingHours || dept.workingHours || "24/7",
     status: dept.status as ContentStatusType,
   }));
 
@@ -62,8 +64,15 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
       name: "headDoctor",
       label: "Department Head / Chief Physician",
       type: "text",
-      placeholder: "e.g. Dr. Samuel Bekele",
-      required: true,
+      placeholder: "e.g. Dr. Samuel Bekele, MD",
+      helperText: "Doctor leading this department (displayed as Department Lead on the public page).",
+    },
+    {
+      name: "specializations",
+      label: "Core Specializations",
+      type: "tags",
+      placeholder: "Type a specialization and press Enter or Add (e.g. Pediatric Ophthalmology, Retina Surgery)",
+      helperText: "Clinical capabilities and specializations featured on the department detail page.",
     },
     {
       name: "description",
@@ -118,7 +127,7 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-text">{item.name}</span>
-            <span className="text-xs text-text-muted">Head: {item.headDoctor}</span>
+            <span className="text-xs text-text-muted">Head: {item.headDoctor || "Not assigned"}</span>
           </div>
         </div>
       ),
@@ -207,6 +216,8 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
         id: editingDept?.id,
         name: values.name,
         description: values.description,
+        headDoctor: values.headDoctor,
+        specializations: values.specializations || [],
         image: values.image,
         phone: values.phone,
         email: values.email,

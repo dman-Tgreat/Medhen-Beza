@@ -12,10 +12,13 @@ import { Activity } from "lucide-react";
 interface ServiceRecord {
   id: string;
   name: string;
+  title?: string;
   departmentId?: string;
   departmentName: string;
-  summary?: string;
-  description?: string;
+  summary: string;
+  description: string;
+  availabilityInfo: string;
+  additionalInfo: string;
   image?: string;
   isEmergency?: boolean;
   status: ContentStatusType;
@@ -36,13 +39,16 @@ export function ServicesAdminClient({ initialServices, departments, initialDepar
 
   const formattedServices: ServiceRecord[] = initialServices.map((srv) => ({
     id: srv.id,
-    name: srv.name,
+    name: srv.title || srv.name || "Untitled Service",
+    title: srv.title || srv.name || "",
     departmentId: srv.departmentId,
     departmentName: srv.department?.name || "General",
-    summary: srv.summary || "",
-    description: srv.description || "",
+    summary: srv.description || srv.summary || "",
+    description: srv.content || srv.description || "",
+    availabilityInfo: srv.availabilityInfo || "",
+    additionalInfo: srv.additionalInfo || "",
     image: srv.image || undefined,
-    isEmergency: srv.isEmergency || false,
+    isEmergency: Boolean(srv.isFeatured),
     status: srv.status as ContentStatusType,
   }));
 
@@ -64,14 +70,31 @@ export function ServicesAdminClient({ initialServices, departments, initialDepar
     {
       name: "summary",
       label: "Short Summary / Tagline",
-      type: "text",
-      placeholder: "e.g. Non-invasive cardiac diagnostic assessment",
+      type: "textarea",
+      placeholder: "e.g. Non-invasive cardiac diagnostic assessment and vital vascular imaging.",
+      helperText: "Displayed on the service card in the public directory and in the page hero description.",
+      required: true,
     },
     {
       name: "description",
-      label: "Detailed Capabilities & Clinical Information",
+      label: "Service Overview & Clinical Details",
       type: "textarea",
-      placeholder: "Explain what conditions are treated, equipment used, and patient prep requirements...",
+      placeholder: "Explain what conditions are treated, equipment used, preparation steps, and patient care procedures...",
+      helperText: "Displayed under 'Service Overview' on the service detail page.",
+    },
+    {
+      name: "availabilityInfo",
+      label: "Operating Availability & Schedule",
+      type: "text",
+      placeholder: "e.g. Mon - Fri 8:00 AM - 5:00 PM · 24/7 Emergency",
+      helperText: "Displayed in the sidebar under 'Availability'.",
+    },
+    {
+      name: "additionalInfo",
+      label: "Key Care Highlights",
+      type: "textarea",
+      placeholder: "Enter highlights (one per line):\n• Modern 4D Doppler ultrasound columns\n• Board-certified cardiologist oversight\n• Same-day diagnostic report delivery",
+      helperText: "Each bullet or line becomes a highlight badge under 'Key Care Highlights'.",
     },
     {
       name: "image",
@@ -83,11 +106,11 @@ export function ServicesAdminClient({ initialServices, departments, initialDepar
     },
     {
       name: "isEmergency",
-      label: "Is this a 24/7 Emergency Service?",
+      label: "Is this an Emergency / Priority Service?",
       type: "select",
       options: [
         { label: "No - Regular Scheduled Service", value: "false" },
-        { label: "Yes - Emergency & Urgent Care Service", value: "true" },
+        { label: "Yes - 24/7 Emergency & Urgent Care Service", value: "true" },
       ],
     },
   ];
@@ -104,7 +127,9 @@ export function ServicesAdminClient({ initialServices, departments, initialDepar
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-text">{item.name}</span>
-            <span className="text-xs text-text-muted">{item.summary || "Clinical service"}</span>
+            <span className="text-xs text-text-muted line-clamp-1 max-w-sm">
+              {item.summary || "Clinical service"}
+            </span>
           </div>
         </div>
       ),
@@ -187,13 +212,14 @@ export function ServicesAdminClient({ initialServices, departments, initialDepar
     const res = await saveServiceAction(
       {
         id: editingService?.id,
-        title: values.title || values.name,
-        description: values.description,
-        content: values.content,
-        departmentId: values.departmentId || departments[0]?.id,
+        title: values.name || values.title,
+        description: values.summary || values.description,
+        content: values.description || values.content,
         availabilityInfo: values.availabilityInfo,
+        additionalInfo: values.additionalInfo,
+        departmentId: values.departmentId || departments[0]?.id,
         image: values.image,
-        isFeatured: values.isFeatured === "true" || values.isFeatured === true,
+        isFeatured: values.isEmergency === "true" || values.isEmergency === true,
       },
       actionType
     );
@@ -237,7 +263,7 @@ export function ServicesAdminClient({ initialServices, departments, initialDepar
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           title={editingService ? `Edit Service: ${editingService.name}` : "Create Clinical Service"}
-          description="Add or update medical service details and departmental assignments."
+          description="Add or update medical service details, short summary, detailed overview, highlights, and schedule."
           fields={formFields}
           initialValues={
             editingService

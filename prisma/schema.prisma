@@ -191,9 +191,11 @@ model Department {
   phone        String?
   email        String?
   location     String? // Building / Wing / Floor
-  workingHours String?
-  isFeatured   Boolean @default(false)
-  order        Int     @default(0)
+  workingHours    String?
+  headDoctor      String? // Department Lead / Chief Physician
+  specializations String[] @default([]) // Core Specializations
+  isFeatured      Boolean  @default(false)
+  order           Int      @default(0)
 
   // SEO Metadata
   metaTitle       String?
