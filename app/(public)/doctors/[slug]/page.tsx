@@ -25,6 +25,7 @@ import {
   getPublicRelatedDoctors,
   getPublicDepartmentBySlug,
   getPublicDoctors,
+  getPublicSiteSettings,
 } from "@/lib/queries/public";
 import { contentMetadata, hospitalReference, absoluteUrl } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -44,15 +45,25 @@ export async function generateMetadata({
   params,
 }: DoctorPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const doctor = await getPublicDoctorBySlug(slug);
+  const [doctor, settings] = await Promise.all([
+    getPublicDoctorBySlug(slug),
+    getPublicSiteSettings(),
+  ]);
 
   if (!doctor) {
     return {
-      title: "Doctor Not Found | Medhen Beza Hospital",
+      title: "Doctor Not Found",
     };
   }
 
-  return contentMetadata({ title: doctor.metaTitle || `${doctor.name} — ${doctor.specialty}`, description: doctor.metaDescription || doctor.biography, path: `/doctors/${doctor.slug}`, canonicalUrl: doctor.canonicalUrl, image: doctor.ogImage || doctor.photo });
+  return contentMetadata({
+    title: doctor.metaTitle || `${doctor.name} — ${doctor.specialty}`,
+    description: doctor.metaDescription || doctor.biography,
+    path: `/doctors/${doctor.slug}`,
+    canonicalUrl: doctor.canonicalUrl,
+    image: doctor.ogImage || doctor.photo,
+    siteName: settings.hospitalName,
+  });
 }
 
 export default async function DoctorProfilePage({ params }: DoctorPageProps) {
@@ -63,14 +74,15 @@ export default async function DoctorProfilePage({ params }: DoctorPageProps) {
     notFound();
   }
 
-  const [department, otherDoctors] = await Promise.all([
+  const [department, otherDoctors, settings] = await Promise.all([
     getPublicDepartmentBySlug(doctor.departmentSlug),
     getPublicRelatedDoctors(doctor.departmentSlug, doctor.slug, 3),
+    getPublicSiteSettings(),
   ]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "Physician", name: doctor.name, description: doctor.biography, url: absoluteUrl(`/doctors/${doctor.slug}`), image: doctor.photo ? absoluteUrl(doctor.photo) : undefined, medicalSpecialty: doctor.specialty, worksFor: hospitalReference() }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Physician", name: doctor.name, description: doctor.biography, url: absoluteUrl(`/doctors/${doctor.slug}`), image: doctor.photo ? absoluteUrl(doctor.photo) : undefined, medicalSpecialty: doctor.specialty, worksFor: hospitalReference(settings.hospitalName) }} />
       <PageHero
         title={doctor.name}
         description={`${doctor.title} · ${doctor.department}`}

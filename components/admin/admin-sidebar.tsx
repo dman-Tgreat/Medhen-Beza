@@ -41,6 +41,7 @@ interface AdminSidebarProps {
   isResizing?: boolean;
   onStartResize?: (e: React.MouseEvent) => void;
   onResetWidth?: () => void;
+  hospitalName?: string;
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -73,9 +74,12 @@ export function AdminSidebar({
   isResizing = false,
   onStartResize,
   onResetWidth,
+  hospitalName = "Medhen Beza Hospital",
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const { currentUser, navGroups, logout } = useAdminRole();
+
+  const brandName = hospitalName.replace(/hospital|specialized/gi, "").trim() || hospitalName;
 
   const isLinkActive = (href: string) => {
     if (href === "/admin") {
@@ -101,15 +105,15 @@ export function AdminSidebar({
             href="/admin"
             onClick={isMobileDrawer ? onCloseMobile : undefined}
             className="flex items-center gap-3 group focus:outline-none min-w-0"
-            title="Medhen Beza Hospital CMS"
+            title={`${hospitalName} CMS`}
           >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white shadow-cta transition-transform group-hover:scale-105">
               <Cross className="h-5 w-5 rotate-45" />
             </div>
             {!collapsed && (
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold tracking-tight text-text leading-tight group-hover:text-primary transition-colors whitespace-nowrap">
-                  Medhen Beza
+                <span className="text-sm font-bold tracking-tight text-text leading-tight group-hover:text-primary transition-colors whitespace-nowrap truncate max-w-[170px]" title={hospitalName}>
+                  {brandName}
                 </span>
                 <span className="text-[10px] font-semibold text-secondary-dark tracking-wide uppercase whitespace-nowrap">
                   Hospital CMS

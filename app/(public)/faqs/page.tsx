@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/sections/Hero";
 import { FAQsDirectoryClient } from "@/components/public/FAQsDirectoryClient";
-import { getPublicFAQs } from "@/lib/queries/public";
+import { getPublicFAQs, getPublicSiteSettings } from "@/lib/queries/public";
 
-export const metadata: Metadata = {
-  title: "Frequently Asked Questions (FAQs) | Medhen Beza Hospital",
-  description:
-    "Find answers to frequently asked questions about doctor appointments, emergency admission, health insurance, visiting hours, and clinical services at Medhen Beza Hospital.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "Frequently Asked Questions (FAQs)",
+    description: `Find answers to frequently asked questions about doctor appointments, emergency admission, health insurance, visiting hours, and clinical services at ${settings.hospitalName}.`,
+  };
+}
 
 export default async function FAQsPage() {
   const groups = await getPublicFAQs();

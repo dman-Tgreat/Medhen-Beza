@@ -1,25 +1,31 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SITE_URL } from "@/lib/seo";
+import { getPublicSiteSettings } from "@/lib/queries/public";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: "Medhen Beza Hospital | Compassionate Care & Advanced Medicine",
-    template: "%s | Medhen Beza Hospital",
-  },
-  description:
-    "Medhen Beza Hospital in Addis Ababa providing 24/7 emergency response, specialized healthcare services, and advanced clinical care.",
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    siteName: "Medhen Beza Hospital",
-    title: "Medhen Beza Hospital | Compassionate Care & Advanced Medicine",
-    description: "Specialized healthcare services and advanced clinical care in Addis Ababa.",
-    url: SITE_URL,
-  },
-  twitter: { card: "summary" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  const siteTitle = settings.seoTitle || `${settings.hospitalName} | ${settings.tagline}`;
+  const siteDesc = settings.seoDescription || settings.description;
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: siteTitle,
+      template: `%s | ${settings.hospitalName}`,
+    },
+    description: siteDesc,
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      siteName: settings.hospitalName,
+      title: siteTitle,
+      description: siteDesc,
+      url: SITE_URL,
+    },
+    twitter: { card: "summary" },
+  };
+}
 
 export default function RootLayout({
   children,

@@ -34,12 +34,12 @@ export async function generateMetadata({
 
   if (!facility) {
     return {
-      title: "Facility Not Found | Medhen Beza Hospital",
+      title: "Facility Not Found",
     };
   }
 
   return {
-    title: `${facility.name} | Hospital Facilities | Medhen Beza Hospital`,
+    title: `${facility.name} | Hospital Facilities`,
     description: facility.description,
   };
 }

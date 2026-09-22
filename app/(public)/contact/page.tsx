@@ -3,11 +3,13 @@ import { PageHero } from "@/components/sections/Hero";
 import { ContactFormClient } from "@/components/public/ContactFormClient";
 import { getPublicDepartments, getPublicSiteSettings } from "@/lib/queries/public";
 
-export const metadata: Metadata = {
-  title: "Contact & Appointments | Hospital Inquiries",
-  description:
-    "Get in touch for general inquiries, clinical appointments, emergency admissions, and medical department contacts.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "Contact & Appointments",
+    description: `Get in touch with ${settings.hospitalName} for general inquiries, clinical appointments, emergency admissions, and medical department contacts.`,
+  };
+}
 
 export default async function ContactPage() {
   const [departments, settings] = await Promise.all([

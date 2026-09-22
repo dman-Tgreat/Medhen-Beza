@@ -91,13 +91,22 @@ export async function saveSiteSettingsAction(
       console.error("[SETTINGS AUDIT ERROR]", auditErr);
     }
 
-    // Revalidate public and admin pages
+    // Revalidate public and admin pages and layouts
+    revalidatePath("/", "layout");
+    revalidatePath("/admin", "layout");
     revalidatePath("/");
     revalidatePath("/about");
     revalidatePath("/contact");
     revalidatePath("/emergency");
     revalidatePath("/services");
     revalidatePath("/departments");
+    revalidatePath("/doctors");
+    revalidatePath("/facilities");
+    revalidatePath("/news");
+    revalidatePath("/events");
+    revalidatePath("/gallery");
+    revalidatePath("/careers");
+    revalidatePath("/faqs");
     revalidatePath("/admin/settings");
 
     return { success: true };

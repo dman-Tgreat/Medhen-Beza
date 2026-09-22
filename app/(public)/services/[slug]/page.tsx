@@ -42,15 +42,25 @@ export async function generateMetadata({
   params,
 }: ServicePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const service = await getPublicServiceBySlug(slug);
+  const [service, settings] = await Promise.all([
+    getPublicServiceBySlug(slug),
+    getPublicSiteSettings(),
+  ]);
 
   if (!service) {
     return {
-      title: "Service Not Found | Medhen Beza Hospital",
+      title: "Service Not Found",
     };
   }
 
-  return contentMetadata({ title: service.metaTitle || `${service.name} | Medical Services`, description: service.metaDescription || service.description, path: `/services/${service.slug}`, canonicalUrl: service.canonicalUrl, image: service.ogImage || service.image });
+  return contentMetadata({
+    title: service.metaTitle || `${service.name} | Medical Services`,
+    description: service.metaDescription || service.description,
+    path: `/services/${service.slug}`,
+    canonicalUrl: service.canonicalUrl,
+    image: service.ogImage || service.image,
+    siteName: settings.hospitalName,
+  });
 }
 
 export default async function ServiceDetailPage({ params }: ServicePageProps) {
@@ -73,7 +83,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "MedicalProcedure", name: service.name, description: service.description, url: absoluteUrl(`/services/${service.slug}`), image: service.image ? absoluteUrl(service.image) : undefined, provider: hospitalReference() }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "MedicalProcedure", name: service.name, description: service.description, url: absoluteUrl(`/services/${service.slug}`), image: service.image ? absoluteUrl(service.image) : undefined, provider: hospitalReference(settings.hospitalName) }} />
       <PageHero
         title={service.name}
         description={service.description}

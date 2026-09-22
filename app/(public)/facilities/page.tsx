@@ -4,14 +4,16 @@ import Image from "next/image";
 import { Building2, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import { PageHero } from "@/components/sections/Hero";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { getPublicFacilities } from "@/lib/queries/public";
+import { getPublicFacilities, getPublicSiteSettings } from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Hospital Facilities & Infrastructure | Medhen Beza Hospital",
-  description:
-    "Explore our modern clinical infrastructure, sterile operating theatres, diagnostic imaging suites, intensive care units, and inpatient rooms.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "Hospital Facilities & Infrastructure",
+    description: `Explore modern clinical infrastructure, sterile operating theatres, diagnostic imaging suites, intensive care units, and inpatient rooms at ${settings.hospitalName}.`,
+  };
+}
 
 export default async function FacilitiesPage() {
   const facilities = await getPublicFacilities();

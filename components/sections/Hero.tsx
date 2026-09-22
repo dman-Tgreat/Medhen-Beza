@@ -4,6 +4,7 @@ import { Calendar, PhoneCall, ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { type BreadcrumbItem } from "@/components/layout/Breadcrumbs";
+import { HOSPITAL_INFO } from "@/lib/constants";
 
 // ─── Shared internal helpers ──────────────────────────────────────────────────
 
@@ -48,13 +49,13 @@ export interface HeroProps {
  */
 export function Hero({
   eyebrow = "Leading Healthcare Excellence",
-  headline = "Medhen Beza",
+  headline = HOSPITAL_INFO.shortName,
   headlineAccent = "Hospital",
   supportingText = "Compassionate care, advanced medicine, exceptional service — delivering patient-centered clinical care, 24/7 emergency response, and state-of-the-art medical technology.",
   primaryCta = { label: "Book Appointment", href: "/appointments" },
   secondaryCta = { label: "Emergency Services", href: "/emergency" },
   photoSrc,
-  photoAlt = "Medical team at Medhen Beza Hospital",
+  photoAlt = `Medical team at ${HOSPITAL_INFO.name}`,
   stats = [
     { value: "50+", label: "Specialized Doctors" },
     { value: "24/7", label: "Emergency & Care" },
@@ -235,7 +236,7 @@ export function HeroWithBackground({
   eyebrow = "World-Class Healthcare",
   headline = "Your Health,",
   headlineAccent = "Our Priority",
-  supportingText = "From routine check-ups to complex surgeries, Medhen Beza Hospital brings together the region's finest specialists under one roof.",
+  supportingText = `From routine check-ups to complex surgeries, ${HOSPITAL_INFO.name} brings together the region's finest specialists under one roof.`,
   primaryCta = { label: "Explore Services", href: "/services" },
   secondaryCta = { label: "Find a Doctor", href: "/doctors" },
   className,

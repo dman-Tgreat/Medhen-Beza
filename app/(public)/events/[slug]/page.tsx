@@ -14,7 +14,7 @@ import {
 import { PageHero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { getPublicEventBySlug, getPublicEvents } from "@/lib/queries/public";
+import { getPublicEventBySlug, getPublicEvents, getPublicSiteSettings } from "@/lib/queries/public";
 import { contentMetadata, absoluteUrl, hospitalReference } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 
@@ -33,20 +33,33 @@ export async function generateMetadata({
   params,
 }: EventPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const event = await getPublicEventBySlug(slug);
+  const [event, settings] = await Promise.all([
+    getPublicEventBySlug(slug),
+    getPublicSiteSettings(),
+  ]);
 
   if (!event) {
     return {
-      title: "Event Not Found | Medhen Beza Hospital",
+      title: "Event Not Found",
     };
   }
 
-  return contentMetadata({ title: event.metaTitle || event.title, description: event.metaDescription || event.description, path: `/events/${event.slug}`, canonicalUrl: event.canonicalUrl, image: event.image });
+  return contentMetadata({
+    title: event.metaTitle || event.title,
+    description: event.metaDescription || event.description,
+    path: `/events/${event.slug}`,
+    canonicalUrl: event.canonicalUrl,
+    image: event.image,
+    siteName: settings.hospitalName,
+  });
 }
 
 export default async function EventDetailPage({ params }: EventPageProps) {
   const { slug } = await params;
-  const event = await getPublicEventBySlug(slug);
+  const [event, settings] = await Promise.all([
+    getPublicEventBySlug(slug),
+    getPublicSiteSettings(),
+  ]);
 
   if (!event) {
     notFound();
@@ -54,7 +67,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "Event", name: event.title, description: event.description, url: absoluteUrl(`/events/${event.slug}`), image: event.image ? absoluteUrl(event.image) : undefined, organizer: hospitalReference(), location: { "@type": "Place", name: event.location } }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Event", name: event.title, description: event.description, url: absoluteUrl(`/events/${event.slug}`), image: event.image ? absoluteUrl(event.image) : undefined, organizer: hospitalReference(settings.hospitalName), location: { "@type": "Place", name: event.location } }} />
       <PageHero
         title={event.title}
         description={`Event Date: ${event.dateFormatted} · ${event.location}`}

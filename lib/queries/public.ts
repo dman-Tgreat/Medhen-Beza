@@ -29,11 +29,13 @@ export interface PublicSiteSettings {
   tagline: string;
   description: string;
   emergencyPhone: string;
+  ambulancePhone: string;
   generalPhone: string;
   email: string;
   location: string;
   address: string;
   hours: string;
+  visitingHours: string;
   heroEyebrow: string;
   heroHeadline: string;
   heroHeadlineAccent: string;
@@ -47,6 +49,10 @@ export interface PublicSiteSettings {
   hospitalIntroImage?: string;
   emergencyGate: string;
   emergencyHours: string;
+  city: string;
+  country: string;
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
@@ -59,16 +65,60 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
       map.set(r.key, r.value);
     }
 
-    const hospitalName = map.get("hospital_name") || HOSPITAL_INFO.name;
-    const shortName = map.get("short_name") || HOSPITAL_INFO.shortName;
-    const tagline = map.get("tagline") || HOSPITAL_INFO.tagline;
-    const description = map.get("description") || HOSPITAL_INFO.description;
-    const emergencyPhone = map.get("emergency_phone") || HOSPITAL_INFO.emergencyPhone;
-    const generalPhone = map.get("general_phone") || HOSPITAL_INFO.generalPhone;
-    const email = map.get("email") || HOSPITAL_INFO.email;
-    const location = map.get("location") || HOSPITAL_INFO.location;
-    const address = map.get("address") || HOSPITAL_INFO.address;
-    const hours = map.get("working_hours") || map.get("hours") || HOSPITAL_INFO.hours;
+    const hospitalName =
+      map.get("hospital_name") || map.get("name") || HOSPITAL_INFO.name;
+    const shortName =
+      map.get("short_name") ||
+      (hospitalName.toLowerCase().includes("hospital")
+        ? hospitalName.replace(/hospital/i, "").trim()
+        : hospitalName) ||
+      HOSPITAL_INFO.shortName;
+    const tagline =
+      map.get("tagline") ||
+      map.get("hero_headline_accent") ||
+      HOSPITAL_INFO.tagline;
+    const description =
+      map.get("seo_description") ||
+      map.get("description") ||
+      map.get("hero_supporting_text") ||
+      HOSPITAL_INFO.description;
+
+    const emergencyPhone =
+      map.get("hospital_emergency") ||
+      map.get("emergency_phone") ||
+      HOSPITAL_INFO.emergencyPhone;
+    const ambulancePhone =
+      map.get("ambulance_phone") ||
+      map.get("hospital_emergency") ||
+      map.get("emergency_phone") ||
+      HOSPITAL_INFO.emergencyPhone;
+    const generalPhone =
+      map.get("hospital_phone") ||
+      map.get("general_phone") ||
+      map.get("phone") ||
+      HOSPITAL_INFO.generalPhone;
+    const email =
+      map.get("hospital_email") ||
+      map.get("email") ||
+      HOSPITAL_INFO.email;
+    const address =
+      map.get("hospital_address") ||
+      map.get("address") ||
+      HOSPITAL_INFO.address;
+    const location =
+      map.get("location") ||
+      address ||
+      HOSPITAL_INFO.location;
+    const hours =
+      map.get("visiting_hours") ||
+      map.get("working_hours") ||
+      map.get("hours") ||
+      HOSPITAL_INFO.hours;
+    const visitingHours =
+      map.get("visiting_hours") ||
+      map.get("working_hours") ||
+      map.get("hours") ||
+      HOSPITAL_INFO.hours;
 
     const heroEyebrow = map.get("hero_eyebrow") || "Leading Healthcare Excellence";
     const heroHeadline = map.get("hero_headline") || "Compassionate care.";
@@ -80,13 +130,23 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
 
     const hospitalIntroTitle = map.get("hospital_intro_title") || "Trusted care for every stage of life";
     const rawIntro = map.get("hospital_intro_text") ||
-      "Medhen Beza Hospital provides patient-centred, modern clinical care in Addis Ababa, delivering healthcare with empathy, clinical precision, and dignity.\n\nOur multidisciplinary teams of specialists work across cutting-edge diagnostic and surgical units to serve families across Ethiopia.\n\nCommitted to continuous clinical excellence and modern standards of practice.";
+      `${hospitalName} provides patient-centred, modern clinical care, delivering healthcare with empathy, clinical precision, and dignity.\n\nOur multidisciplinary teams of specialists work across cutting-edge diagnostic and surgical units to serve families across the region.\n\nCommitted to continuous clinical excellence and modern standards of practice.`;
     const hospitalIntroParagraphs = rawIntro.split("\n\n").map((p) => p.trim()).filter(Boolean);
 
     const emergencyGate = map.get("emergency_gate") || "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road";
     const emergencyHours = map.get("emergency_hours") || "Open 24 Hours · 7 Days a Week · All Holidays";
     const heroImage = map.get("hero_image") || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200";
     const hospitalIntroImage = map.get("hospital_intro_image") || "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=1200";
+    const seoTitle = map.get("seo_title") || `${hospitalName} | ${tagline}`;
+    const seoDescription = map.get("seo_description") || description;
+    const city =
+      map.get("city") ||
+      (address.toLowerCase().includes("adama")
+        ? "Adama"
+        : address.toLowerCase().includes("addis")
+        ? "Addis Ababa"
+        : HOSPITAL_INFO.city);
+    const country = map.get("country") || HOSPITAL_INFO.country;
 
     return {
       hospitalName,
@@ -94,11 +154,15 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
       tagline,
       description,
       emergencyPhone,
+      ambulancePhone,
       generalPhone,
       email,
       location,
       address,
+      city,
+      country,
       hours,
+      visitingHours,
       heroEyebrow,
       heroHeadline,
       heroHeadlineAccent,
@@ -112,6 +176,8 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
       hospitalIntroImage,
       emergencyGate,
       emergencyHours,
+      seoTitle,
+      seoDescription,
     };
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicSiteSettings]", error);
@@ -121,11 +187,15 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
       tagline: HOSPITAL_INFO.tagline,
       description: HOSPITAL_INFO.description,
       emergencyPhone: HOSPITAL_INFO.emergencyPhone,
+      ambulancePhone: HOSPITAL_INFO.emergencyPhone,
       generalPhone: HOSPITAL_INFO.generalPhone,
       email: HOSPITAL_INFO.email,
       location: HOSPITAL_INFO.location,
       address: HOSPITAL_INFO.address,
+      city: HOSPITAL_INFO.city,
+      country: HOSPITAL_INFO.country,
       hours: HOSPITAL_INFO.hours,
+      visitingHours: HOSPITAL_INFO.hours,
       heroEyebrow: "Leading Healthcare Excellence",
       heroHeadline: "Compassionate care.",
       heroHeadlineAccent: "Trusted healthcare.",
@@ -136,13 +206,14 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
       statDepartments: "15+",
       hospitalIntroTitle: "Trusted care for every stage of life",
       hospitalIntroParagraphs: [
-        "Medhen Beza Hospital provides patient-centred, modern clinical care in Addis Ababa, delivering healthcare with empathy, clinical precision, and dignity.",
-        "Our multidisciplinary teams of specialists work across cutting-edge diagnostic and surgical units to serve families across Ethiopia.",
-        "Committed to continuous clinical excellence and modern standards of practice.",
+        `${HOSPITAL_INFO.name} provides patient-centred, modern clinical care, delivering healthcare with empathy, clinical precision, and dignity.`,
+        "Our multidisciplinary teams of specialists work across cutting-edge diagnostic and surgical units to serve families across the region.",
       ],
       hospitalIntroImage: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=1200",
       emergencyGate: "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road",
       emergencyHours: "Open 24 Hours · 7 Days a Week · All Holidays",
+      seoTitle: `${HOSPITAL_INFO.name} | ${HOSPITAL_INFO.tagline}`,
+      seoDescription: HOSPITAL_INFO.description,
     };
   }
 }
@@ -648,8 +719,48 @@ export async function getPublicPageBySlug(slug: string) {
 }
 
 export async function getPublicAboutPage(): Promise<AboutPageData> {
-  const dbPage = await getPublicPageBySlug("about");
-  const base = { ...MOCK_ABOUT_PAGE };
+  const [dbPage, settings] = await Promise.all([
+    getPublicPageBySlug("about"),
+    getPublicSiteSettings(),
+  ]);
+
+  const base: AboutPageData = {
+    ...MOCK_ABOUT_PAGE,
+    hero: { ...MOCK_ABOUT_PAGE.hero },
+    introduction: {
+      ...MOCK_ABOUT_PAGE.introduction,
+      paragraphs: [...MOCK_ABOUT_PAGE.introduction.paragraphs],
+    },
+    missionVision: {
+      mission: { ...MOCK_ABOUT_PAGE.missionVision.mission },
+      vision: { ...MOCK_ABOUT_PAGE.missionVision.vision },
+    },
+    values: MOCK_ABOUT_PAGE.values.map((v) => ({ ...v })),
+    leadership: MOCK_ABOUT_PAGE.leadership.map((l) => ({ ...l })),
+    environment: {
+      ...MOCK_ABOUT_PAGE.environment,
+      featured: { ...MOCK_ABOUT_PAGE.environment.featured },
+      supporting: MOCK_ABOUT_PAGE.environment.supporting.map((p) => ({ ...p })),
+    },
+    accreditations: MOCK_ABOUT_PAGE.accreditations ? MOCK_ABOUT_PAGE.accreditations.map((a) => ({ ...a })) : [],
+    finalCta: { ...MOCK_ABOUT_PAGE.finalCta },
+  };
+
+  // Dynamically replace default brand names with live hospitalName from settings
+  base.hero.title = `About ${settings.hospitalName}`;
+  base.hero.supportingText = base.hero.supportingText.replace(
+    /Medhen Beza Hospital|Medhen Beza|Medhin Beza Hospital|Medhin Beza/gi,
+    settings.hospitalName
+  );
+  base.hero.imageAlt = `${settings.hospitalName} main medical facility`;
+
+  base.introduction.paragraphs = base.introduction.paragraphs.map((p) =>
+    p.replace(
+      /Medhen Beza Hospital|Medhen Beza|Medhin Beza Hospital|Medhin Beza/gi,
+      settings.hospitalName
+    )
+  );
+  base.introduction.photoAlt = `Medical team and care providers at ${settings.hospitalName}`;
 
   if (dbPage) {
     if (dbPage.title) base.hero.title = dbPage.title;

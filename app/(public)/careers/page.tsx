@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/sections/Hero";
 import { CareersDirectoryClient } from "@/components/public/CareersDirectoryClient";
-import { getPublicCareers, getPublicDepartments } from "@/lib/queries/public";
+import { getPublicCareers, getPublicDepartments, getPublicSiteSettings } from "@/lib/queries/public";
 
-export const metadata: Metadata = {
-  title: "Career Opportunities & Medical Vacancies | Medhen Beza Hospital",
-  description:
-    "Join the clinical, nursing, and administrative team at Medhen Beza Hospital. Explore open career opportunities and healthcare vacancies in Addis Ababa.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "Career Opportunities & Medical Vacancies",
+    description: `Join the clinical, nursing, and administrative team at ${settings.hospitalName}. Explore open career opportunities and healthcare vacancies in ${settings.city}.`,
+  };
+}
 
 export default async function CareersPage() {
   const [careers, departments] = await Promise.all([

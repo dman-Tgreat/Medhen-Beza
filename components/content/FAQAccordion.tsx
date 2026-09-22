@@ -138,7 +138,7 @@ export const FAQ_MOCK: FAQItem[] = [
       "You can book an appointment through our online portal, by calling our general line at +251 116 000 111, or by visiting the hospital reception desk. Walk-in consultations are also available subject to specialist availability.",
   },
   {
-    question: "Does Medhen Beza Hospital accept insurance?",
+    question: "Do you accept health insurance?",
     answer:
       "Yes, we work with most major Ethiopian and international health insurance providers. Please bring your insurance card and a valid photo ID to your appointment. Contact our billing department for a full list of accepted providers.",
   },

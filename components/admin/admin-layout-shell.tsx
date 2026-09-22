@@ -25,9 +25,11 @@ export interface NotificationItem {
 export function AdminLayoutShell({
   children,
   initialNotifications = [],
+  hospitalName,
 }: {
   children: React.ReactNode;
   initialNotifications?: NotificationItem[];
+  hospitalName?: string;
 }) {
   const pathname = usePathname();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -125,6 +127,7 @@ export function AdminLayoutShell({
         isResizing={isResizing}
         onStartResize={handleStartResize}
         onResetWidth={handleResetWidth}
+        hospitalName={hospitalName}
       />
 
       {/* Main Content Area */}

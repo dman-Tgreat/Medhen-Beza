@@ -177,12 +177,12 @@ export function ContactInfo({
   );
 }
 
-// ─── Default data pulled from HOSPITAL_INFO for convenience ──────────────────
+import { HOSPITAL_INFO } from "@/lib/constants";
 
 export const CONTACT_INFO_DEFAULTS: ContactInfoData = {
-  address: "Bole Road, Addis Ababa, Ethiopia",
-  phone: "+251 116 000 111",
-  email: "info@medhenbeza.com",
-  hours: "Mon – Fri: 8 AM – 6 PM · Sat: 9 AM – 2 PM · Emergency: 24/7",
-  emergency: "+251 911 000 999",
+  address: HOSPITAL_INFO.address,
+  phone: HOSPITAL_INFO.phone.main,
+  email: HOSPITAL_INFO.email,
+  hours: HOSPITAL_INFO.hours.visiting,
+  emergency: HOSPITAL_INFO.phone.emergency,
 };

@@ -2,13 +2,15 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/sections/Hero";
 import { ServicesDirectoryClient } from "@/components/public/ServicesDirectoryClient";
-import { getPublicServices, getPublicDepartments } from "@/lib/queries/public";
+import { getPublicServices, getPublicDepartments, getPublicSiteSettings } from "@/lib/queries/public";
 
-export const metadata: Metadata = {
-  title: "Clinical Services & Diagnostics | Medhen Beza Hospital",
-  description:
-    "Comprehensive inpatient and outpatient clinical services, diagnostic imaging, pathology, and surgical procedures at Medhen Beza Hospital Addis Ababa.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "Clinical Services & Diagnostics",
+    description: `Comprehensive inpatient and outpatient clinical services, diagnostic imaging, pathology, and surgical procedures at ${settings.hospitalName} ${settings.city}.`,
+  };
+}
 
 export default async function ServicesPage() {
   const [services, departments] = await Promise.all([

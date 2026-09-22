@@ -14,11 +14,13 @@ import { PageHero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/button";
 import { getPublicSiteSettings, getPublicPageBySlug } from "@/lib/queries/public";
 
-export const metadata: Metadata = {
-  title: "Emergency Services 24/7 | Hospital Emergency Care",
-  description:
-    "24/7 Emergency Medical Response & Trauma Center. Immediate critical care hotline available around the clock.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "Emergency Services 24/7",
+    description: `24/7 Emergency Medical Response & Trauma Center at ${settings.hospitalName}. Immediate critical care hotline available around the clock.`,
+  };
+}
 
 export default async function EmergencyPage() {
   const settings = await getPublicSiteSettings();
@@ -26,8 +28,9 @@ export default async function EmergencyPage() {
 
   const phone = settings.emergencyPhone;
   const emergencyPhoneRaw = phone.replace(/\s/g, "");
-  const gateInfo = settings.emergencyGate || "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road";
+  const gateInfo = settings.emergencyGate || `Gate 1 (Dedicated Ambulance & Emergency Driveway), ${settings.address || "Bole Road"}`;
   const hoursInfo = settings.emergencyHours || "Open 24 Hours · 7 Days a Week · All Holidays";
+  const mapQuery = encodeURIComponent(settings.address || settings.location || "Adama, Ethiopia");
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -190,11 +193,11 @@ export default async function EmergencyPage() {
                 Emergency Entrance & Map Navigation
               </h3>
               <p className="text-small text-text-muted">
-                Hospital Plus Code: <span className="font-semibold text-text font-mono">H73F+R49, Adama</span>. Direct ramp access for ambulances and private emergency vehicles.
+                Hospital Address: <span className="font-semibold text-text font-mono">{settings.address || settings.location || "Adama, Ethiopia"}</span>. Direct ramp access for ambulances and private emergency vehicles.
               </p>
             </div>
             <a
-              href="https://www.google.com/maps/search/?api=1&query=H73F%2BR49%2C+Adama"
+              href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border text-xs font-semibold text-primary hover:bg-primary-light transition-colors shrink-0"
@@ -206,8 +209,8 @@ export default async function EmergencyPage() {
 
           <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-xl overflow-hidden border border-border bg-surface shadow-xs">
             <iframe
-              title="Hospital Emergency Location - H73F+R49, Adama"
-              src="https://maps.google.com/maps?q=H73F%2BR49%2C+Adama&t=&z=16&ie=UTF8&iwloc=&output=embed"
+              title={`${settings.hospitalName} Emergency Location`}
+              src={`https://maps.google.com/maps?q=${mapQuery}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
               className="w-full h-full border-0 absolute inset-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

@@ -30,14 +30,16 @@ import { SectionHeader } from "@/components/sections/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { AboutPageData } from "@/lib/mock-data";
-import { getPublicAboutPage } from "@/lib/queries/public";
+import { getPublicAboutPage, getPublicSiteSettings } from "@/lib/queries/public";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "About Us | Medhen Beza Hospital",
-  description:
-    "Learn about Medhen Beza Hospital in Addis Ababa — our story, mission, vision, core values, leadership team, clinical environment, and accreditations.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "About Us",
+    description: `Learn about ${settings.hospitalName} — our story, mission, vision, core values, leadership team, clinical environment, and accreditations.`,
+  };
+}
 
 // ─── Reusable Section Wrapper ────────────────────────────────────────────────
 function Section({
@@ -62,9 +64,15 @@ function Section({
 }
 
 // ─── 1. PageHero ─────────────────────────────────────────────────────────────
-function AboutHero({ data }: { data: AboutPageData["hero"] }) {
+function AboutHero({
+  data,
+  hospitalName = "Medhen Beza Hospital",
+}: {
+  data: AboutPageData["hero"];
+  hospitalName?: string;
+}) {
   return (
-    <section className="bg-surface border-b border-border py-10 lg:py-16">
+    <section className="bg-surface border-b border-border pt-8 pb-16 lg:pb-20">
       <div className="layout-container">
         {/* Breadcrumb navigation */}
         <Breadcrumbs items={[{ label: "About" }]} className="mb-8" />
@@ -101,7 +109,7 @@ function AboutHero({ data }: { data: AboutPageData["hero"] }) {
                   </div>
                   <div>
                     <p className="text-small font-semibold text-text">
-                      Medhen Beza Medical Campus
+                      {hospitalName} Medical Campus
                     </p>
                     <p className="text-caption text-text-muted mt-0.5">
                       [Hospital exterior photography slot]
@@ -227,13 +235,19 @@ function MissionVision({ data }: { data: AboutPageData["missionVision"] }) {
 }
 
 // ─── 4. Core Values ──────────────────────────────────────────────────────────
-function CoreValues({ values }: { values: AboutPageData["values"] }) {
+function CoreValues({
+  values,
+  hospitalName = "Medhen Beza Hospital",
+}: {
+  values: AboutPageData["values"];
+  hospitalName?: string;
+}) {
   return (
     <Section tinted>
       <SectionHeader
         eyebrow="Our Principles"
         title="Core Values"
-        description="The fundamental principles guiding every diagnosis, treatment, and patient interaction at Medhen Beza Hospital."
+        description={`The fundamental principles guiding every diagnosis, treatment, and patient interaction at ${hospitalName}.`}
       />
 
       <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -494,12 +508,15 @@ function FinalCTA({ data }: { data: AboutPageData["finalCta"] }) {
 
 // ─── Main Page Component ─────────────────────────────────────────────────────
 export default async function AboutPage() {
-  const data = await getPublicAboutPage();
+  const [data, settings] = await Promise.all([
+    getPublicAboutPage(),
+    getPublicSiteSettings(),
+  ]);
 
   return (
     <>
       {/* 1. PageHero */}
-      <AboutHero data={data.hero} />
+      <AboutHero data={data.hero} hospitalName={settings.hospitalName} />
 
       {/* 2. Hospital Introduction */}
       <ScrollReveal>
@@ -513,7 +530,7 @@ export default async function AboutPage() {
 
       {/* 4. Core Values */}
       <ScrollReveal>
-        <CoreValues values={data.values} />
+        <CoreValues values={data.values} hospitalName={settings.hospitalName} />
       </ScrollReveal>
 
       {/* 5. Leadership */}

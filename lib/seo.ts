@@ -20,6 +20,7 @@ export function contentMetadata(input: {
   image?: string;
   canonicalUrl?: string | null;
   type?: "website" | "article";
+  siteName?: string;
 }): Metadata {
   const description = descriptionFallback(input.description, HOSPITAL_INFO.description);
   const url = absoluteUrl(input.canonicalUrl || input.path);
@@ -33,7 +34,7 @@ export function contentMetadata(input: {
       url,
       title: input.title,
       description,
-      siteName: HOSPITAL_INFO.name,
+      siteName: input.siteName || HOSPITAL_INFO.name,
       ...(image ? { images: [{ url: image, alt: input.title }] } : {}),
     },
     twitter: {
@@ -71,6 +72,6 @@ export function hospitalJsonLd(settings?: {
   };
 }
 
-export function hospitalReference() {
-  return { "@type": "Hospital", name: HOSPITAL_INFO.name, url: SITE_URL };
+export function hospitalReference(settings?: { hospitalName?: string }) {
+  return { "@type": "Hospital", name: settings?.hospitalName || HOSPITAL_INFO.name, url: SITE_URL };
 }

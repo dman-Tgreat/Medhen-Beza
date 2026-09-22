@@ -3,13 +3,17 @@ import { getSession } from "@/lib/auth/session";
 import { AdminRoleProvider } from "@/components/admin/role-context";
 import { AdminLayoutShell } from "@/components/admin/admin-layout-shell";
 import { getAdminUserNotifications } from "@/lib/queries/admin";
+import { getPublicSiteSettings } from "@/lib/queries/public";
 
 export default async function AdminRootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
+  const [session, settings] = await Promise.all([
+    getSession(),
+    getPublicSiteSettings(),
+  ]);
 
   // The authentication pages live under this layout but must remain available
   // without a session. Middleware protects every other /admin route.
@@ -35,7 +39,10 @@ export default async function AdminRootLayout({
 
   return (
     <AdminRoleProvider initialSession={session}>
-      <AdminLayoutShell initialNotifications={serializedNotifications}>
+      <AdminLayoutShell
+        initialNotifications={serializedNotifications}
+        hospitalName={settings.hospitalName}
+      >
         {children}
       </AdminLayoutShell>
     </AdminRoleProvider>

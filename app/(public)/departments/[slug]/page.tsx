@@ -24,6 +24,7 @@ import {
   getPublicDepartments,
   getPublicServices,
   getPublicDoctors,
+  getPublicSiteSettings,
 } from "@/lib/queries/public";
 import { contentMetadata, absoluteUrl, hospitalReference } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -43,22 +44,35 @@ export async function generateMetadata({
   params,
 }: DepartmentPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const dept = await getPublicDepartmentBySlug(slug);
+  const [dept, settings] = await Promise.all([
+    getPublicDepartmentBySlug(slug),
+    getPublicSiteSettings(),
+  ]);
 
   if (!dept) {
     return {
-      title: "Department Not Found | Medhen Beza Hospital",
+      title: "Department Not Found",
     };
   }
 
-  return contentMetadata({ title: dept.metaTitle || `${dept.name} Department`, description: dept.metaDescription || dept.description, path: `/departments/${dept.slug}`, canonicalUrl: dept.canonicalUrl, image: dept.ogImage || dept.image });
+  return contentMetadata({
+    title: dept.metaTitle || `${dept.name} Department`,
+    description: dept.metaDescription || dept.description,
+    path: `/departments/${dept.slug}`,
+    canonicalUrl: dept.canonicalUrl,
+    image: dept.ogImage || dept.image,
+    siteName: settings.hospitalName,
+  });
 }
 
 export default async function DepartmentDetailPage({
   params,
 }: DepartmentPageProps) {
   const { slug } = await params;
-  const dept = await getPublicDepartmentBySlug(slug);
+  const [dept, settings] = await Promise.all([
+    getPublicDepartmentBySlug(slug),
+    getPublicSiteSettings(),
+  ]);
 
   if (!dept) {
     notFound();
@@ -78,7 +92,7 @@ export default async function DepartmentDetailPage({
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "MedicalOrganization", name: `${dept.name} Department`, description: dept.description, url: absoluteUrl(`/departments/${dept.slug}`), image: dept.image ? absoluteUrl(dept.image) : undefined, medicalSpecialty: dept.name, parentOrganization: hospitalReference() }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "MedicalOrganization", name: `${dept.name} Department`, description: dept.description, url: absoluteUrl(`/departments/${dept.slug}`), image: dept.image ? absoluteUrl(dept.image) : undefined, medicalSpecialty: dept.name, parentOrganization: hospitalReference(settings.hospitalName) }} />
       <PageHero
         title={`${dept.name} Department`}
         description={dept.description}

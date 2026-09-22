@@ -16,7 +16,7 @@ import { PageHero } from "@/components/sections/Hero";
 import { NewsCard } from "@/components/content/NewsCard";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { getPublicNewsBySlug, getPublicNews } from "@/lib/queries/public";
+import { getPublicNewsBySlug, getPublicNews, getPublicSiteSettings } from "@/lib/queries/public";
 import { contentMetadata, absoluteUrl, hospitalReference } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 
@@ -35,22 +35,36 @@ export async function generateMetadata({
   params,
 }: NewsArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = await getPublicNewsBySlug(slug);
+  const [article, settings] = await Promise.all([
+    getPublicNewsBySlug(slug),
+    getPublicSiteSettings(),
+  ]);
 
   if (!article) {
     return {
-      title: "Article Not Found | Medhen Beza Hospital",
+      title: "Article Not Found",
     };
   }
 
-  return contentMetadata({ title: article.metaTitle || article.title, description: article.metaDescription || article.summary, path: `/news/${article.slug}`, canonicalUrl: article.canonicalUrl, image: article.ogImage || article.image, type: "article" });
+  return contentMetadata({
+    title: article.metaTitle || article.title,
+    description: article.metaDescription || article.summary,
+    path: `/news/${article.slug}`,
+    canonicalUrl: article.canonicalUrl,
+    image: article.ogImage || article.image,
+    type: "article",
+    siteName: settings.hospitalName,
+  });
 }
 
 export default async function NewsArticleDetailPage({
   params,
 }: NewsArticlePageProps) {
   const { slug } = await params;
-  const article = await getPublicNewsBySlug(slug);
+  const [article, settings] = await Promise.all([
+    getPublicNewsBySlug(slug),
+    getPublicSiteSettings(),
+  ]);
 
   if (!article) {
     notFound();
@@ -63,7 +77,7 @@ export default async function NewsArticleDetailPage({
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.summary, url: absoluteUrl(`/news/${article.slug}`), image: article.image ? absoluteUrl(article.image) : undefined, author: { "@type": "Organization", name: hospitalReference().name }, publisher: hospitalReference() }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.summary, url: absoluteUrl(`/news/${article.slug}`), image: article.image ? absoluteUrl(article.image) : undefined, author: { "@type": "Organization", name: settings.hospitalName }, publisher: hospitalReference(settings.hospitalName) }} />
       <PageHero
         title={article.title}
         description={`Published on ${article.date} · ${article.readTime}`}

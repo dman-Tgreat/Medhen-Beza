@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { PageHero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/button";
-import { getPublicCareerBySlug, getPublicCareers } from "@/lib/queries/public";
+import { getPublicCareerBySlug, getPublicCareers, getPublicSiteSettings } from "@/lib/queries/public";
 
 interface CareerPageProps {
   params: Promise<{ slug: string }>;
@@ -35,19 +35,22 @@ export async function generateMetadata({
 
   if (!career) {
     return {
-      title: "Career Opportunity Not Found | Medhen Beza Hospital",
+      title: "Career Opportunity Not Found",
     };
   }
 
   return {
-    title: `${career.position} | Careers | Medhen Beza Hospital`,
+    title: `${career.position} | Careers`,
     description: career.overview,
   };
 }
 
 export default async function CareerDetailPage({ params }: CareerPageProps) {
   const { slug } = await params;
-  const career = await getPublicCareerBySlug(slug);
+  const [career, settings] = await Promise.all([
+    getPublicCareerBySlug(slug),
+    getPublicSiteSettings(),
+  ]);
 
   if (!career) {
     notFound();
@@ -172,7 +175,7 @@ export default async function CareerDetailPage({ params }: CareerPageProps) {
 
               <div className="border-t border-border pt-4 space-y-2">
                 <Button asChild variant="primary" className="w-full">
-                  <Link href="mailto:careers@medhenbeza.com?subject=Application for position">
+                  <Link href={`mailto:${settings.email}?subject=Application for ${encodeURIComponent(career.position)}`}>
                     Apply via Email
                   </Link>
                 </Button>

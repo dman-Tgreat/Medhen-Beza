@@ -2,13 +2,15 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/sections/Hero";
 import { DoctorsDirectoryClient } from "@/components/public/DoctorsDirectoryClient";
-import { getPublicDoctors, getPublicDepartments } from "@/lib/queries/public";
+import { getPublicDoctors, getPublicDepartments, getPublicSiteSettings } from "@/lib/queries/public";
 
-export const metadata: Metadata = {
-  title: "Find a Doctor & Medical Specialists | Medhen Beza Hospital",
-  description:
-    "Search and find trusted, board-certified physicians, surgeons, and specialists at Medhen Beza Hospital Addis Ababa.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "Find a Doctor & Medical Specialists",
+    description: `Search and find trusted, board-certified physicians, surgeons, and specialists at ${settings.hospitalName} ${settings.city}.`,
+  };
+}
 
 export default async function DoctorsPage() {
   const [doctors, departments] = await Promise.all([

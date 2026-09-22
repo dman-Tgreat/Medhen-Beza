@@ -2,13 +2,15 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/sections/Hero";
 import { NewsDirectoryClient } from "@/components/public/NewsDirectoryClient";
-import { getPublicNews } from "@/lib/queries/public";
+import { getPublicNews, getPublicSiteSettings } from "@/lib/queries/public";
 
-export const metadata: Metadata = {
-  title: "Hospital News, Medical Advances & Health Articles | Medhen Beza Hospital",
-  description:
-    "Stay informed with the latest medical news, specialized clinical updates, community health outreach, and physician insights from Medhen Beza Hospital.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "Hospital News, Medical Advances & Health Articles",
+    description: `Stay informed with the latest medical news, specialized clinical updates, community health outreach, and physician insights from ${settings.hospitalName}.`,
+  };
+}
 
 export default async function NewsPage() {
   const news = await getPublicNews();

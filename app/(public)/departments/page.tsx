@@ -4,16 +4,21 @@ import { Building2, Compass, ShieldCheck } from "lucide-react";
 import { PageHero } from "@/components/sections/Hero";
 import { DepartmentCard } from "@/components/content/DepartmentCard";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { getPublicDepartments } from "@/lib/queries/public";
+import { getPublicDepartments, getPublicSiteSettings } from "@/lib/queries/public";
 
-export const metadata: Metadata = {
-  title: "Clinical Departments | Medhen Beza Hospital",
-  description:
-    "Explore the medical departments and clinical divisions at Medhen Beza Hospital in Addis Ababa — Cardiology, Maternity, Pediatrics, Surgery, Neurology, and more.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  return {
+    title: "Clinical Departments",
+    description: `Explore the medical departments and clinical divisions at ${settings.hospitalName} in ${settings.city} — Cardiology, Maternity, Pediatrics, Surgery, Neurology, and more.`,
+  };
+}
 
 export default async function DepartmentsPage() {
-  const departments = await getPublicDepartments();
+  const [departments, settings] = await Promise.all([
+    getPublicDepartments(),
+    getPublicSiteSettings(),
+  ]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -33,7 +38,7 @@ export default async function DepartmentsPage() {
               <Compass className="w-5 h-5 text-secondary shrink-0" />
               <span>
                 Showing <strong>{departments.length}</strong> specialized
-                clinical divisions across the Medhen Beza medical campus
+                clinical divisions across the {settings.hospitalName} medical campus
               </span>
             </div>
             <div className="flex items-center gap-4 text-caption">

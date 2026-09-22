@@ -238,10 +238,12 @@ export function ContactFormClient({
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-text block">Hospital Location</span>
-                  <span className="text-text-muted">{settings?.address || "H73F+R49, Adama, Ethiopia"}</span>
-                  <span className="text-xs text-primary font-mono block mt-1">
-                    Plus Code: H73F+R49, Adama
-                  </span>
+                  <span className="text-text-muted">{settings?.address || HOSPITAL_INFO.address}</span>
+                  {settings?.location && settings.location !== settings?.address && (
+                    <span className="text-xs text-primary font-mono block mt-1">
+                      {settings.location}
+                    </span>
+                  )}
                 </div>
               </div>
 
