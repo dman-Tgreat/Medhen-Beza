@@ -60,7 +60,7 @@ export default async function FacilityDetailPage({
       <PageHero
         eyebrow="Hospital Facility"
         title={facility.name}
-        description={facility.tagline || facility.description}
+        // description={facility.tagline || facility.description}
         breadcrumbs={[
           { label: "Facilities", href: "/facilities" },
           { label: facility.name },
