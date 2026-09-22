@@ -35,7 +35,8 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
+      SITE_URL: ${SITE_URL:-${NEXT_PUBLIC_SITE_URL:-http://localhost}}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-${SITE_URL:-http://localhost}}
     volumes:
       # Persistent local storage for user/staff uploaded media
       - mb_uploads_data:/app/public/uploads
