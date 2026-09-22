@@ -12,7 +12,7 @@ import type {
 } from "@/lib/mock-data";
 
 import { HOSPITAL_INFO } from "@/lib/constants";
-import { getVideoEmbedUrl, getVideoThumbnailUrl } from "@/lib/media/video";
+import { getVideoEmbedUrl, getVideoThumbnailUrl, isDirectVideoFile } from "@/lib/media/video";
 import type { AboutPageData } from "@/lib/mock-data";
 import { MOCK_ABOUT_PAGE } from "@/lib/mock-data";
 import {
@@ -584,12 +584,9 @@ function mapCareer(car: any): CareerDetailData {
     deadline: deadlineDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     postedDate: createdDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     overview: car.description || "Clinical opportunity at Medhen Beza Hospital.",
-    responsibilities: car.responsibilities && car.responsibilities.length > 0 ? car.responsibilities : [
-      "Deliver compassionate, high-quality patient care in accordance with hospital clinical guidelines.",
-      "Collaborate effectively with multidisciplinary medical teams and support staff.",
-    ],
-    requirements: car.requirements && car.requirements.length > 0 ? car.requirements : [],
-    qualifications: car.qualifications && car.qualifications.length > 0 ? car.qualifications : [],
+    responsibilities: Array.isArray(car.responsibilities) ? car.responsibilities : [],
+    requirements: Array.isArray(car.requirements) ? car.requirements : [],
+    qualifications: Array.isArray(car.qualifications) ? car.qualifications : [],
     benefits: [
       "Competitive hospital compensation package",
       "Comprehensive medical coverage at Medhen Beza Hospital",
@@ -732,9 +729,12 @@ export async function getPublicGallery(): Promise<any[]> {
     return items.map((g) => {
       const isVideo = g.type === "VIDEO";
       const fallbackThumb = isVideo ? getVideoThumbnailUrl(g.url) : null;
-      const imageSrc = isVideo
+      let imageSrc = isVideo
         ? (g.thumbnailUrl || fallbackThumb || "")
         : (g.url || g.thumbnailUrl || "");
+      if (imageSrc && isDirectVideoFile(imageSrc)) {
+        imageSrc = "";
+      }
 
       return {
         id: g.id,

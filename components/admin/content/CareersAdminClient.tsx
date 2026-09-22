@@ -18,6 +18,7 @@ interface CareerRecord {
   location: string;
   deadline: string;
   description?: string;
+  responsibilities?: string[];
   requirements?: string[];
   status: ContentStatusType;
 }
@@ -43,7 +44,8 @@ export function CareersAdminClient({ initialCareers, departments }: CareersAdmin
     location: car.location || "Addis Ababa, Ethiopia",
     deadline: car.deadline ? new Date(car.deadline).toISOString().split("T")[0] : "Open Until Filled",
     description: car.description || "",
-    requirements: car.requirements || [],
+    responsibilities: Array.isArray(car.responsibilities) ? car.responsibilities : [],
+    requirements: Array.isArray(car.requirements) ? car.requirements : [],
     status: car.status as ContentStatusType,
   }));
 
@@ -94,9 +96,18 @@ export function CareersAdminClient({ initialCareers, departments }: CareersAdmin
       required: true,
     },
     {
-      name: "requirements",
-      label: "Key Qualifications & Certifications",
+      name: "responsibilities",
+      label: "Key Responsibilities",
       type: "tags",
+      placeholder: "Type a responsibility and press Enter or Add",
+      helperText: "Daily clinical, patient care, or operational duties.",
+    },
+    {
+      name: "requirements",
+      label: "Candidate Requirements",
+      type: "tags",
+      placeholder: "Type a requirement (e.g. BSc in Nursing, 3+ years experience) and press Enter or Add",
+      helperText: "Required degrees, professional licensing, experience, and certifications.",
     },
   ];
 
@@ -194,7 +205,8 @@ export function CareersAdminClient({ initialCareers, departments }: CareersAdmin
         location: values.location,
         deadline: values.deadline,
         description: values.description,
-        requirements: values.requirements,
+        responsibilities: values.responsibilities || [],
+        requirements: values.requirements || [],
       },
       actionType
     );
@@ -241,11 +253,19 @@ export function CareersAdminClient({ initialCareers, departments }: CareersAdmin
           description="HR staff drafts require Hospital Director approval before public posting."
           fields={formFields}
           initialValues={
-            editingCareer || {
-              departmentId: departments[0]?.id,
-              employmentType: "FULL_TIME",
-              location: "Addis Ababa, Ethiopia",
-            }
+            editingCareer
+              ? {
+                  ...editingCareer,
+                  responsibilities: editingCareer.responsibilities || [],
+                  requirements: editingCareer.requirements || [],
+                }
+              : {
+                  departmentId: departments[0]?.id,
+                  employmentType: "FULL_TIME",
+                  location: "Addis Ababa, Ethiopia",
+                  responsibilities: [],
+                  requirements: [],
+                }
           }
           onSubmit={handleFormSubmit}
           isLoading={isSubmitting}

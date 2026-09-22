@@ -95,29 +95,15 @@ export default async function CareerDetailPage({ params }: CareerPageProps) {
 
               {career.requirements && career.requirements.length > 0 && (
                 <div className="border-t border-border pt-6 space-y-3">
-                  <h3 className="text-h4 font-bold text-text">Candidate Requirements</h3>
+                  <h3 className="text-h4 font-bold text-text flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5 text-secondary" />
+                    Candidate Requirements
+                  </h3>
                   <div className="space-y-2">
                     {career.requirements.map((req, idx) => (
                       <div key={idx} className="flex items-start gap-2.5 text-small text-text">
                         <CheckCircle2 className="h-4 w-4 text-secondary shrink-0 mt-0.5" />
                         <span>{req}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {career.qualifications && career.qualifications.length > 0 && (
-                <div className="border-t border-border pt-6 space-y-3">
-                  <h3 className="text-h4 font-bold text-text flex items-center gap-2">
-                    <GraduationCap className="h-5 w-5 text-primary" />
-                    Required Qualifications
-                  </h3>
-                  <div className="space-y-2">
-                    {career.qualifications.map((q, idx) => (
-                      <div key={idx} className="flex items-start gap-2.5 text-small text-text">
-                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                        <span>{q}</span>
                       </div>
                     ))}
                   </div>
