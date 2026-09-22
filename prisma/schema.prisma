@@ -117,6 +117,12 @@ model User {
   approvedEvents  HospitalEvent[] @relation("EventApprovedBy")
   publishedEvents HospitalEvent[] @relation("EventPublishedBy")
 
+  // Content Ownership Tracking: Facilities
+  createdFacilities   Facility[] @relation("FacilityCreatedBy")
+  submittedFacilities Facility[] @relation("FacilitySubmittedBy")
+  approvedFacilities  Facility[] @relation("FacilityApprovedBy")
+  publishedFacilities Facility[] @relation("FacilityPublishedBy")
+
   // Site Settings updates
   siteSettingsUpdated SiteSetting[]
 
@@ -366,6 +372,7 @@ model News {
   content       String   @db.Text
   featuredImage String?
   authorName    String? // Public-facing byline
+  readTime      String? // Estimated reading time (e.g. "3 min read")
   tags          String[] // Tag list stored as native PostgreSQL text array
   isFeatured    Boolean  @default(false)
   viewCount     Int      @default(0)
@@ -636,6 +643,52 @@ model FAQ {
   @@index([category])
   @@index([status])
   @@map("faqs")
+}
+
+// ─── 6b. Hospital Facilities ─────────────────────────────────────────────────
+
+model Facility {
+  id              String        @id @default(uuid())
+  name            String
+  slug            String        @unique
+  tagline         String?
+  description     String?       @db.Text
+  category        String        @default("Clinical Unit")
+  capacity        String?
+  location        String?
+  hours           String?
+  phone           String?
+  features        String[]      @default([])
+  image           String?
+  galleryImages   String[]      @default([])
+  order           Int           @default(0)
+
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?       @db.Text
+
+  createdById String?
+  createdBy   User?     @relation("FacilityCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+
+  submittedById String?
+  submittedBy   User?     @relation("FacilitySubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt   DateTime?
+
+  approvedById String?
+  approvedBy   User?     @relation("FacilityApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+
+  publishedById String?
+  publishedBy   User?     @relation("FacilityPublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+
+  archivedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([slug])
+  @@map("facilities")
 }
 
 // ─── 7. Inquiries & Site Settings ─────────────────────────────────────────────

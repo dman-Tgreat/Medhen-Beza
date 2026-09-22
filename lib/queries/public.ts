@@ -498,6 +498,15 @@ export async function getPublicServiceBySlug(slug: string): Promise<ServiceDetai
 // ─── 4. News ────────────────────────────────────────────────────────────────
 
 function mapNews(news: any): NewsDetailData {
+  const wordCount = (news.content || "").trim().split(/\s+/).filter(Boolean).length;
+  const calculatedReadTime = `${Math.max(1, Math.ceil(wordCount / 200))} min read`;
+  const readTime = news.readTime && news.readTime.trim() ? news.readTime.trim() : calculatedReadTime;
+
+  const rawTags = Array.isArray(news.tags) ? news.tags : [];
+  const tags = rawTags
+    .map((t: string) => (typeof t === "string" ? t.replace(/^#/, "").trim() : ""))
+    .filter(Boolean);
+
   return {
     id: news.id,
     title: news.title,
@@ -505,13 +514,13 @@ function mapNews(news: any): NewsDetailData {
     summary: news.summary || news.excerpt || news.content?.slice(0, 160) || "",
     category: news.category?.name || "Hospital News",
     date: (news.publishedAt || news.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    readTime: `${Math.max(2, Math.ceil((news.content || "").split(" ").length / 180))} min read`,
+    readTime,
     author: {
       name: news.authorName || news.createdBy?.name || "Medhen Beza Medical Editorial",
       role: "Medical Communications",
     },
     contentParagraphs: (news.content || "").split("\n\n").filter(Boolean),
-    tags: Array.isArray(news.tags) && news.tags.length > 0 ? news.tags : ["Healthcare", "Addis Ababa"],
+    tags,
     image: news.featuredImage || news.coverImage || undefined,
     href: `/news/${news.slug}`,
     metaTitle: news.metaTitle,
@@ -881,44 +890,82 @@ export async function getPublicAboutPage(): Promise<AboutPageData> {
 
 // ─── 10. Facilities ─────────────────────────────────────────────────────────
 
+function resolveValidImageUrl(url?: string | null): string | undefined {
+  if (!url || typeof url !== "string") return undefined;
+  const trimmed = url.trim();
+  if (!trimmed) return undefined;
+
+  // Convert YouTube watch/embed/short link to img.youtube.com thumbnail
+  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/i);
+  if (ytMatch && ytMatch[1]) {
+    return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+  }
+
+  // If someone passed a raw youtube URL that wasn't matched
+  if (trimmed.includes("youtube.com") || trimmed.includes("youtu.be")) {
+    return "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80";
+  }
+
+  if (trimmed.startsWith("/") || trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+
+  return undefined;
+}
+
+function mapFacility(f: any): FacilityDetailData {
+  const defaultFeatures = [
+    "Specialist physician and nursing coverage",
+    "Sterile climate-controlled environmental systems",
+    "Continuous patient vital monitoring",
+    "Integrated emergency resuscitation protocol",
+  ];
+
+  const features =
+    Array.isArray(f.features) && f.features.length > 0
+      ? f.features
+      : defaultFeatures;
+
+  const validImage = resolveValidImageUrl(f.image);
+
+  return {
+    id: f.id,
+    slug: f.slug || f.id,
+    name: f.name,
+    image: validImage,
+    imageAlt: `${f.name} at Medhen Beza Hospital`,
+    tagline: f.tagline || f.name,
+    description: f.description || "State-of-the-art clinical environment engineered for patient safety.",
+    longDescription: f.description || "",
+    category: f.category || "Clinical Unit",
+    capacity: f.capacity || undefined,
+    location: f.location || "Main Hospital Complex",
+    hours: f.hours || "24/7 Clinical & Emergency Access",
+    phone: f.phone || "+251 11 654 3000",
+    features,
+    galleryImages: validImage ? [{ src: validImage, alt: f.name }] : [],
+    href: `/facilities/${f.slug || f.id}`,
+  };
+}
+
 export async function getPublicFacilities(): Promise<FacilityDetailData[]> {
   try {
-    const galleryItems = await db.gallery.findMany({
+    const facilities = await db.facility.findMany({
       where: {
         status: ContentStatus.PUBLISHED,
-        album: { equals: "Facilities", mode: "insensitive" },
       },
       orderBy: [{ order: "asc" }, { createdAt: "desc" }],
     });
+
+    if (facilities.length > 0) {
+      return facilities.map(mapFacility);
+    }
 
     const depts = await db.department.findMany({
       where: { status: ContentStatus.PUBLISHED },
       orderBy: [{ order: "asc" }],
       take: 6,
     });
-
-    if (galleryItems.length > 0) {
-      return galleryItems.map((g) => ({
-        id: g.id,
-        slug: g.id,
-        name: g.title,
-        image: g.type === "VIDEO"
-          ? g.thumbnailUrl || undefined
-          : g.url || g.thumbnailUrl || undefined,
-        imageAlt: g.altText || g.title,
-        tagline: g.description || "State-of-the-art medical environment",
-        description: g.description || "Modern clinical infrastructure designed for patient safety and comfort.",
-        longDescription: g.description || "",
-        location: "Main Medical Campus",
-        features: [
-          "Modern clinical and surgical suites",
-          "Dedicated patient support and infection control",
-          "Continuous medical team monitoring",
-        ],
-        galleryImages: [{ src: g.url || "", alt: g.altText || g.title }],
-        href: `/facilities/${g.id}`,
-      }));
-    }
 
     return depts.map((d) => ({
       id: d.id,
@@ -929,7 +976,11 @@ export async function getPublicFacilities(): Promise<FacilityDetailData[]> {
       tagline: d.description || "Advanced medical wing",
       description: d.description || "State-of-the-art clinical environment.",
       longDescription: d.description || "",
+      category: "Clinical Wing",
+      capacity: "Comprehensive Care Unit",
       location: d.location || "Main Campus",
+      hours: d.workingHours || "24/7 Care",
+      phone: d.phone || "+251 11 654 3000",
       features: [
         "Advanced diagnostic and monitoring equipment",
         "24/7 specialist physician oversight",
@@ -946,32 +997,15 @@ export async function getPublicFacilities(): Promise<FacilityDetailData[]> {
 
 export async function getPublicFacilityBySlug(slug: string): Promise<FacilityDetailData | null> {
   try {
-    const item = await db.gallery.findFirst({
+    const item = await db.facility.findFirst({
       where: {
-        id: slug,
+        OR: [{ slug }, { id: slug }],
         status: ContentStatus.PUBLISHED,
       },
     });
 
     if (item) {
-      return {
-        id: item.id,
-        slug: item.id,
-        name: item.title,
-        image: item.url || undefined,
-        imageAlt: item.altText || item.title,
-        tagline: item.description || "State-of-the-art hospital infrastructure",
-        description: item.description || "High-standard clinical environment built for patient safety.",
-        longDescription: item.description || "",
-        location: "Main Medical Campus",
-        features: [
-          "24/7 patient vital monitoring",
-          "Sterile, climate-controlled environmental systems",
-          "Integrated emergency physician support",
-        ],
-        galleryImages: [{ src: item.url || "", alt: item.altText || item.title }],
-        href: `/facilities/${item.id}`,
-      };
+      return mapFacility(item);
     }
 
     const dept = await db.department.findFirst({
@@ -988,10 +1022,14 @@ export async function getPublicFacilityBySlug(slug: string): Promise<FacilityDet
         name: `${dept.name} Pavilion`,
         image: dept.image || undefined,
         imageAlt: dept.name,
-        tagline: dept.description,
-        description: dept.description,
-        longDescription: dept.description,
+        tagline: dept.description || `${dept.name} Clinical Wing`,
+        description: dept.description || "State-of-the-art clinical environment.",
+        longDescription: dept.description || "",
+        category: "Department Wing",
+        capacity: "Multidisciplinary Unit",
         location: dept.location || "Main Campus",
+        hours: dept.workingHours || "24/7 Care",
+        phone: dept.phone || "+251 11 654 3000",
         features: [
           "Modern clinical suites and procedure rooms",
           "24/7 dedicated specialist care",

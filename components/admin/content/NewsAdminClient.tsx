@@ -19,6 +19,8 @@ interface NewsRecord {
   coverImage?: string;
   excerpt?: string;
   content?: string;
+  readTime?: string;
+  tags?: string[];
 }
 
 interface NewsAdminClientProps {
@@ -32,6 +34,24 @@ export function NewsAdminClient({ initialNews }: NewsAdminClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const existingCategories = Array.from(
+    new Set(
+      initialNews
+        .map((item) => item.category?.name)
+        .filter((cat): cat is string => Boolean(cat && cat.trim()))
+    )
+  );
+  const defaultCategoryOptions = [
+    "Hospital News",
+    "Clinical Updates",
+    "Health & Wellness",
+    "Technology & Equipment",
+    "Community Outreach",
+  ];
+  const combinedCategoryOptions = Array.from(
+    new Set([...existingCategories, ...defaultCategoryOptions])
+  );
+
   const formattedNews: NewsRecord[] = initialNews.map((item) => ({
     id: item.id,
     title: item.title,
@@ -39,9 +59,11 @@ export function NewsAdminClient({ initialNews }: NewsAdminClientProps) {
     author: item.authorName || item.createdBy?.name || "Medhen Beza Team",
     publishedDate: item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : "—",
     status: item.status as ContentStatusType,
-    coverImage: item.coverImage || undefined,
-    excerpt: item.excerpt || "",
+    coverImage: item.coverImage || item.featuredImage || undefined,
+    excerpt: item.excerpt || item.summary || "",
     content: item.content || "",
+    readTime: item.readTime || "",
+    tags: Array.isArray(item.tags) ? item.tags : [],
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -54,15 +76,11 @@ export function NewsAdminClient({ initialNews }: NewsAdminClientProps) {
     },
     {
       name: "categoryName",
-      label: "Category",
-      type: "select",
-      options: [
-        { label: "Hospital News", value: "Hospital News" },
-        { label: "Technology & Equipment", value: "Technology" },
-        { label: "Health & Wellness Tips", value: "Health Tips" },
-        { label: "Community Outreach", value: "Community" },
-        { label: "Clinical Updates", value: "Clinical Updates" },
-      ],
+      label: "Category / Topic",
+      type: "text",
+      placeholder: "e.g. Hospital News, Technology, Health Tips...",
+      helperText: "Type any category or pick a suggestion below. New categories will be created automatically.",
+      options: combinedCategoryOptions.map((c) => ({ label: c, value: c })),
       required: true,
     },
     {
@@ -71,6 +89,20 @@ export function NewsAdminClient({ initialNews }: NewsAdminClientProps) {
       type: "text",
       placeholder: "e.g. Abel Girma or Dr. Bethlehem Tadesse",
       required: true,
+    },
+    {
+      name: "readTime",
+      label: "Estimated Read Time (optional)",
+      type: "text",
+      placeholder: "e.g. 3 min read (calculated automatically if blank)",
+      helperText: "Leave blank to automatically calculate based on article length, or type a custom read time.",
+    },
+    {
+      name: "tags",
+      label: "Article Hashtags & Topics",
+      type: "tags",
+      placeholder: "Type a tag (e.g. Cardiology, Screening) and press Enter or Add",
+      helperText: "Displayed as hashtags (#tag) at the bottom of the article.",
     },
     {
       name: "coverImage",
@@ -189,7 +221,9 @@ export function NewsAdminClient({ initialNews }: NewsAdminClientProps) {
         content: values.content,
         featuredImage: values.featuredImage || values.coverImage,
         authorName: values.authorName,
+        readTime: values.readTime,
         tags: values.tags,
+        categoryName: values.categoryName,
         categoryId: values.categoryId,
         isFeatured: values.isFeatured === "true" || values.isFeatured === true,
       },
@@ -243,8 +277,10 @@ export function NewsAdminClient({ initialNews }: NewsAdminClientProps) {
                   ...editingNews,
                   authorName: editingNews.author,
                   categoryName: editingNews.category,
+                  readTime: editingNews.readTime,
+                  tags: editingNews.tags || [],
                 }
-              : { categoryName: "Hospital News" }
+              : { categoryName: "Hospital News", tags: [] }
           }
           onSubmit={handleFormSubmit}
           isLoading={isSubmitting}

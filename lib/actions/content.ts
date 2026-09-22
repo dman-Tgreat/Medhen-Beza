@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import { ContentStatus, EmploymentType, MediaType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { uniqueSlug } from "@/lib/slugs";
+import { uniqueSlug, slugify } from "@/lib/slugs";
 import {
   approveContentAction,
   archiveContentAction,
@@ -527,8 +527,10 @@ export async function saveNewsAction(
     content: string;
     featuredImage?: string;
     authorName?: string;
+    readTime?: string;
     tags?: string[];
     categoryId?: string;
+    categoryName?: string;
     isFeatured?: boolean;
     slug?: string;
     regenerateSlug?: boolean;
@@ -544,6 +546,35 @@ export async function saveNewsAction(
       targetStatus
     );
 
+    // Dynamic Category Resolution: If categoryName provided, find existing or auto-create in db.newsCategory
+    let resolvedCategoryId: string | null = data.categoryId || null;
+    if (data.categoryName && data.categoryName.trim()) {
+      const trimmedName = data.categoryName.trim();
+      let cat = await db.newsCategory.findFirst({
+        where: { name: { equals: trimmedName, mode: "insensitive" } },
+      });
+      if (!cat) {
+        const catBaseSlug = slugify(trimmedName);
+        let catSlug = catBaseSlug;
+        let cSuffix = 2;
+        while (await db.newsCategory.findUnique({ where: { slug: catSlug } })) {
+          catSlug = `${catBaseSlug}-${cSuffix++}`;
+        }
+        cat = await db.newsCategory.create({
+          data: {
+            name: trimmedName,
+            slug: catSlug,
+            description: `${trimmedName} articles and updates`,
+          },
+        });
+      }
+      resolvedCategoryId = cat.id;
+    }
+
+    const cleanTags = Array.isArray(data.tags)
+      ? data.tags.map((t) => t.replace(/^#/, "").trim()).filter(Boolean)
+      : [];
+
     if (data.id && !data.id.startsWith("news-new-")) {
       const existing = await db.news.findUnique({ where: { id: data.id }, select: { slug: true } });
       const slug = data.regenerateSlug ? await uniqueSlug("news", data.slug || data.title, data.id) : existing?.slug || await uniqueSlug("news", data.title);
@@ -556,8 +587,9 @@ export async function saveNewsAction(
           content: data.content,
           featuredImage: data.featuredImage,
           authorName: data.authorName || session.name,
-          tags: data.tags || [],
-          categoryId: data.categoryId || null,
+          readTime: data.readTime || null,
+          tags: cleanTags,
+          categoryId: resolvedCategoryId,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
@@ -581,8 +613,9 @@ export async function saveNewsAction(
           content: data.content,
           featuredImage: data.featuredImage,
           authorName: data.authorName || session.name,
-          tags: data.tags || [],
-          categoryId: data.categoryId || null,
+          readTime: data.readTime || null,
+          tags: cleanTags,
+          categoryId: resolvedCategoryId,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
           createdById: session.id,

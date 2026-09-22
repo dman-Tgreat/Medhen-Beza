@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAdminRole } from "./role-context";
 import {
   Dialog,
@@ -81,12 +81,25 @@ export function ContentFormModal({
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState("general");
 
+  const prevIsOpenRef = useRef(false);
+  const prevIdRef = useRef<any>(undefined);
+
   useEffect(() => {
     if (isOpen) {
-      setFormData(initialValues || {});
-      setActiveTab("general");
+      const currentId = initialValues?.id;
+      // Only re-initialize form data if:
+      // 1. The modal just opened from closed state, OR
+      // 2. The record being edited actually changed (different id)
+      if (!prevIsOpenRef.current || (currentId !== undefined && currentId !== prevIdRef.current)) {
+        setFormData(initialValues || {});
+        setActiveTab("general");
+        prevIdRef.current = currentId;
+      }
+    } else {
+      prevIdRef.current = undefined;
     }
-  }, [isOpen, initialValues]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, initialValues?.id]);
 
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -142,12 +155,35 @@ export function ContentFormModal({
             </label>
             <Input
               type={field.type}
+              list={field.options && field.options.length > 0 ? `${field.name}-suggestions` : undefined}
               value={val}
               onChange={(e) => handleChange(field.name, e.target.value)}
               placeholder={field.placeholder}
               className="text-base sm:text-xs min-h-[44px] sm:min-h-[36px] sm:h-9 bg-surface"
               required={field.required}
             />
+            {field.options && field.options.length > 0 && (
+              <>
+                <datalist id={`${field.name}-suggestions`}>
+                  {field.options.map((opt) => (
+                    <option key={opt.value} value={opt.label || opt.value} />
+                  ))}
+                </datalist>
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-text-light">Suggested:</span>
+                  {field.options.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => handleChange(field.name, opt.label || opt.value)}
+                      className="text-[10px] px-2 py-0.5 rounded-full bg-background hover:bg-primary-light hover:text-primary border border-border transition-colors text-text-muted cursor-pointer"
+                    >
+                      {opt.label || opt.value}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
             {field.helperText && <p className="text-[11px] text-text-light">{field.helperText}</p>}
           </div>
         );
