@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Only use standalone output for Docker containers; let Vercel handle serverless functions natively
+  ...(process.env.BUILD_STANDALONE === "true" || (!process.env.VERCEL && process.env.NODE_ENV === "production" && process.env.DOCKER_BUILD === "true")
+    ? { output: "standalone" }
+    : {}),
   experimental: {
     serverActions: {
       bodySizeLimit: "100mb",
