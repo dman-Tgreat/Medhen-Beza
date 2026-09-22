@@ -1,0 +1,23 @@
+# Caddy Reverse Proxy Configuration for Medhen Beza Hospital
+# In production, replace ":80" with your domain name (e.g., "medhenbeza.com, www.medhenbeza.com")
+# Caddy will automatically issue and renew free Let's Encrypt SSL certificates.
+
+:80 {
+    encode gzip zstd
+
+    # Proxy all traffic to the Next.js container
+    reverse_proxy web:3000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Security Headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    }
+}

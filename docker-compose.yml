@@ -1,0 +1,77 @@
+services:
+  # ─── 1. PostgreSQL Database (100% Free & Open-Source) ─────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: medhen_hospital_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-medhen}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-MedhenHospital2026!}
+      POSTGRES_DB: ${POSTGRES_DB:-medhin_beza_db}
+    volumes:
+      - mb_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-medhen} -d ${POSTGRES_DB:-medhin_beza_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - medhen_net
+
+  # ─── 2. Medhen Beza Hospital Web Platform & CMS ───────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medhen_hospital_web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-medhen}:${POSTGRES_PASSWORD:-MedhenHospital2026!}@db:5432/${POSTGRES_DB:-medhin_beza_db}?schema=public
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-cloudinary}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
+    volumes:
+      # Persistent local storage for user/staff uploaded media
+      - mb_uploads_data:/app/public/uploads
+    networks:
+      - medhen_net
+    expose:
+      - "3000"
+
+  # ─── 3. Caddy Reverse Proxy & Automatic SSL (100% Free & Open-Source) ─────
+  caddy:
+    image: caddy:2-alpine
+    container_name: medhen_hospital_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    networks:
+      - medhen_net
+
+volumes:
+  mb_postgres_data:
+    name: medhen_postgres_data
+  mb_uploads_data:
+    name: medhen_uploads_data
+  caddy_data:
+    name: medhen_caddy_data
+  caddy_config:
+    name: medhen_caddy_config
+
+networks:
+  medhen_net:
+    name: medhen_hospital_network
+    driver: bridge

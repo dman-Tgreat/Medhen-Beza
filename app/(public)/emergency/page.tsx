@@ -13,6 +13,7 @@ import {
 import { PageHero } from "@/components/sections/Hero";
 import { Button } from "@/components/ui/button";
 import { getPublicSiteSettings, getPublicPageBySlug } from "@/lib/queries/public";
+import { HospitalMap } from "@/components/public/HospitalMap";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSiteSettings();
@@ -185,37 +186,14 @@ export default async function EmergencyPage() {
           </div>
         </section>
 
-        {/* 5. Campus Emergency Gate Location & Map Guidance */}
+        {/* 5. Campus Emergency Gate Location & OpenStreetMap Guidance */}
         <section className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="space-y-1">
-              <h3 className="text-h3 font-bold text-text">
-                Emergency Entrance & Map Navigation
-              </h3>
-              <p className="text-small text-text-muted">
-                Hospital Address: <span className="font-semibold text-text font-mono">{settings.address || settings.location || "Adama, Ethiopia"}</span>. Direct ramp access for ambulances and private emergency vehicles.
-              </p>
-            </div>
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border text-xs font-semibold text-primary hover:bg-primary-light transition-colors shrink-0"
-            >
-              <Navigation className="w-3.5 h-3.5" />
-              Open in Google Maps
-            </a>
-          </div>
-
-          <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-xl overflow-hidden border border-border bg-surface shadow-xs">
-            <iframe
-              title={`${settings.hospitalName} Emergency Location`}
-              src={`https://maps.google.com/maps?q=${mapQuery}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
-              className="w-full h-full border-0 absolute inset-0"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
+          <HospitalMap
+            variant="emergency"
+            title="Emergency Entrance & Map Navigation"
+            subtitle={`Hospital Address: ${settings.address || settings.location || "Adama, Ethiopia"}. Direct ramp access for ambulances and private emergency vehicles.`}
+            address={settings.address || settings.location || "H73F+R49, Adama, Ethiopia"}
+          />
         </section>
       </main>
     </div>
