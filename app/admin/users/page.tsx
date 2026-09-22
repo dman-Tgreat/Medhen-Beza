@@ -48,7 +48,7 @@ const USER_FORM_FIELDS: FormFieldConfig[] = [
     name: "password",
     label: "Account Password (Leave blank to keep current if editing)",
     type: "text",
-    placeholder: "Minimum 6 characters",
+    placeholder: "Minimum 8 characters",
     required: false,
   },
 ];
@@ -186,6 +186,7 @@ export default function UsersAdminPage() {
 
     if (res.error) {
       setActionError(res.error);
+      return { error: res.error };
     } else if (res.data) {
       const saved = res.data;
       if (editingUser) {
@@ -197,6 +198,7 @@ export default function UsersAdminPage() {
       }
       setTimeout(() => setActionSuccess(null), 3000);
       setModalOpen(false);
+      return { success: true };
     }
   };
 

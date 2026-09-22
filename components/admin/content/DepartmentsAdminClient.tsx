@@ -92,8 +92,9 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
     {
       name: "phone",
       label: "Department Extension / Phone",
-      type: "text",
-      placeholder: "+251 11 654 xxxx",
+      type: "tel",
+      placeholder: "e.g. +251 11 654 3000",
+      helperText: "Direct contact line for this clinical department (accepts Ethiopian phone numbers).",
     },
     {
       name: "email",
@@ -231,10 +232,11 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
 
     if (res.error) {
       setErrorMessage(res.error);
-      alert(res.error);
+      return { error: res.error };
     } else {
       setModalOpen(false);
       router.refresh();
+      return { success: true };
     }
   };
 

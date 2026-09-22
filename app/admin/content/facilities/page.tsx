@@ -63,9 +63,10 @@ const FACILITY_FORM_FIELDS: FormFieldConfig[] = [
   {
     name: "phone",
     label: "Direct Extension / Unit Contact Phone",
-    type: "text",
+    type: "tel",
+    allowShortCode: true,
     placeholder: "e.g. +251 11 654 3030",
-    helperText: "Clickable direct inquiry phone in the sidebar.",
+    helperText: "Clickable direct inquiry phone in the sidebar (accepts Ethiopian phone numbers and unit extensions).",
   },
   {
     name: "features",
@@ -249,7 +250,7 @@ export default function FacilitiesAdminPage() {
 
     if (res.error) {
       setActionError(res.error);
-      alert(res.error);
+      return { error: res.error };
     } else if (res.data) {
       const saved = res.data;
       if (editingFac) {
@@ -262,6 +263,7 @@ export default function FacilitiesAdminPage() {
       setTimeout(() => setActionSuccess(null), 3000);
       setModalOpen(false);
       router.refresh();
+      return { success: true };
     }
   };
 

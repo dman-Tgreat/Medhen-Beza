@@ -13,6 +13,17 @@ import {
   revertToDraftAction,
   submitForApprovalAction,
 } from "@/lib/actions/transitions";
+import {
+  departmentSchema,
+  doctorSchema,
+  serviceSchema,
+  careerSchema,
+  newsSchema,
+  eventSchema,
+  faqSchema,
+  gallerySchema,
+} from "@/lib/validation/schemas";
+import { normalizeEthiopianPhone } from "@/lib/validation/phone";
 
 export interface ActionResult<T = any> {
   success?: boolean;
@@ -139,6 +150,11 @@ export async function saveDoctorAction(
         return { error: "Please create at least one Department before adding a Doctor." };
       }
       departmentId = firstDept.id;
+    }
+
+    const docValidation = doctorSchema.safeParse({ ...doctorData, departmentId });
+    if (!docValidation.success) {
+      return { error: docValidation.error.issues[0]?.message || "Invalid doctor profile data." };
     }
 
     if (doctorData.id && !doctorData.id.startsWith("doc-new-")) {
@@ -306,25 +322,32 @@ export async function saveDepartmentAction(
       targetStatus
     );
 
+    const validation = departmentSchema.safeParse(data);
+    if (!validation.success) {
+      return { error: validation.error.issues[0]?.message || "Invalid department information." };
+    }
+    const validated = validation.data;
+    const cleanPhone = validated.phone ? normalizeEthiopianPhone(validated.phone, false) : null;
+
     if (data.id && !data.id.startsWith("dept-new-")) {
       const existing = await db.department.findUnique({ where: { id: data.id }, select: { slug: true } });
-      const slug = data.regenerateSlug ? await uniqueSlug("department", data.slug || data.name, data.id) : existing?.slug || await uniqueSlug("department", data.name);
+      const slug = data.regenerateSlug ? await uniqueSlug("department", data.slug || validated.name, data.id) : existing?.slug || await uniqueSlug("department", validated.name);
       const updated = await db.department.update({
         where: { id: data.id },
         data: {
-          name: data.name,
+          name: validated.name,
           slug,
-          description: data.description,
-          phone: data.phone,
-          email: data.email,
-          location: data.location,
-          workingHours: data.workingHours,
-          headDoctor: data.headDoctor,
-          specializations: data.specializations || [],
-          image: data.image,
-          icon: data.icon,
+          description: validated.description || "",
+          phone: cleanPhone,
+          email: validated.email || null,
+          location: validated.location || data.location,
+          workingHours: validated.workingHours || data.workingHours,
+          headDoctor: validated.headDoctor || data.headDoctor,
+          specializations: validated.specializations || [],
+          image: validated.image || data.image,
+          icon: validated.icon || data.icon,
           isFeatured: data.isFeatured || false,
-          order: Number(data.order) || 0,
+          order: Number(validated.order) || 0,
           status: targetStatus,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
@@ -338,22 +361,22 @@ export async function saveDepartmentAction(
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
     } else {
-      const slug = await uniqueSlug("department", data.slug || data.name);
+      const slug = await uniqueSlug("department", data.slug || validated.name);
       const created = await db.department.create({
         data: {
-          name: data.name,
+          name: validated.name,
           slug,
-          description: data.description,
-          phone: data.phone,
-          email: data.email,
-          location: data.location,
-          workingHours: data.workingHours,
-          headDoctor: data.headDoctor,
-          specializations: data.specializations || [],
-          image: data.image,
-          icon: data.icon,
+          description: validated.description || "",
+          phone: cleanPhone,
+          email: validated.email || null,
+          location: validated.location || data.location,
+          workingHours: validated.workingHours || data.workingHours,
+          headDoctor: validated.headDoctor || data.headDoctor,
+          specializations: validated.specializations || [],
+          image: validated.image || data.image,
+          icon: validated.icon || data.icon,
           isFeatured: data.isFeatured || false,
-          order: Number(data.order) || 0,
+          order: Number(validated.order) || 0,
           status: targetStatus,
           createdById: session.id,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
@@ -433,6 +456,21 @@ export async function saveServiceAction(
       const firstDept = await db.department.findFirst();
       if (!firstDept) return { error: "Please create a department first." };
       departmentId = firstDept.id;
+    }
+
+    const validation = serviceSchema.safeParse({
+      id: data.id,
+      name: data.title,
+      summary: data.description,
+      description: data.content,
+      departmentId,
+      availabilityInfo: data.availabilityInfo,
+      additionalInfo: data.additionalInfo,
+      image: data.image,
+      isEmergency: data.isFeatured,
+    });
+    if (!validation.success) {
+      return { error: validation.error.issues[0]?.message || "Invalid clinical service details." };
     }
 
     if (data.id && !data.id.startsWith("srv-new-")) {
@@ -575,6 +613,21 @@ export async function saveNewsAction(
       ? data.tags.map((t) => t.replace(/^#/, "").trim()).filter(Boolean)
       : [];
 
+    const validation = newsSchema.safeParse({
+      id: data.id,
+      title: data.title,
+      category: data.categoryName || data.categoryId || "General News",
+      excerpt: data.summary,
+      content: data.content,
+      readTime: data.readTime,
+      tags: cleanTags,
+      image: data.featuredImage,
+      author: data.authorName,
+    });
+    if (!validation.success) {
+      return { error: validation.error.issues[0]?.message || "Invalid article details." };
+    }
+
     if (data.id && !data.id.startsWith("news-new-")) {
       const existing = await db.news.findUnique({ where: { id: data.id }, select: { slug: true } });
       const slug = data.regenerateSlug ? await uniqueSlug("news", data.slug || data.title, data.id) : existing?.slug || await uniqueSlug("news", data.title);
@@ -678,6 +731,18 @@ export async function saveGalleryAction(
       targetStatus
     );
 
+    const validation = gallerySchema.safeParse({
+      id: data.id,
+      title: data.title,
+      category: data.album || "General",
+      type: data.type || "IMAGE",
+      url: data.url,
+      thumbnailUrl: data.thumbnailUrl,
+    });
+    if (!validation.success) {
+      return { error: validation.error.issues[0]?.message || "Invalid media asset details." };
+    }
+
     if (data.id && !data.id.startsWith("gal-new-")) {
       const updated = await db.gallery.update({
         where: { id: data.id },
@@ -769,6 +834,18 @@ export async function saveEventAction(
       "Event Mutation",
       targetStatus
     );
+
+    const validation = eventSchema.safeParse({
+      id: data.id,
+      title: data.title,
+      date: String(data.eventDate),
+      location: data.location || "Medhen Beza Hospital Campus",
+      description: data.description,
+      image: data.image,
+    });
+    if (!validation.success) {
+      return { error: validation.error.issues[0]?.message || "Invalid event details." };
+    }
 
     const parsedDate = new Date(data.eventDate);
 
@@ -881,6 +958,21 @@ export async function saveCareerAction(
       if (dept) departmentId = dept.id;
     }
 
+    const validation = careerSchema.safeParse({
+      id: data.id,
+      title: data.position,
+      departmentId: departmentId || "general",
+      employmentType: data.employmentType || "FULL_TIME",
+      location: data.location || "Addis Ababa, Ethiopia",
+      deadline: data.deadline ? String(data.deadline) : undefined,
+      description: data.description,
+      responsibilities: data.responsibilities || [],
+      requirements: data.requirements || [],
+    });
+    if (!validation.success) {
+      return { error: validation.error.issues[0]?.message || "Invalid career vacancy details." };
+    }
+
     const parsedDeadline = new Date(data.deadline);
 
     if (data.id && !data.id.startsWith("car-new-")) {
@@ -983,6 +1075,16 @@ export async function saveFAQAction(
       targetStatus
     );
 
+    const validation = faqSchema.safeParse({
+      id: data.id,
+      question: data.question,
+      answer: data.answer,
+      category: data.category || "General",
+    });
+    if (!validation.success) {
+      return { error: validation.error.issues[0]?.message || "Invalid FAQ details." };
+    }
+
     if (data.id && !data.id.startsWith("faq-new-")) {
       const updated = await db.fAQ.update({
         where: { id: data.id },
@@ -1064,6 +1166,13 @@ export async function savePageAction(
       "Page Mutation",
       targetStatus
     );
+
+    if (!data.title || data.title.trim().length < 2) {
+      return { error: "Page title is required (minimum 2 characters)." };
+    }
+    if (!data.content || data.content.trim().length === 0) {
+      return { error: "Page content cannot be empty." };
+    }
 
     const inputSlug = (data.slug || "").replace(/^\/+/, "").trim();
 

@@ -228,10 +228,11 @@ export function ServicesAdminClient({ initialServices, departments, initialDepar
 
     if (res.error) {
       setErrorMessage(res.error);
-      alert(res.error);
+      return { error: res.error };
     } else {
       setModalOpen(false);
       router.refresh();
+      return { success: true };
     }
   };
 

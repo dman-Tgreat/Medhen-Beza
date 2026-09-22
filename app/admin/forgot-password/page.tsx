@@ -30,8 +30,14 @@ export default function ForgotPasswordPage() {
     setSuccessMessage(null);
     setDevResetUrl(null);
 
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setError("Please provide a valid staff email address.");
+      return;
+    }
+
     const formData = new FormData();
-    formData.set("email", email);
+    formData.set("email", cleanEmail);
 
     startTransition(async () => {
       const result = await requestPasswordResetAction(null, formData);

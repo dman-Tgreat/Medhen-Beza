@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { siteSettingsSchema } from "@/lib/validation/schemas";
 import {
   getAdminSettingsAction,
   saveSiteSettingsAction,
@@ -29,6 +31,8 @@ export default function SettingsAdminPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("contact");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Hospital Contact Info
   const [hospitalName, setHospitalName] = useState("Medhen Beza Specialized Hospital");
@@ -99,6 +103,7 @@ export default function SettingsAdminPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveError(null);
+    setFieldErrors({});
     setIsSaving(true);
     setSavedSuccess(false);
 
@@ -129,11 +134,40 @@ export default function SettingsAdminPage() {
       seo_description: metaDescription,
     };
 
+    // Client-side validation using Zod
+    const validationResult = siteSettingsSchema.safeParse(payload);
+    if (!validationResult.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of validationResult.error.issues) {
+        const field = issue.path[0]?.toString() || "form";
+        if (!errors[field]) errors[field] = issue.message;
+      }
+      setFieldErrors(errors);
+      const firstError = validationResult.error.issues[0]?.message || "Please fix validation errors.";
+      setSaveError(firstError);
+      setIsSaving(false);
+
+      if (
+        errors.hospital_name ||
+        errors.hospital_phone ||
+        errors.hospital_emergency ||
+        errors.ambulance_phone ||
+        errors.hospital_email ||
+        errors.hospital_address
+      ) {
+        setActiveTab("contact");
+      } else if (errors.auto_archive_days) {
+        setActiveTab("workflow");
+      }
+      return;
+    }
+
     const res = await saveSiteSettingsAction(payload);
     setIsSaving(false);
 
     if (res.error) {
       setSaveError(res.error);
+      if (res.fieldErrors) setFieldErrors(res.fieldErrors);
     } else {
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 4000);
@@ -181,7 +215,7 @@ export default function SettingsAdminPage() {
 
         {/* Settings Tabs */}
         <form onSubmit={handleSave}>
-          <Tabs defaultValue="contact" className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="bg-surface border border-border h-11 p-1">
               <TabsTrigger value="contact" className="text-xs">
                 <Phone className="h-3.5 w-3.5 mr-1.5 text-primary" />
@@ -214,49 +248,85 @@ export default function SettingsAdminPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-text">Official Hospital Name</label>
-                  <Input
-                    value={hospitalName}
-                    onChange={(e) => setHospitalName(e.target.value)}
-                    className="text-xs h-9 bg-background"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-text">General Inquiries Email</label>
-                  <Input
-                    value={emailGeneral}
-                    onChange={(e) => setEmailGeneral(e.target.value)}
-                    className="text-xs h-9 bg-background"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-text">Main Telephone Switchboard</label>
-                  <Input
-                    value={phoneMain}
-                    onChange={(e) => setPhoneMain(e.target.value)}
-                    className="text-xs h-9 bg-background font-mono"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-emergency flex items-center gap-1">
-                    <span>Emergency Hotline Number (24/7)</span>
+                  <label className="text-xs font-semibold text-text">
+                    Official Hospital Name <span className="text-emergency">*</span>
                   </label>
                   <Input
-                    value={phoneEmergency}
-                    onChange={(e) => setPhoneEmergency(e.target.value)}
-                    className="text-xs h-9 bg-background font-mono border-emergency/40 text-emergency font-bold"
+                    value={hospitalName}
+                    onChange={(e) => {
+                      setHospitalName(e.target.value);
+                      if (fieldErrors.hospital_name) setFieldErrors({ ...fieldErrors, hospital_name: "" });
+                    }}
+                    className={`text-xs h-9 bg-background ${
+                      fieldErrors.hospital_name ? "border-emergency text-emergency" : ""
+                    }`}
+                  />
+                  {fieldErrors.hospital_name && (
+                    <p className="text-[11px] text-emergency font-medium">{fieldErrors.hospital_name}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-text">
+                    General Inquiries Email <span className="text-emergency">*</span>
+                  </label>
+                  <Input
+                    type="email"
+                    value={emailGeneral}
+                    onChange={(e) => {
+                      setEmailGeneral(e.target.value);
+                      if (fieldErrors.hospital_email) setFieldErrors({ ...fieldErrors, hospital_email: "" });
+                    }}
+                    className={`text-xs h-9 bg-background ${
+                      fieldErrors.hospital_email ? "border-emergency text-emergency" : ""
+                    }`}
+                  />
+                  {fieldErrors.hospital_email && (
+                    <p className="text-[11px] text-emergency font-medium">{fieldErrors.hospital_email}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <PhoneInput
+                    label="Main Telephone Switchboard"
+                    value={phoneMain}
+                    onChange={(val) => {
+                      setPhoneMain(val);
+                      if (fieldErrors.hospital_phone) setFieldErrors({ ...fieldErrors, hospital_phone: "" });
+                    }}
+                    error={fieldErrors.hospital_phone}
+                    helperText="Primary hospital line (e.g. +251 11 654 3210 or 011 654 3210)."
+                    required
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-text">Ambulance Dispatch Line</label>
-                  <Input
+                  <PhoneInput
+                    label="Emergency Hotline Number (24/7)"
+                    value={phoneEmergency}
+                    onChange={(val) => {
+                      setPhoneEmergency(val);
+                      if (fieldErrors.hospital_emergency) setFieldErrors({ ...fieldErrors, hospital_emergency: "" });
+                    }}
+                    allowShortCode
+                    error={fieldErrors.hospital_emergency}
+                    helperText="Critical trauma line (e.g. +251 11 654 9999 or 911 shortcode)."
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <PhoneInput
+                    label="Ambulance Dispatch Line"
                     value={ambulancePhone}
-                    onChange={(e) => setAmbulancePhone(e.target.value)}
-                    className="text-xs h-9 bg-background font-mono"
+                    onChange={(val) => {
+                      setAmbulancePhone(val);
+                      if (fieldErrors.ambulance_phone) setFieldErrors({ ...fieldErrors, ambulance_phone: "" });
+                    }}
+                    allowShortCode
+                    error={fieldErrors.ambulance_phone}
+                    helperText="Direct dispatch desk for emergency ambulance vehicles."
+                    required
                   />
                 </div>
 
@@ -415,9 +485,17 @@ export default function SettingsAdminPage() {
                   <Input
                     type="number"
                     value={autoArchiveDays}
-                    onChange={(e) => setAutoArchiveDays(e.target.value)}
-                    className="text-xs h-9 bg-background"
+                    onChange={(e) => {
+                      setAutoArchiveDays(e.target.value);
+                      if (fieldErrors.auto_archive_days) setFieldErrors({ ...fieldErrors, auto_archive_days: "" });
+                    }}
+                    className={`text-xs h-9 bg-background ${
+                      fieldErrors.auto_archive_days ? "border-emergency text-emergency" : ""
+                    }`}
                   />
+                  {fieldErrors.auto_archive_days && (
+                    <p className="text-[11px] text-emergency font-medium">{fieldErrors.auto_archive_days}</p>
+                  )}
                 </div>
               </div>
             </TabsContent>

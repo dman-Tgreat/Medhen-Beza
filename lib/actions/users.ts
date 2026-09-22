@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { adminUserSchema } from "@/lib/validation/schemas";
 
 export interface ActionResult<T = any> {
   success?: boolean;
@@ -100,6 +101,19 @@ export async function saveAdminUserAction(data: {
       return { error: `Invalid role specified: ${data.roleCode}` };
     }
 
+    const validation = adminUserSchema.safeParse(data);
+    if (!validation.success) {
+      return { error: validation.error.issues[0]?.message || "Invalid user credentials provided." };
+    }
+    const validated = validation.data;
+
+    const existingWithEmail = await db.user.findUnique({
+      where: { email: validated.email },
+    });
+    if (existingWithEmail && existingWithEmail.id !== data.id) {
+      return { error: `A staff member with email "${validated.email}" already exists.` };
+    }
+
     if (data.id) {
       // UPDATE EXISTING USER
       const existingUser = await db.user.findUnique({
@@ -111,8 +125,8 @@ export async function saveAdminUserAction(data: {
       }
 
       const updateData: any = {
-        name: data.name,
-        email: data.email.toLowerCase().trim(),
+        name: validated.name,
+        email: validated.email,
       };
 
       if (data.password && data.password.trim().length >= 6) {

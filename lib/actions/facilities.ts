@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import { ContentStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { facilitySchema } from "@/lib/validation/schemas";
+import { normalizeEthiopianPhone } from "@/lib/validation/phone";
 
 export interface ActionResult<T = any> {
   success?: boolean;
@@ -129,30 +131,37 @@ export async function saveAdminFacilityAction(
       targetStatus = data.status;
     }
 
-    const cleanCategory = (data.category || "").trim() || "Clinical Unit";
-    const cleanFeatures = Array.isArray(data.features)
-      ? data.features.map((f) => f.trim()).filter(Boolean)
+    const validation = facilitySchema.safeParse(data);
+    if (!validation.success) {
+      return { error: validation.error.issues[0]?.message || "Invalid facility details provided." };
+    }
+
+    const validated = validation.data;
+    const cleanCategory = (validated.category || "").trim() || "Clinical Unit";
+    const cleanFeatures = Array.isArray(validated.features)
+      ? validated.features.map((f) => f.trim()).filter(Boolean)
       : [];
+    const cleanPhone = validated.phone ? normalizeEthiopianPhone(validated.phone, true) : null;
 
     if (data.id && !data.id.startsWith("fac-new-")) {
       const existing = await db.facility.findUnique({ where: { id: data.id } });
-      const slug = data.slug || existing?.slug || (await uniqueFacilitySlug(data.name, data.id));
+      const slug = validated.slug || existing?.slug || (await uniqueFacilitySlug(validated.name, data.id));
 
       const updated = await db.facility.update({
         where: { id: data.id },
         data: {
-          name: data.name,
+          name: validated.name,
           slug,
-          tagline: data.tagline,
-          description: data.description || "",
+          tagline: validated.tagline,
+          description: validated.description || "",
           category: cleanCategory,
-          capacity: data.capacity,
-          location: data.location,
-          hours: data.hours,
-          phone: data.phone,
+          capacity: validated.capacity,
+          location: validated.location,
+          hours: validated.hours,
+          phone: cleanPhone,
           features: cleanFeatures,
-          image: data.image,
-          order: Number(data.order) || 0,
+          image: validated.image,
+          order: Number(validated.order) || 0,
           status: targetStatus,
           publishedById: targetStatus === ContentStatus.PUBLISHED ? session.id : undefined,
           publishedAt: targetStatus === ContentStatus.PUBLISHED ? new Date() : undefined,
@@ -187,22 +196,22 @@ export async function saveAdminFacilityAction(
         },
       };
     } else {
-      const slug = await uniqueFacilitySlug(data.name);
+      const slug = await uniqueFacilitySlug(validated.name);
 
       const created = await db.facility.create({
         data: {
-          name: data.name,
+          name: validated.name,
           slug,
-          tagline: data.tagline,
-          description: data.description || "",
+          tagline: validated.tagline,
+          description: validated.description || "",
           category: cleanCategory,
-          capacity: data.capacity,
-          location: data.location,
-          hours: data.hours,
-          phone: data.phone,
+          capacity: validated.capacity,
+          location: validated.location,
+          hours: validated.hours,
+          phone: cleanPhone,
           features: cleanFeatures,
-          image: data.image || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
-          order: Number(data.order) || 0,
+          image: validated.image || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+          order: Number(validated.order) || 0,
           status: targetStatus,
           createdById: session.id,
           publishedById: targetStatus === ContentStatus.PUBLISHED ? session.id : undefined,

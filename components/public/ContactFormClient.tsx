@@ -16,11 +16,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { HOSPITAL_INFO } from "@/lib/constants";
 import type { DepartmentDetailData } from "@/lib/mock-data";
 import type { PublicSiteSettings } from "@/lib/queries/public";
 import { submitContactMessageAction } from "@/lib/actions/contact";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { contactMessageSchema } from "@/lib/validation/schemas";
+import { parseEthiopianPhone } from "@/lib/validation/phone";
+import { HospitalMap } from "./HospitalMap";
 
 interface ContactFormData {
   fullName: string;
@@ -47,30 +51,75 @@ export function ContactFormClient({
     message: "",
   });
 
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitSuccess, setSubmitSuccess] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
 
+  const validateClientSide = (): boolean => {
+    const result = contactMessageSchema.safeParse(formData);
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const field = issue.path[0]?.toString() || "form";
+        if (!errors[field]) {
+          errors[field] = issue.message;
+        }
+      }
+      setFieldErrors(errors);
+      return false;
+    }
+    setFieldErrors({});
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitError(null);
-    setIsSubmitting(true);
-    const result = await submitContactMessageAction(new FormData(e.currentTarget));
-    setIsSubmitting(false);
-    if (result.error) {
-      setSubmitError(result.error);
+
+    // Run client validation first to provide instant feedback
+    if (!validateClientSide()) {
       return;
     }
-    if (result.success) {
-      setSubmitSuccess(true);
-      setFormData({
-        fullName: "",
-        email: "",
-        phone: "",
-        department: "General Inquiries",
-        subject: "",
-        message: "",
-      });
+
+    setIsSubmitting(true);
+    const formPayload = new FormData();
+    formPayload.set("fullName", formData.fullName);
+    formPayload.set("email", formData.email);
+    formPayload.set("phone", formData.phone);
+    formPayload.set("department", formData.department);
+    formPayload.set("subject", formData.subject);
+    formPayload.set("message", formData.message);
+
+    try {
+      const result = await submitContactMessageAction(formPayload);
+      setIsSubmitting(false);
+
+      if (result.error) {
+        setSubmitError(result.error);
+        if (result.fieldErrors) {
+          setFieldErrors(result.fieldErrors);
+        }
+        return;
+      }
+
+      if (result.success) {
+        setSubmitSuccess(true);
+        setFieldErrors({});
+        setFormData({
+          fullName: "",
+          email: "",
+          phone: "",
+          department: "General Inquiries",
+          subject: "",
+          message: "",
+        });
+      }
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setSubmitError(
+        "A network error occurred while submitting your message. Please check your connection or contact the hospital directly."
+      );
     }
   };
 
@@ -104,17 +153,19 @@ export function ContactFormClient({
               </Button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div className="hidden" aria-hidden="true">
                 <label htmlFor="website">Website</label>
                 <input id="website" name="website" tabIndex={-1} autoComplete="off" />
               </div>
+
               {submitError && (
                 <Alert variant="emergency">
                   <AlertTitle>Unable to send inquiry</AlertTitle>
                   <AlertDescription>{submitError}</AlertDescription>
                 </Alert>
               )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-text">
@@ -124,10 +175,22 @@ export function ContactFormClient({
                     name="fullName"
                     required
                     value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, fullName: e.target.value });
+                      if (fieldErrors.fullName) {
+                        setFieldErrors({ ...fieldErrors, fullName: "" });
+                      }
+                    }}
                     placeholder="e.g. Abebe Bekele"
-                    className="bg-background h-10 text-xs"
+                    className={`bg-background h-10 text-xs ${
+                      fieldErrors.fullName ? "border-emergency text-emergency" : ""
+                    }`}
                   />
+                  {fieldErrors.fullName && (
+                    <p className="text-[11px] text-emergency font-medium">
+                      {fieldErrors.fullName}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
@@ -139,23 +202,39 @@ export function ContactFormClient({
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      if (fieldErrors.email) {
+                        setFieldErrors({ ...fieldErrors, email: "" });
+                      }
+                    }}
                     placeholder="name@example.com"
-                    className="bg-background h-10 text-xs"
+                    className={`bg-background h-10 text-xs ${
+                      fieldErrors.email ? "border-emergency text-emergency" : ""
+                    }`}
                   />
+                  {fieldErrors.email && (
+                    <p className="text-[11px] text-emergency font-medium">
+                      {fieldErrors.email}
+                    </p>
+                  )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-text">Phone Number</label>
-                  <Input
-                    name="phone"
-                    type="tel"
+                  <PhoneInput
+                    label="Phone Number"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+251 91 123 4567"
-                    className="bg-background h-10 text-xs"
+                    onChange={(val) => {
+                      setFormData({ ...formData, phone: val });
+                      if (fieldErrors.phone) {
+                        setFieldErrors({ ...fieldErrors, phone: "" });
+                      }
+                    }}
+                    error={fieldErrors.phone}
+                    helperText="Accepts Ethio Telecom (09...) & Safaricom (07...)"
+                    className="h-10 bg-background"
                   />
                 </div>
 
@@ -185,10 +264,22 @@ export function ContactFormClient({
                   name="subject"
                   required
                   value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, subject: e.target.value });
+                    if (fieldErrors.subject) {
+                      setFieldErrors({ ...fieldErrors, subject: "" });
+                    }
+                  }}
                   placeholder="e.g. Cardiology consultation appointment inquiry"
-                  className="bg-background h-10 text-xs"
+                  className={`bg-background h-10 text-xs ${
+                    fieldErrors.subject ? "border-emergency text-emergency" : ""
+                  }`}
                 />
+                {fieldErrors.subject && (
+                  <p className="text-[11px] text-emergency font-medium">
+                    {fieldErrors.subject}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -200,10 +291,22 @@ export function ContactFormClient({
                   required
                   rows={4}
                   value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, message: e.target.value });
+                    if (fieldErrors.message) {
+                      setFieldErrors({ ...fieldErrors, message: "" });
+                    }
+                  }}
                   placeholder="Please describe your inquiry or appointment requirements in detail..."
-                  className="w-full rounded-md border border-border bg-background p-3 text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary"
+                  className={`w-full rounded-md border bg-background p-3 text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary ${
+                    fieldErrors.message ? "border-emergency text-emergency" : "border-border"
+                  }`}
                 />
+                {fieldErrors.message && (
+                  <p className="text-[11px] text-emergency font-medium">
+                    {fieldErrors.message}
+                  </p>
+                )}
               </div>
 
               <Button
@@ -303,39 +406,12 @@ export function ContactFormClient({
         </div>
       </div>
 
-      {/* Hospital Campus Map Section */}
-      <div className="mt-8 bg-surface rounded-3xl border border-border p-6 sm:p-8 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
-              <MapPin className="h-4 w-4" />
-              Hospital Campus Location
-            </div>
-            <h3 className="text-h3 font-bold text-text">Campus Location & Interactive Map</h3>
-            <p className="text-small text-text-muted">
-              Location Plus Code: <span className="font-semibold text-text font-mono">H73F+R49, Adama</span> · {settings?.address || "H73F+R49, Adama, Ethiopia"}
-            </p>
-          </div>
-          <a
-            href="https://www.google.com/maps/search/?api=1&query=H73F%2BR49%2C+Adama"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-dark shadow-sm transition-colors shrink-0"
-          >
-            <Navigation className="h-4 w-4" />
-            Open in Google Maps
-          </a>
-        </div>
-
-        <div className="relative aspect-[16/9] md:aspect-[21/8] rounded-2xl overflow-hidden border border-border bg-background shadow-inner">
-          <iframe
-            title="Hospital Campus Location - H73F+R49, Adama"
-            src="https://maps.google.com/maps?q=H73F%2BR49%2C+Adama&t=&z=16&ie=UTF8&iwloc=&output=embed"
-            className="w-full h-full border-0 absolute inset-0"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        </div>
+      {/* Hospital Campus Map Section (100% Open-Source OpenStreetMap) */}
+      <div className="mt-8 bg-surface rounded-3xl border border-border p-6 sm:p-8 shadow-sm">
+        <HospitalMap
+          address={settings?.address || HOSPITAL_INFO.address}
+          plusCode={HOSPITAL_INFO.plusCode}
+        />
       </div>
     </div>
   );
