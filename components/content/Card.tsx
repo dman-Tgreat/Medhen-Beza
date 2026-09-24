@@ -3,6 +3,8 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+import { useI18n } from "@/components/i18n/I18nProvider";
+
 // ─── Card Root ────────────────────────────────────────────────────────────────
 
 export interface CardRootProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -107,19 +109,24 @@ export interface CardLinkProps
 }
 
 export const CardLink = React.forwardRef<HTMLAnchorElement, CardLinkProps>(
-  ({ label = "Learn more", className, children, ...props }, ref) => (
-    <a
-      ref={ref}
-      className={cn(
-        "group/link inline-flex items-center gap-1",
-        "text-small font-semibold text-primary",
-        "transition-[gap,opacity] duration-200",
-        "hover:gap-2 focus-visible:outline-none focus-visible:underline",
-        className
-      )}
-      {...props}
-    >
-      {children ?? label}
+  ({ label, className, children, ...props }, ref) => {
+    const { t } = useI18n();
+    const fallbackLabel = t("common.learnMore") || "Learn more";
+    const resolvedLabel = label ?? fallbackLabel;
+
+    return (
+      <a
+        ref={ref}
+        className={cn(
+          "group/link inline-flex items-center gap-1",
+          "text-small font-semibold text-primary",
+          "transition-[gap,opacity] duration-200",
+          "hover:gap-2 focus-visible:outline-none focus-visible:underline",
+          className
+        )}
+        {...props}
+      >
+        {children ?? resolvedLabel}
       <svg
         aria-hidden
         className="w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-hover/link:translate-x-0.5"
@@ -133,6 +140,7 @@ export const CardLink = React.forwardRef<HTMLAnchorElement, CardLinkProps>(
         <path d="M3 8h10M9 4l4 4-4 4" />
       </svg>
     </a>
-  )
+  );
+}
 );
 CardLink.displayName = "CardLink";

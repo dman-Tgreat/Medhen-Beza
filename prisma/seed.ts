@@ -1,5 +1,6 @@
 import { PrismaClient, ContentStatus, MediaType, EmploymentType } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -90,29 +91,30 @@ async function main() {
 
   const actions = ["CREATE", "READ", "UPDATE", "DELETE", "APPROVE", "PUBLISH", "ARCHIVE"];
 
-  const permissions: Array<{ id: string; action: string; resource: string }> = [];
+  const permissionsData: Array<{ id: string; action: string; resource: string; description: string }> = [];
   for (const resource of resources) {
     for (const action of actions) {
-      const perm = await prisma.permission.create({
-        data: {
-          action,
-          resource,
-          description: `Permission to ${action} on ${resource}`,
-        },
+      permissionsData.push({
+        id: crypto.randomUUID(),
+        action,
+        resource,
+        description: `Permission to ${action} on ${resource}`,
       });
-      permissions.push(perm);
     }
   }
+  await prisma.permission.createMany({ data: permissionsData });
+  const permissions = permissionsData;
   console.log(`✅ Seeded ${permissions.length} granular permissions.`);
 
   // ─── 4. Map Permissions to Roles (Content Ownership Matrix §26) ────────────
+  const rolePermissionsData: Array<{ id: string; roleId: string; permissionId: string }> = [];
+
   // Hospital Director: ALL permissions
   for (const perm of permissions) {
-    await prisma.rolePermission.create({
-      data: {
-        roleId: roles["HOSPITAL_DIRECTOR"].id,
-        permissionId: perm.id,
-      },
+    rolePermissionsData.push({
+      id: crypto.randomUUID(),
+      roleId: roles["HOSPITAL_DIRECTOR"].id,
+      permissionId: perm.id,
     });
   }
 
@@ -121,13 +123,17 @@ async function main() {
   for (const perm of permissions) {
     if (medicalDirectorResources.includes(perm.resource)) {
       if (["CREATE", "READ", "UPDATE", "DELETE"].includes(perm.action)) {
-        await prisma.rolePermission.create({
-          data: { roleId: roles["MEDICAL_DIRECTOR"].id, permissionId: perm.id },
+        rolePermissionsData.push({
+          id: crypto.randomUUID(),
+          roleId: roles["MEDICAL_DIRECTOR"].id,
+          permissionId: perm.id,
         });
       }
     } else if (perm.action === "READ") {
-      await prisma.rolePermission.create({
-        data: { roleId: roles["MEDICAL_DIRECTOR"].id, permissionId: perm.id },
+      rolePermissionsData.push({
+        id: crypto.randomUUID(),
+        roleId: roles["MEDICAL_DIRECTOR"].id,
+        permissionId: perm.id,
       });
     }
   }
@@ -136,13 +142,17 @@ async function main() {
   for (const perm of permissions) {
     if (perm.resource === "CAREERS") {
       if (["CREATE", "READ", "UPDATE", "DELETE", "ARCHIVE"].includes(perm.action)) {
-        await prisma.rolePermission.create({
-          data: { roleId: roles["HR_STAFF"].id, permissionId: perm.id },
+        rolePermissionsData.push({
+          id: crypto.randomUUID(),
+          roleId: roles["HR_STAFF"].id,
+          permissionId: perm.id,
         });
       }
     } else if (perm.action === "READ") {
-      await prisma.rolePermission.create({
-        data: { roleId: roles["HR_STAFF"].id, permissionId: perm.id },
+      rolePermissionsData.push({
+        id: crypto.randomUUID(),
+        roleId: roles["HR_STAFF"].id,
+        permissionId: perm.id,
       });
     }
   }
@@ -152,13 +162,17 @@ async function main() {
   for (const perm of permissions) {
     if (contentStaffResources.includes(perm.resource)) {
       if (["CREATE", "READ", "UPDATE", "DELETE"].includes(perm.action)) {
-        await prisma.rolePermission.create({
-          data: { roleId: roles["CONTENT_STAFF"].id, permissionId: perm.id },
+        rolePermissionsData.push({
+          id: crypto.randomUUID(),
+          roleId: roles["CONTENT_STAFF"].id,
+          permissionId: perm.id,
         });
       }
     } else if (perm.action === "READ") {
-      await prisma.rolePermission.create({
-        data: { roleId: roles["CONTENT_STAFF"].id, permissionId: perm.id },
+      rolePermissionsData.push({
+        id: crypto.randomUUID(),
+        roleId: roles["CONTENT_STAFF"].id,
+        permissionId: perm.id,
       });
     }
   }
@@ -167,16 +181,21 @@ async function main() {
   const sysAdminResources = ["USERS", "ROLES", "SETTINGS", "AUDIT_LOGS", "MESSAGES", "MEDIA"];
   for (const perm of permissions) {
     if (sysAdminResources.includes(perm.resource)) {
-      await prisma.rolePermission.create({
-        data: { roleId: roles["SYSTEM_ADMIN"].id, permissionId: perm.id },
+      rolePermissionsData.push({
+        id: crypto.randomUUID(),
+        roleId: roles["SYSTEM_ADMIN"].id,
+        permissionId: perm.id,
       });
     } else if (perm.action === "READ") {
-      await prisma.rolePermission.create({
-        data: { roleId: roles["SYSTEM_ADMIN"].id, permissionId: perm.id },
+      rolePermissionsData.push({
+        id: crypto.randomUUID(),
+        roleId: roles["SYSTEM_ADMIN"].id,
+        permissionId: perm.id,
       });
     }
   }
 
+  await prisma.rolePermission.createMany({ data: rolePermissionsData });
   console.log("✅ Configured role permission matrices.");
 
   // ─── 5. Seed Initial Administrative Users ──────────────────────────────────

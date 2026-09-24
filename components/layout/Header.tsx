@@ -18,10 +18,33 @@ import {
 } from "@/lib/constants";
 import { EmergencyButton } from "@/components/ui/emergency-button";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import type { SupportedLocale } from "@/lib/i18n/config";
 import type { PublicSiteSettings } from "@/lib/queries/public";
 
+const NAV_TRANSLATION_KEYS: Record<string, string> = {
+  "/services": "nav.services",
+  "/departments": "nav.departments",
+  "/doctors": "nav.doctors",
+  "/facilities": "nav.facilities",
+  "/about": "nav.about",
+  "/news": "nav.news",
+  "/events": "nav.events",
+  "/careers": "nav.careers",
+  "/gallery": "nav.gallery",
+  "/faqs": "nav.faqs",
+  "/contact": "nav.contact",
+};
+
 // ─── Logo ─────────────────────────────────────────────────────────────────────
-function Logo({ hospitalName = "Medhen Beza Hospital" }: { hospitalName?: string }) {
+function Logo({
+  hospitalName = "Medhen Beza Hospital",
+  locale = "en",
+}: {
+  hospitalName?: string;
+  locale?: string;
+}) {
   // If name has "Hospital", separate it for the subtitle styling
   const hasHospital = hospitalName.toLowerCase().includes("hospital");
   const mainName = hasHospital
@@ -30,7 +53,7 @@ function Logo({ hospitalName = "Medhen Beza Hospital" }: { hospitalName?: string
 
   return (
     <Link
-      href="/"
+      href={`/${locale}`}
       className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
       aria-label={`${hospitalName} — home`}
     >
@@ -54,15 +77,19 @@ interface NavLinkProps {
   href: string;
   name: string;
   pathname: string;
+  locale: string;
 }
 
-function NavLink({ href, name, pathname }: NavLinkProps) {
+function NavLink({ href, name, pathname, locale }: NavLinkProps) {
+  const targetHref = `/${locale}${href === "/" ? "" : href}`;
   const isActive =
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+    href === "/"
+      ? pathname === `/${locale}` || pathname === "/"
+      : pathname.startsWith(targetHref);
 
   return (
     <Link
-      href={href}
+      href={targetHref}
       className={cn(
         "relative px-1 py-1 text-sm font-medium transition-colors duration-150",
         "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full",
@@ -81,9 +108,10 @@ function NavLink({ href, name, pathname }: NavLinkProps) {
 }
 
 // ─── "More" Dropdown ─────────────────────────────────────────────────────────
-function MoreDropdown({ pathname }: { pathname: string }) {
+function MoreDropdown({ pathname, locale }: { pathname: string; locale: string }) {
+  const { t } = useI18n();
   const isAnyMoreActive = MORE_NAV_LINKS.some((l) =>
-    pathname.startsWith(l.href)
+    pathname.startsWith(`/${locale}${l.href}`)
   );
 
   return (
@@ -97,7 +125,7 @@ function MoreDropdown({ pathname }: { pathname: string }) {
           isAnyMoreActive ? "text-primary font-semibold" : "text-text-muted"
         )}
       >
-        More
+        {t("nav.more")}
         <ChevronDown className="w-3.5 h-3.5 opacity-60 transition-transform duration-200 group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
 
@@ -107,11 +135,14 @@ function MoreDropdown({ pathname }: { pathname: string }) {
         className="w-48 rounded-xl border border-border bg-surface shadow-dropdown p-1"
       >
         {MORE_NAV_LINKS.map((link) => {
-          const isActive = pathname.startsWith(link.href);
+          const targetHref = `/${locale}${link.href}`;
+          const isActive = pathname.startsWith(targetHref);
+          const label = NAV_TRANSLATION_KEYS[link.href] ? t(NAV_TRANSLATION_KEYS[link.href]) : link.name;
+
           return (
             <DropdownMenuItem key={link.href} asChild>
               <Link
-                href={link.href}
+                href={targetHref}
                 className={cn(
                   "flex items-center px-3 py-2.5 rounded-lg text-sm font-medium",
                   "transition-colors duration-100 cursor-pointer",
@@ -122,7 +153,7 @@ function MoreDropdown({ pathname }: { pathname: string }) {
                 )}
                 aria-current={isActive ? "page" : undefined}
               >
-                {link.name}
+                {label}
               </Link>
             </DropdownMenuItem>
           );
@@ -133,8 +164,16 @@ function MoreDropdown({ pathname }: { pathname: string }) {
 }
 
 // ─── Header ──────────────────────────────────────────────────────────────────
-export function Header({ settings }: { settings?: PublicSiteSettings }) {
+export function Header({
+  settings,
+  currentLocale,
+}: {
+  settings?: PublicSiteSettings;
+  currentLocale?: SupportedLocale;
+}) {
   const pathname = usePathname();
+  const { t, locale } = useI18n();
+  const effectiveLocale = currentLocale || locale;
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
@@ -159,31 +198,39 @@ export function Header({ settings }: { settings?: PublicSiteSettings }) {
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[72px] lg:h-[80px]">
             {/* Logo — always visible */}
-            <Logo hospitalName={settings?.hospitalName} />
+            <Logo hospitalName={settings?.hospitalName} locale={effectiveLocale} />
 
             {/* Desktop nav — hidden on mobile */}
             <nav
               aria-label="Primary navigation"
               className="hidden lg:flex items-center gap-6"
             >
-              {PRIMARY_NAV_LINKS.map((link) => (
-                <NavLink
-                  key={link.href}
-                  href={link.href}
-                  name={link.name}
-                  pathname={pathname}
-                />
-              ))}
-              <MoreDropdown pathname={pathname} />
+              {PRIMARY_NAV_LINKS.map((link) => {
+                const label = NAV_TRANSLATION_KEYS[link.href] ? t(NAV_TRANSLATION_KEYS[link.href]) : link.name;
+                return (
+                  <NavLink
+                    key={link.href}
+                    href={link.href}
+                    name={label}
+                    pathname={pathname}
+                    locale={effectiveLocale}
+                  />
+                );
+              })}
+              <MoreDropdown pathname={pathname} locale={effectiveLocale} />
               <NavLink
                 href={CONTACT_NAV_LINK.href}
-                name={CONTACT_NAV_LINK.name}
+                name={t("nav.contact")}
                 pathname={pathname}
+                locale={effectiveLocale}
               />
             </nav>
 
             {/* Right-side actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              {/* Language Switcher Dropdown */}
+              <LanguageSwitcher currentLocale={effectiveLocale} className="hidden sm:inline-flex" />
+
               {/* Emergency button — always visible on desktop, hidden on mobile (accessible in drawer) */}
               <EmergencyButton
                 phone={settings?.emergencyPhone}
@@ -197,7 +244,7 @@ export function Header({ settings }: { settings?: PublicSiteSettings }) {
                 aria-expanded={isMobileNavOpen}
                 aria-controls="mobile-nav"
                 aria-label={
-                  isMobileNavOpen ? "Close navigation menu" : "Open navigation menu"
+                  isMobileNavOpen ? t("nav.closeMenu") : t("nav.openMenu")
                 }
                 className={cn(
                   "lg:hidden w-11 h-11 flex items-center justify-center rounded-xl",
@@ -223,6 +270,7 @@ export function Header({ settings }: { settings?: PublicSiteSettings }) {
         isOpen={isMobileNavOpen}
         onClose={closeMobileNav}
         settings={settings}
+        currentLocale={effectiveLocale}
       />
     </>
   );

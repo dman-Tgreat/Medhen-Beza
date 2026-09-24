@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 export interface BreadcrumbItem {
   label: string;
@@ -14,15 +17,11 @@ export interface BreadcrumbsProps {
 }
 
 /**
- * Breadcrumbs — renders "Home / Section / Current Page" navigation.
- *
- * Usage (on a Doctor profile page):
- *   <Breadcrumbs items={[{ label: "Doctors", href: "/doctors" }, { label: "Dr. Abebe Example" }]} />
- *
- * "Home" is always auto-prepended. Pass items without a Home entry.
- * The last item (no href) is the current page and is styled as active.
+ * Breadcrumbs — renders "Home / Section / Current Page" navigation with locale support.
  */
 export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
+  const { locale, t } = useI18n();
+
   return (
     <nav
       aria-label="Breadcrumb"
@@ -32,7 +31,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
         {/* Home */}
         <li className="flex items-center gap-0.5">
           <Link
-            href="/"
+            href={`/${locale}`}
             className={cn(
               "flex items-center gap-1 px-1 py-0.5 rounded-sm",
               "text-text-muted hover:text-primary transition-colors",
@@ -40,21 +39,29 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
             )}
           >
             <Home className="w-3.5 h-3.5 shrink-0" aria-hidden />
-            <span>Home</span>
+            <span>{t("nav.home") || "Home"}</span>
           </Link>
         </li>
 
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
+          const resolvedHref = item.href
+            ? item.href.startsWith(`/${locale}`)
+              ? item.href
+              : item.href.startsWith("/")
+              ? `/${locale}${item.href}`
+              : `/${locale}/${item.href}`
+            : undefined;
+
           return (
             <li key={index} className="flex items-center gap-0.5">
               <ChevronRight
                 className="w-3.5 h-3.5 text-border shrink-0"
                 aria-hidden
               />
-              {item.href && !isLast ? (
+              {resolvedHref && !isLast ? (
                 <Link
-                  href={item.href}
+                  href={resolvedHref}
                   className={cn(
                     "px-1 py-0.5 rounded-sm",
                     "text-text-muted hover:text-primary transition-colors",

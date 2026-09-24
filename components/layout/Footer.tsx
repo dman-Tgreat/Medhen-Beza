@@ -2,17 +2,24 @@ import Link from "next/link";
 import { HeartPulse, Phone, Mail, MapPin, Clock } from "lucide-react";
 import { HOSPITAL_INFO, FOOTER_QUICK_LINKS, FOOTER_HOSPITAL_LINKS } from "@/lib/constants";
 import { EmergencyButton } from "@/components/ui/emergency-button";
+import type { SupportedLocale } from "@/lib/i18n/config";
 import type { PublicSiteSettings } from "@/lib/queries/public";
 
 // ─── Footer Logo ──────────────────────────────────────────────────────────────
-function FooterLogo({ hospitalName = "Medhen Beza Hospital" }: { hospitalName?: string }) {
+function FooterLogo({
+  hospitalName = "Medhen Beza Hospital",
+  locale = "en",
+}: {
+  hospitalName?: string;
+  locale?: string;
+}) {
   const hasHospital = hospitalName.toLowerCase().includes("hospital");
   const mainName = hasHospital
     ? hospitalName.replace(/hospital/i, "").trim()
     : hospitalName;
 
   return (
-    <div className="flex items-center gap-3">
+    <Link href={`/${locale}`} className="flex items-center gap-3">
       <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shrink-0">
         <HeartPulse className="w-5 h-5" aria-hidden />
       </div>
@@ -22,7 +29,7 @@ function FooterLogo({ hospitalName = "Medhen Beza Hospital" }: { hospitalName?: 
           {hasHospital ? "Hospital" : "Medical Care"}
         </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -38,15 +45,17 @@ function ColHeading({ children }: { children: React.ReactNode }) {
 // ─── Footer link list ─────────────────────────────────────────────────────────
 function FooterLinkList({
   links,
+  locale = "en",
 }: {
   links: ReadonlyArray<{ name: string; href: string }>;
+  locale?: string;
 }) {
   return (
     <ul className="flex flex-col gap-2.5">
       {links.map((link) => (
         <li key={link.href}>
           <Link
-            href={link.href}
+            href={`/${locale}${link.href}`}
             className="text-sm text-slate-400 hover:text-white transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-sm"
           >
             {link.name}
@@ -74,7 +83,13 @@ function ContactRow({
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
-export function Footer({ settings }: { settings?: PublicSiteSettings }) {
+export function Footer({
+  settings,
+  currentLocale = "en",
+}: {
+  settings?: PublicSiteSettings;
+  currentLocale?: SupportedLocale;
+}) {
   const year = new Date().getFullYear();
   const hospitalName = settings?.hospitalName || HOSPITAL_INFO.name;
   const description = settings?.description || HOSPITAL_INFO.description;
@@ -84,15 +99,53 @@ export function Footer({ settings }: { settings?: PublicSiteSettings }) {
   const hours = settings?.hours || HOSPITAL_INFO.hours;
   const emergencyPhone = settings?.emergencyPhone || HOSPITAL_INFO.emergencyPhone;
 
+  const headings = {
+    quickLinks:
+      currentLocale === "am"
+        ? "ፈጣን ማገናኛዎች"
+        : currentLocale === "om"
+        ? "Geessituu Saffisaa"
+        : "Quick Links",
+    hospital:
+      currentLocale === "am"
+        ? "ስለ ሆስፒታሉ"
+        : currentLocale === "om"
+        ? "Waa'ee Hospitaalaa"
+        : "Hospital",
+    contact:
+      currentLocale === "am"
+        ? "አድራሻ እና ስልክ"
+        : currentLocale === "om"
+        ? "Qunnamtii"
+        : "Contact",
+    emergency:
+      currentLocale === "am"
+        ? "የድንገተኛ ህክምና"
+        : currentLocale === "om"
+        ? "Balaa Tasaa"
+        : "Emergency",
+    emergencyText:
+      currentLocale === "am"
+        ? "የ24 ሰዓት የድንገተኛ ህክምና ክፍላችን ዘወትር ክፍት ነው። በማንኛውም ሰዓት ይደውሉ ወይም ይምጡ።"
+        : currentLocale === "om"
+        ? "Gareen yaala tasaa keenya sa'aatii 24 qophiidha. Bilbilaa ykn kottaa — isiniif jirra."
+        : "Our 24/7 emergency team is always ready. Call or come in — we're here.",
+    rights:
+      currentLocale === "am"
+        ? "መብቱ በህግ የተጠበቀ ነው።"
+        : currentLocale === "om"
+        ? "Mirgi qophaa'aa dha."
+        : "All rights reserved.",
+  };
+
   return (
     <footer className="bg-slate-900 text-slate-300" aria-label="Site footer">
       {/* Main footer grid */}
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
-
           {/* Col 1 — Brand */}
           <div className="sm:col-span-2 lg:col-span-1 space-y-4">
-            <FooterLogo hospitalName={hospitalName} />
+            <FooterLogo hospitalName={hospitalName} locale={currentLocale} />
             <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
               {description}
             </p>
@@ -100,19 +153,19 @@ export function Footer({ settings }: { settings?: PublicSiteSettings }) {
 
           {/* Col 2 — Quick Links */}
           <div>
-            <ColHeading>Quick Links</ColHeading>
-            <FooterLinkList links={FOOTER_QUICK_LINKS} />
+            <ColHeading>{headings.quickLinks}</ColHeading>
+            <FooterLinkList links={FOOTER_QUICK_LINKS} locale={currentLocale} />
           </div>
 
           {/* Col 3 — Hospital */}
           <div>
-            <ColHeading>Hospital</ColHeading>
-            <FooterLinkList links={FOOTER_HOSPITAL_LINKS} />
+            <ColHeading>{headings.hospital}</ColHeading>
+            <FooterLinkList links={FOOTER_HOSPITAL_LINKS} locale={currentLocale} />
           </div>
 
           {/* Col 4 — Contact */}
           <div>
-            <ColHeading>Contact</ColHeading>
+            <ColHeading>{headings.contact}</ColHeading>
             <div className="flex flex-col gap-3">
               <ContactRow icon={MapPin}>{address}</ContactRow>
               <ContactRow icon={Phone}>
@@ -137,10 +190,10 @@ export function Footer({ settings }: { settings?: PublicSiteSettings }) {
 
           {/* Col 5 — Emergency CTA */}
           <div>
-            <ColHeading>Emergency</ColHeading>
+            <ColHeading>{headings.emergency}</ColHeading>
             <div className="bg-emergency/10 border border-emergency/20 rounded-xl p-4 space-y-3">
               <p className="text-sm text-slate-300 leading-snug">
-                Our 24/7 emergency team is always ready. Call or come in — we&apos;re here.
+                {headings.emergencyText}
               </p>
               <EmergencyButton
                 phone={emergencyPhone}
@@ -155,16 +208,16 @@ export function Footer({ settings }: { settings?: PublicSiteSettings }) {
       {/* Divider */}
       <div className="border-t border-slate-800">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <span>© {year} {hospitalName}. All rights reserved.</span>
+          <span>© {year} {hospitalName}. {headings.rights}</span>
           <div className="flex items-center gap-4">
             <Link
-              href="/privacy"
+              href={`/${currentLocale}/privacy`}
               className="hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm"
             >
               Privacy Policy
             </Link>
             <Link
-              href="/terms"
+              href={`/${currentLocale}/terms`}
               className="hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm"
             >
               Terms of Service

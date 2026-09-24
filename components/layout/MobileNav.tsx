@@ -7,16 +7,38 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MOBILE_NAV_LINKS } from "@/lib/constants";
 import { EmergencyButton } from "@/components/ui/emergency-button";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import type { SupportedLocale } from "@/lib/i18n/config";
 import type { PublicSiteSettings } from "@/lib/queries/public";
 
 interface MobileNavProps {
   isOpen: boolean;
   onClose: () => void;
   settings?: PublicSiteSettings;
+  currentLocale?: SupportedLocale;
 }
 
-export function MobileNav({ isOpen, onClose, settings }: MobileNavProps) {
+const NAV_TRANSLATION_KEYS: Record<string, string> = {
+  "/": "nav.home",
+  "/services": "nav.services",
+  "/departments": "nav.departments",
+  "/doctors": "nav.doctors",
+  "/facilities": "nav.facilities",
+  "/about": "nav.about",
+  "/news": "nav.news",
+  "/events": "nav.events",
+  "/careers": "nav.careers",
+  "/gallery": "nav.gallery",
+  "/faqs": "nav.faqs",
+  "/contact": "nav.contact",
+  "/emergency": "nav.emergency",
+};
+
+export function MobileNav({ isOpen, onClose, settings, currentLocale }: MobileNavProps) {
   const pathname = usePathname();
+  const { t, locale } = useI18n();
+  const effectiveLocale = currentLocale || locale;
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
 
   // Close on route change
@@ -28,7 +50,6 @@ export function MobileNav({ isOpen, onClose, settings }: MobileNavProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      // Focus first nav link for keyboard users
       firstLinkRef.current?.focus();
     } else {
       document.body.style.overflow = "";
@@ -74,11 +95,11 @@ export function MobileNav({ isOpen, onClose, settings }: MobileNavProps) {
         {/* Drawer header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <span className="font-bold text-base text-text tracking-tight">
-            Navigation
+            {t("nav.more")}
           </span>
           <button
             onClick={onClose}
-            aria-label="Close navigation menu"
+            aria-label={t("nav.closeMenu")}
             className={cn(
               "w-10 h-10 flex items-center justify-center rounded-lg",
               "text-text-muted hover:text-text hover:bg-background transition-colors",
@@ -89,6 +110,11 @@ export function MobileNav({ isOpen, onClose, settings }: MobileNavProps) {
           </button>
         </div>
 
+        {/* Language selector in mobile drawer */}
+        <div className="px-4 py-3 border-b border-border bg-surface/50">
+          <LanguageSwitcher currentLocale={effectiveLocale} variant="mobile" />
+        </div>
+
         {/* Nav links — scrollable */}
         <nav
           aria-label="Mobile navigation"
@@ -96,15 +122,17 @@ export function MobileNav({ isOpen, onClose, settings }: MobileNavProps) {
         >
           <ul className="flex flex-col gap-1">
             {MOBILE_NAV_LINKS.map((link, i) => {
+              const targetHref = `/${effectiveLocale}${link.href === "/" ? "" : link.href}`;
               const isActive =
                 link.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.href);
+                  ? pathname === `/${effectiveLocale}` || pathname === "/"
+                  : pathname.startsWith(targetHref);
+              const label = NAV_TRANSLATION_KEYS[link.href] ? t(NAV_TRANSLATION_KEYS[link.href]) : link.name;
 
               return (
                 <li key={link.href}>
                   <Link
-                    href={link.href}
+                    href={targetHref}
                     ref={i === 0 ? firstLinkRef : undefined}
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium",
@@ -116,7 +144,7 @@ export function MobileNav({ isOpen, onClose, settings }: MobileNavProps) {
                     )}
                     aria-current={isActive ? "page" : undefined}
                   >
-                    {link.name}
+                    {label}
                   </Link>
                 </li>
               );
@@ -127,7 +155,7 @@ export function MobileNav({ isOpen, onClose, settings }: MobileNavProps) {
         {/* Pinned Emergency action */}
         <div className="px-5 py-5 border-t border-border bg-emergency-light/40">
           <p className="text-xs text-text-muted mb-3 font-medium uppercase tracking-wider">
-            24/7 Emergency Care
+            {t("common.emergency247")}
           </p>
           <EmergencyButton
             phone={settings?.emergencyPhone}
