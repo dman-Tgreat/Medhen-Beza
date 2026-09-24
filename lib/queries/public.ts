@@ -12,9 +12,11 @@ import type {
 } from "@/lib/mock-data";
 
 import { HOSPITAL_INFO } from "@/lib/constants";
+import { type SupportedLocale, DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { localizeEntity, formatLocalizedDate } from "@/lib/i18n/localize";
 import { getVideoEmbedUrl, getVideoThumbnailUrl, isDirectVideoFile } from "@/lib/media/video";
 import type { AboutPageData } from "@/lib/mock-data";
-import { MOCK_ABOUT_PAGE } from "@/lib/mock-data";
+import { MOCK_ABOUT_PAGE, getMockAboutPage } from "@/lib/mock-data";
 import {
   Heart,
   Award,
@@ -86,7 +88,9 @@ export interface PublicSiteSettings {
   seoDescription?: string;
 }
 
-export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
+export async function getPublicSiteSettings(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<PublicSiteSettings> {
   try {
     const rows = await db.siteSetting.findMany({
       where: { isPublic: true },
@@ -96,22 +100,30 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
       map.set(r.key, r.value);
     }
 
+    const getVal = (key: string): string | undefined => {
+      if (locale !== "en") {
+        const localized = map.get(`${key}_${locale}`);
+        if (localized && localized.trim().length > 0) return localized;
+      }
+      return map.get(key);
+    };
+
     const hospitalName =
-      map.get("hospital_name") || map.get("name") || HOSPITAL_INFO.name;
+      getVal("hospital_name") || getVal("name") || HOSPITAL_INFO.name;
     const shortName =
-      map.get("short_name") ||
+      getVal("short_name") ||
       (hospitalName.toLowerCase().includes("hospital")
         ? hospitalName.replace(/hospital/i, "").trim()
         : hospitalName) ||
       HOSPITAL_INFO.shortName;
     const tagline =
-      map.get("tagline") ||
-      map.get("hero_headline_accent") ||
+      getVal("tagline") ||
+      getVal("hero_headline_accent") ||
       HOSPITAL_INFO.tagline;
     const description =
-      map.get("seo_description") ||
-      map.get("description") ||
-      map.get("hero_supporting_text") ||
+      getVal("seo_description") ||
+      getVal("description") ||
+      getVal("hero_supporting_text") ||
       HOSPITAL_INFO.description;
 
     const emergencyPhone =
@@ -137,39 +149,39 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
       map.get("address") ||
       HOSPITAL_INFO.address;
     const location =
-      map.get("location") ||
+      getVal("location") ||
       address ||
       HOSPITAL_INFO.location;
     const hours =
-      map.get("visiting_hours") ||
-      map.get("working_hours") ||
-      map.get("hours") ||
+      getVal("visiting_hours") ||
+      getVal("working_hours") ||
+      getVal("hours") ||
       HOSPITAL_INFO.hours;
     const visitingHours =
-      map.get("visiting_hours") ||
-      map.get("working_hours") ||
-      map.get("hours") ||
+      getVal("visiting_hours") ||
+      getVal("working_hours") ||
+      getVal("hours") ||
       HOSPITAL_INFO.hours;
 
-    const heroEyebrow = map.get("hero_eyebrow") || "Leading Healthcare Excellence";
-    const heroHeadline = map.get("hero_headline") || "Compassionate care.";
-    const heroHeadlineAccent = map.get("hero_headline_accent") || "Trusted healthcare.";
-    const heroSupportingText = map.get("hero_supporting_text") || "Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first.";
-    const statSpecialists = map.get("stat_specialists") || "50+";
-    const statEmergency = map.get("stat_emergency") || "24/7";
-    const statDepartments = map.get("stat_departments") || "15+";
+    const heroEyebrow = getVal("hero_eyebrow") || "Leading Healthcare Excellence";
+    const heroHeadline = getVal("hero_headline") || "Compassionate care.";
+    const heroHeadlineAccent = getVal("hero_headline_accent") || "Trusted healthcare.";
+    const heroSupportingText = getVal("hero_supporting_text") || "Close to you, committed to you — exceptional clinical care delivered by specialists who put patients first.";
+    const statSpecialists = getVal("stat_specialists") || "50+";
+    const statEmergency = getVal("stat_emergency") || "24/7";
+    const statDepartments = getVal("stat_departments") || "15+";
 
-    const hospitalIntroTitle = map.get("hospital_intro_title") || "Trusted care for every stage of life";
-    const rawIntro = map.get("hospital_intro_text") ||
+    const hospitalIntroTitle = getVal("hospital_intro_title") || "Trusted care for every stage of life";
+    const rawIntro = getVal("hospital_intro_text") ||
       `${hospitalName} provides patient-centred, modern clinical care, delivering healthcare with empathy, clinical precision, and dignity.\n\nOur multidisciplinary teams of specialists work across cutting-edge diagnostic and surgical units to serve families across the region.\n\nCommitted to continuous clinical excellence and modern standards of practice.`;
     const hospitalIntroParagraphs = rawIntro.split("\n\n").map((p) => p.trim()).filter(Boolean);
 
-    const emergencyGate = map.get("emergency_gate") || "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road";
-    const emergencyHours = map.get("emergency_hours") || "Open 24 Hours · 7 Days a Week · All Holidays";
+    const emergencyGate = getVal("emergency_gate") || "Gate 1 (Dedicated Ambulance & Emergency Driveway), Bole Road";
+    const emergencyHours = getVal("emergency_hours") || "Open 24 Hours · 7 Days a Week · All Holidays";
     const heroImage = map.get("hero_image") || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200";
     const hospitalIntroImage = map.get("hospital_intro_image") || "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=1200";
-    const seoTitle = map.get("seo_title") || `${hospitalName} | ${tagline}`;
-    const seoDescription = map.get("seo_description") || description;
+    const seoTitle = getVal("seo_title") || `${hospitalName} | ${tagline}`;
+    const seoDescription = getVal("seo_description") || description;
     const city =
       map.get("city") ||
       (address.toLowerCase().includes("adama")
@@ -251,47 +263,67 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
 
 // ─── 1. Doctors ─────────────────────────────────────────────────────────────
 
-function mapDoctor(doc: any): DoctorDetailData {
+function mapDoctor(doc: any, locale: SupportedLocale = DEFAULT_LOCALE): DoctorDetailData {
+  const locDoc = localizeEntity(doc, locale, [
+    "fullName",
+    "specialty",
+    "position",
+    "biography",
+    "experience",
+    "areasOfExpertise",
+    "availability",
+    "metaTitle",
+    "metaDescription",
+  ]);
+  const locDept = locDoc.department
+    ? localizeEntity(locDoc.department, locale, ["name", "description", "location"])
+    : null;
+
   return {
-    id: doc.id,
-    name: doc.fullName,
-    slug: doc.slug,
-    specialty: doc.specialty,
-    department: doc.department?.name || "General Medicine",
-    departmentSlug: doc.department?.slug || "general",
-    title: doc.position || "Senior Specialist",
-    photo: doc.profilePhoto || undefined,
-    href: `/doctors/${doc.slug}`,
-    biography: doc.biography || "",
-    qualifications: doc.qualifications || [],
-    experience: doc.experience || "10+ years of dedicated clinical experience",
-    languages: doc.languages || ["Amharic", "English"],
-    areasOfExpertise: doc.areasOfExpertise || [],
-    officeLocation: doc.department?.location || "Main Hospital Building",
-    availability: doc.availability || "Monday - Friday: 9:00 AM - 5:00 PM",
-    contactEmail: doc.department?.email || "info@medhenbeza.com",
-    metaTitle: doc.metaTitle,
-    metaDescription: doc.metaDescription,
-    canonicalUrl: doc.canonicalUrl,
-    ogImage: doc.ogImage,
+    id: locDoc.id,
+    name: locDoc.fullName,
+    slug: locDoc.slug,
+    specialty: locDoc.specialty,
+    department: locDept?.name || locDoc.department?.name || "General Medicine",
+    departmentSlug: locDoc.department?.slug || "general",
+    title: locDoc.position || "Senior Specialist",
+    photo: locDoc.profilePhoto || undefined,
+    href: `/${locale}/doctors/${locDoc.slug}`,
+    biography: locDoc.biography || "",
+    qualifications: locDoc.qualifications || [],
+    experience: locDoc.experience || "10+ years of dedicated clinical experience",
+    languages: locDoc.languages || ["Amharic", "English"],
+    areasOfExpertise: locDoc.areasOfExpertise || [],
+    officeLocation: locDept?.location || locDoc.department?.location || "Main Hospital Building",
+    availability: locDoc.availability || "Monday - Friday: 9:00 AM - 5:00 PM",
+    contactEmail: locDoc.department?.email || "info@medhenbeza.com",
+    metaTitle: locDoc.metaTitle,
+    metaDescription: locDoc.metaDescription,
+    canonicalUrl: locDoc.canonicalUrl,
+    ogImage: locDoc.ogImage,
   };
 }
 
-export async function getPublicDoctors(): Promise<DoctorDetailData[]> {
+export async function getPublicDoctors(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<DoctorDetailData[]> {
   try {
     const docs = await db.doctor.findMany({
       where: { status: ContentStatus.PUBLISHED },
       include: { department: true },
       orderBy: [{ order: "asc" }, { fullName: "asc" }],
     });
-    return docs.map(mapDoctor);
+    return docs.map((d) => mapDoctor(d, locale));
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicDoctors]", error);
     return [];
   }
 }
 
-export async function getPublicDoctorBySlug(slug: string): Promise<DoctorDetailData | null> {
+export async function getPublicDoctorBySlug(
+  slug: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<DoctorDetailData | null> {
   try {
     const doc = await db.doctor.findFirst({
       where: {
@@ -307,7 +339,7 @@ export async function getPublicDoctorBySlug(slug: string): Promise<DoctorDetailD
         },
       },
     });
-    return doc ? mapDoctor(doc) : null;
+    return doc ? mapDoctor(doc, locale) : null;
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicDoctorBySlug]", error);
     return null;
@@ -317,7 +349,8 @@ export async function getPublicDoctorBySlug(slug: string): Promise<DoctorDetailD
 export async function getPublicRelatedDoctors(
   departmentSlug: string,
   excludeSlug: string,
-  limit = 3
+  limit = 3,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): Promise<DoctorDetailData[]> {
   try {
     const docs = await db.doctor.findMany({
@@ -329,47 +362,68 @@ export async function getPublicRelatedDoctors(
       include: { department: true },
       take: limit,
     });
-    return docs.map(mapDoctor);
+    return docs.map((d) => mapDoctor(d, locale));
   } catch (error) {
+    console.error("[PUBLIC_QUERY_ERROR: getPublicRelatedDoctors]", error);
     return [];
   }
 }
 
 // ─── 2. Departments ─────────────────────────────────────────────────────────
 
-function mapDepartment(dept: any): DepartmentDetailData {
-  const leadDoctor = dept.doctors?.find((d: any) =>
+function mapDepartment(dept: any, locale: SupportedLocale = DEFAULT_LOCALE): DepartmentDetailData {
+  const locDept = localizeEntity(dept, locale, [
+    "name",
+    "description",
+    "location",
+    "workingHours",
+    "headDoctor",
+    "specializations",
+    "metaTitle",
+    "metaDescription",
+  ]);
+
+  const leadDoctor = locDept.doctors?.find((d: any) =>
     /head|chief|director|lead/i.test(d.position || "")
-  ) || dept.doctors?.[0];
+  ) || locDept.doctors?.[0];
+
+  const localizedLeadDoctor = leadDoctor
+    ? localizeEntity(leadDoctor, locale, ["fullName", "position"])
+    : null;
 
   const specializations =
-    Array.isArray(dept.specializations) && dept.specializations.length > 0
-      ? dept.specializations
-      : dept.services?.map((s: any) => s.title || s.name) || [];
+    Array.isArray(locDept.specializations) && locDept.specializations.length > 0
+      ? locDept.specializations
+      : locDept.services?.map((s: any) => {
+          const locS = localizeEntity(s, locale, ["title", "name"]);
+          return locS.title || locS.name;
+        }) || [];
 
   return {
-    id: dept.id,
-    name: dept.name,
-    slug: dept.slug,
-    description: dept.description || "Comprehensive clinical unit equipped for specialized patient care.",
-    longDescription: dept.description || "",
-    hours: dept.workingHours || "24/7 Emergency & Inpatient Care",
-    phone: dept.phone || "+251 116 000 111",
-    email: dept.email || "info@medhenbeza.com",
-    location: dept.location || "Main Hospital Complex",
-    headDoctorName: dept.headDoctor || leadDoctor?.fullName || "Consultant Specialist",
+    id: locDept.id,
+    name: locDept.name,
+    slug: locDept.slug,
+    description: locDept.description || "Comprehensive clinical unit equipped for specialized patient care.",
+    longDescription: locDept.description || "",
+    hours: locDept.workingHours || "24/7 Emergency & Inpatient Care",
+    phone: locDept.phone || "+251 116 000 111",
+    email: locDept.email || "info@medhenbeza.com",
+    location: locDept.location || "Main Hospital Complex",
+    headDoctorName: locDept.headDoctor || localizedLeadDoctor?.fullName || "Consultant Specialist",
     keyServices: specializations,
-    href: `/departments/${dept.slug}`,
-    image: dept.image || "",
-    imageAlt: `${dept.name} department at Medhin Beza Hospital`,
-    metaTitle: dept.metaTitle,
-    metaDescription: dept.metaDescription,
-    canonicalUrl: dept.canonicalUrl,
-    ogImage: dept.ogImage,
+    href: `/${locale}/departments/${locDept.slug}`,
+    image: locDept.image || "",
+    imageAlt: `${locDept.name} department at Medhin Beza Hospital`,
+    metaTitle: locDept.metaTitle,
+    metaDescription: locDept.metaDescription,
+    canonicalUrl: locDept.canonicalUrl,
+    ogImage: locDept.ogImage,
   };
 }
 
-export async function getPublicDepartments(): Promise<DepartmentDetailData[]> {
+export async function getPublicDepartments(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<DepartmentDetailData[]> {
   try {
     const depts = await db.department.findMany({
       where: { status: ContentStatus.PUBLISHED },
@@ -379,14 +433,17 @@ export async function getPublicDepartments(): Promise<DepartmentDetailData[]> {
       },
       orderBy: [{ order: "asc" }, { name: "asc" }],
     });
-    return depts.map(mapDepartment);
+    return depts.map((d) => mapDepartment(d, locale));
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicDepartments]", error);
     return [];
   }
 }
 
-export async function getPublicDepartmentBySlug(slug: string): Promise<DepartmentDetailData | null> {
+export async function getPublicDepartmentBySlug(
+  slug: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<DepartmentDetailData | null> {
   try {
     const dept = await db.department.findFirst({
       where: {
@@ -399,7 +456,7 @@ export async function getPublicDepartmentBySlug(slug: string): Promise<Departmen
         careers: { where: { status: ContentStatus.PUBLISHED } },
       },
     });
-    return dept ? mapDepartment(dept) : null;
+    return dept ? mapDepartment(dept, locale) : null;
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicDepartmentBySlug]", error);
     return null;
@@ -408,17 +465,31 @@ export async function getPublicDepartmentBySlug(slug: string): Promise<Departmen
 
 // ─── 3. Services ────────────────────────────────────────────────────────────
 
-function mapService(srv: any): ServiceDetailData {
+function mapService(srv: any, locale: SupportedLocale = DEFAULT_LOCALE): ServiceDetailData {
+  const locSrv = localizeEntity(srv, locale, [
+    "title",
+    "description",
+    "content",
+    "additionalInfo",
+    "availabilityInfo",
+    "metaTitle",
+    "metaDescription",
+  ]);
+
+  const locDept = locSrv.department
+    ? localizeEntity(locSrv.department, locale, ["name", "description", "location"])
+    : null;
+
   let extractedFeatures: string[] = [];
-  if (srv.additionalInfo) {
-    extractedFeatures = srv.additionalInfo
+  if (locSrv.additionalInfo) {
+    extractedFeatures = locSrv.additionalInfo
       .split("\n")
       .map((l: string) => l.replace(/^[-*•]\s*/, "").trim())
       .filter((l: string) => l.length > 2 && l.length < 150)
       .slice(0, 8);
   }
-  if (extractedFeatures.length === 0 && srv.content) {
-    extractedFeatures = srv.content
+  if (extractedFeatures.length === 0 && locSrv.content) {
+    extractedFeatures = locSrv.content
       .split("\n")
       .map((l: string) => l.trim())
       .filter((l: string) => /^[-*•]/.test(l))
@@ -428,31 +499,33 @@ function mapService(srv: any): ServiceDetailData {
   }
 
   return {
-    id: srv.id,
-    name: srv.title || srv.name,
-    slug: srv.slug,
-    description: srv.description || srv.summary || "Specialized clinical service.",
-    longDescription: srv.content || srv.description || srv.summary || "",
-    departmentSlug: srv.department?.slug || "general",
-    departmentName: srv.department?.name || "General Medicine",
-    availability: srv.availabilityInfo || "Standard Clinical Hours",
+    id: locSrv.id,
+    name: locSrv.title || locSrv.name,
+    slug: locSrv.slug,
+    description: locSrv.description || locSrv.summary || "Specialized clinical service.",
+    longDescription: locSrv.content || locSrv.description || locSrv.summary || "",
+    departmentSlug: locDept?.slug || locSrv.department?.slug || "general",
+    departmentName: locDept?.name || locSrv.department?.name || "General Medicine",
+    availability: locSrv.availabilityInfo || "Standard Clinical Hours",
     features: extractedFeatures.length > 0 ? extractedFeatures : [
       "Specialist physician oversight",
       "Modern diagnostic technology",
       "Sterile clinical protocols",
     ],
     procedures: [],
-    relatedDoctorSlugs: srv.department?.doctors?.map((d: any) => d.slug) || [],
-    href: `/services/${srv.slug}`,
-    image: srv.image || undefined,
-    metaTitle: srv.metaTitle,
-    metaDescription: srv.metaDescription,
-    canonicalUrl: srv.canonicalUrl,
-    ogImage: srv.ogImage,
+    relatedDoctorSlugs: locSrv.department?.doctors?.map((d: any) => d.slug) || [],
+    href: `/${locale}/services/${locSrv.slug}`,
+    image: locSrv.image || undefined,
+    metaTitle: locSrv.metaTitle,
+    metaDescription: locSrv.metaDescription,
+    canonicalUrl: locSrv.canonicalUrl,
+    ogImage: locSrv.ogImage,
   };
 }
 
-export async function getPublicServices(): Promise<ServiceDetailData[]> {
+export async function getPublicServices(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<ServiceDetailData[]> {
   try {
     const services = await db.service.findMany({
       where: { status: ContentStatus.PUBLISHED },
@@ -465,14 +538,17 @@ export async function getPublicServices(): Promise<ServiceDetailData[]> {
       },
       orderBy: [{ order: "asc" }, { title: "asc" }],
     });
-    return services.map(mapService);
+    return services.map((s) => mapService(s, locale));
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicServices]", error);
     return [];
   }
 }
 
-export async function getPublicServiceBySlug(slug: string): Promise<ServiceDetailData | null> {
+export async function getPublicServiceBySlug(
+  slug: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<ServiceDetailData | null> {
   try {
     const srv = await db.service.findFirst({
       where: {
@@ -488,7 +564,7 @@ export async function getPublicServiceBySlug(slug: string): Promise<ServiceDetai
         },
       },
     });
-    return srv ? mapService(srv) : null;
+    return srv ? mapService(srv, locale) : null;
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicServiceBySlug]", error);
     return null;
@@ -497,54 +573,74 @@ export async function getPublicServiceBySlug(slug: string): Promise<ServiceDetai
 
 // ─── 4. News ────────────────────────────────────────────────────────────────
 
-function mapNews(news: any): NewsDetailData {
-  const wordCount = (news.content || "").trim().split(/\s+/).filter(Boolean).length;
-  const calculatedReadTime = `${Math.max(1, Math.ceil(wordCount / 200))} min read`;
-  const readTime = news.readTime && news.readTime.trim() ? news.readTime.trim() : calculatedReadTime;
+function mapNews(news: any, locale: SupportedLocale = DEFAULT_LOCALE): NewsDetailData {
+  const locNews = localizeEntity(news, locale, [
+    "title",
+    "summary",
+    "content",
+    "authorName",
+    "readTime",
+    "tags",
+    "metaTitle",
+    "metaDescription",
+  ]);
 
-  const rawTags = Array.isArray(news.tags) ? news.tags : [];
+  const locCat = locNews.category
+    ? localizeEntity(locNews.category, locale, ["name", "description"])
+    : null;
+
+  const wordCount = (locNews.content || "").trim().split(/\s+/).filter(Boolean).length;
+  const calculatedReadTime = `${Math.max(1, Math.ceil(wordCount / 200))} min read`;
+  const readTime = locNews.readTime && locNews.readTime.trim() ? locNews.readTime.trim() : calculatedReadTime;
+
+  const rawTags = Array.isArray(locNews.tags) ? locNews.tags : [];
   const tags = rawTags
     .map((t: string) => (typeof t === "string" ? t.replace(/^#/, "").trim() : ""))
     .filter(Boolean);
 
   return {
-    id: news.id,
-    title: news.title,
-    slug: news.slug,
-    summary: news.summary || news.excerpt || news.content?.slice(0, 160) || "",
-    category: news.category?.name || "Hospital News",
-    date: (news.publishedAt || news.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    id: locNews.id,
+    title: locNews.title,
+    slug: locNews.slug,
+    summary: locNews.summary || locNews.excerpt || locNews.content?.slice(0, 160) || "",
+    category: locCat?.name || locNews.category?.name || "Hospital News",
+    date: formatLocalizedDate(locNews.publishedAt || locNews.createdAt, locale),
     readTime,
     author: {
-      name: news.authorName || news.createdBy?.name || "Medhen Beza Medical Editorial",
+      name: locNews.authorName || locNews.createdBy?.name || "Medhen Beza Medical Editorial",
       role: "Medical Communications",
     },
-    contentParagraphs: (news.content || "").split("\n\n").filter(Boolean),
+    contentParagraphs: (locNews.content || "").split("\n\n").filter(Boolean),
     tags,
-    image: news.featuredImage || news.coverImage || undefined,
-    href: `/news/${news.slug}`,
-    metaTitle: news.metaTitle,
-    metaDescription: news.metaDescription,
-    canonicalUrl: news.canonicalUrl,
-    ogImage: news.ogImage,
+    image: locNews.featuredImage || locNews.coverImage || undefined,
+    href: `/${locale}/news/${locNews.slug}`,
+    metaTitle: locNews.metaTitle,
+    metaDescription: locNews.metaDescription,
+    canonicalUrl: locNews.canonicalUrl,
+    ogImage: locNews.ogImage,
   };
 }
 
-export async function getPublicNews(): Promise<NewsDetailData[]> {
+export async function getPublicNews(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<NewsDetailData[]> {
   try {
     const items = await db.news.findMany({
       where: { status: ContentStatus.PUBLISHED },
       include: { category: true, createdBy: true },
       orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
     });
-    return items.map(mapNews);
+    return items.map((n) => mapNews(n, locale));
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicNews]", error);
     return [];
   }
 }
 
-export async function getPublicNewsBySlug(slug: string): Promise<NewsDetailData | null> {
+export async function getPublicNewsBySlug(
+  slug: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<NewsDetailData | null> {
   try {
     const item = await db.news.findFirst({
       where: {
@@ -553,7 +649,7 @@ export async function getPublicNewsBySlug(slug: string): Promise<NewsDetailData 
       },
       include: { category: true, createdBy: true },
     });
-    return item ? mapNews(item) : null;
+    return item ? mapNews(item, locale) : null;
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicNewsBySlug]", error);
     return null;
@@ -562,7 +658,23 @@ export async function getPublicNewsBySlug(slug: string): Promise<NewsDetailData 
 
 // ─── 5. Careers ─────────────────────────────────────────────────────────────
 
-function mapCareer(car: any): CareerDetailData {
+function mapCareer(car: any, locale: SupportedLocale = DEFAULT_LOCALE): CareerDetailData {
+  const locCar = localizeEntity(car, locale, [
+    "position",
+    "location",
+    "description",
+    "responsibilities",
+    "requirements",
+    "qualifications",
+    "applicationInstructions",
+    "metaTitle",
+    "metaDescription",
+  ]);
+
+  const locDept = locCar.department
+    ? localizeEntity(locCar.department, locale, ["name", "description"])
+    : null;
+
   const empTypeMap: Record<string, any> = {
     FULL_TIME: "Full-time",
     PART_TIME: "Part-time",
@@ -570,48 +682,53 @@ function mapCareer(car: any): CareerDetailData {
     INTERNSHIP: "Internship",
   };
 
-  const deadlineDate = car.deadline ? new Date(car.deadline) : new Date(Date.now() + 30 * 86400000);
-  const createdDate = car.createdAt ? new Date(car.createdAt) : new Date();
+  const deadlineDate = locCar.deadline ? new Date(locCar.deadline) : new Date(Date.now() + 30 * 86400000);
+  const createdDate = locCar.createdAt ? new Date(locCar.createdAt) : new Date();
 
   return {
-    id: car.id,
-    position: car.position,
-    slug: car.slug,
-    department: car.department?.name || "Clinical Operations",
-    departmentSlug: car.department?.slug || "general",
-    type: empTypeMap[car.employmentType] || "Full-time",
-    location: car.location || "Addis Ababa, Ethiopia",
-    deadline: deadlineDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    postedDate: createdDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    overview: car.description || "Clinical opportunity at Medhen Beza Hospital.",
-    responsibilities: Array.isArray(car.responsibilities) ? car.responsibilities : [],
-    requirements: Array.isArray(car.requirements) ? car.requirements : [],
-    qualifications: Array.isArray(car.qualifications) ? car.qualifications : [],
+    id: locCar.id,
+    position: locCar.position,
+    slug: locCar.slug,
+    department: locDept?.name || locCar.department?.name || "Clinical Operations",
+    departmentSlug: locDept?.slug || locCar.department?.slug || "general",
+    type: empTypeMap[locCar.employmentType] || "Full-time",
+    location: locCar.location || "Addis Ababa, Ethiopia",
+    deadline: formatLocalizedDate(deadlineDate, locale),
+    postedDate: formatLocalizedDate(createdDate, locale),
+    overview: locCar.description || "Clinical opportunity at Medhen Beza Hospital.",
+    responsibilities: Array.isArray(locCar.responsibilities) ? locCar.responsibilities : [],
+    requirements: Array.isArray(locCar.requirements) ? locCar.requirements : [],
+    qualifications: Array.isArray(locCar.qualifications) ? locCar.qualifications : [],
     benefits: [
       "Competitive hospital compensation package",
       "Comprehensive medical coverage at Medhen Beza Hospital",
       "Continuous professional training & development",
     ],
-    contactEmail: car.department?.email || "careers@medhenbeza.com",
-    href: `/careers/${car.slug}`,
+    contactEmail: locCar.department?.email || "careers@medhenbeza.com",
+    href: `/${locale}/careers/${locCar.slug}`,
   };
 }
 
-export async function getPublicCareers(): Promise<CareerDetailData[]> {
+export async function getPublicCareers(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<CareerDetailData[]> {
   try {
     const items = await db.career.findMany({
       where: { status: ContentStatus.PUBLISHED },
       include: { department: true },
       orderBy: [{ isFeatured: "desc" }, { deadline: "asc" }],
     });
-    return items.map(mapCareer);
+    return items.map((c) => mapCareer(c, locale));
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicCareers]", error);
     return [];
   }
 }
 
-export async function getPublicCareerBySlug(slug: string): Promise<CareerDetailData | null> {
+export async function getPublicCareerBySlug(
+  slug: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<CareerDetailData | null> {
   try {
     const item = await db.career.findFirst({
       where: {
@@ -620,7 +737,7 @@ export async function getPublicCareerBySlug(slug: string): Promise<CareerDetailD
       },
       include: { department: true },
     });
-    return item ? mapCareer(item) : null;
+    return item ? mapCareer(item, locale) : null;
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicCareerBySlug]", error);
     return null;
@@ -629,47 +746,60 @@ export async function getPublicCareerBySlug(slug: string): Promise<CareerDetailD
 
 // ─── 6. Events ──────────────────────────────────────────────────────────────
 
-function mapEvent(ev: any): EventDetailData {
-  const eventDate = new Date(ev.eventDate);
+function mapEvent(ev: any, locale: SupportedLocale = DEFAULT_LOCALE): EventDetailData {
+  const locEv = localizeEntity(ev, locale, [
+    "title",
+    "description",
+    "location",
+    "metaTitle",
+    "metaDescription",
+  ]);
+
+  const eventDate = new Date(locEv.eventDate);
   const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
   return {
-    id: ev.id,
-    title: ev.title,
-    slug: ev.slug,
+    id: locEv.id,
+    title: locEv.title,
+    slug: locEv.slug,
     day: eventDate.getDate(),
     month: monthNames[eventDate.getMonth()],
     year: eventDate.getFullYear(),
-    dateFormatted: eventDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+    dateFormatted: formatLocalizedDate(eventDate, locale),
     time: "Event Date Scheduled",
-    location: ev.location || "Medhen Beza Hospital Campus",
+    location: locEv.location || "Medhen Beza Hospital Campus",
     isPast: eventDate < new Date(),
-    description: ev.description || "Hospital public medical event.",
-    fullDescription: [ev.description || "Special hospital event."],
+    description: locEv.description || "Hospital public medical event.",
+    fullDescription: [locEv.description || "Special hospital event."],
     agenda: [],
     registrationInfo: "Free attendance for community members and healthcare professionals.",
-    image: ev.image || undefined,
-    href: `/events/${ev.slug}`,
-    metaTitle: ev.metaTitle,
-    metaDescription: ev.metaDescription,
-    canonicalUrl: ev.canonicalUrl,
+    image: locEv.image || undefined,
+    href: `/${locale}/events/${locEv.slug}`,
+    metaTitle: locEv.metaTitle,
+    metaDescription: locEv.metaDescription,
+    canonicalUrl: locEv.canonicalUrl,
   };
 }
 
-export async function getPublicEvents(): Promise<EventDetailData[]> {
+export async function getPublicEvents(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<EventDetailData[]> {
   try {
     const items = await db.hospitalEvent.findMany({
       where: { status: ContentStatus.PUBLISHED },
       orderBy: [{ eventDate: "asc" }],
     });
-    return items.map(mapEvent);
+    return items.map((e) => mapEvent(e, locale));
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicEvents]", error);
     return [];
   }
 }
 
-export async function getPublicEventBySlug(slug: string): Promise<EventDetailData | null> {
+export async function getPublicEventBySlug(
+  slug: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<EventDetailData | null> {
   try {
     const item = await db.hospitalEvent.findFirst({
       where: {
@@ -677,7 +807,7 @@ export async function getPublicEventBySlug(slug: string): Promise<EventDetailDat
         status: ContentStatus.PUBLISHED,
       },
     });
-    return item ? mapEvent(item) : null;
+    return item ? mapEvent(item, locale) : null;
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicEventBySlug]", error);
     return null;
@@ -686,12 +816,18 @@ export async function getPublicEventBySlug(slug: string): Promise<EventDetailDat
 
 // ─── 7. FAQs ────────────────────────────────────────────────────────────────
 
-export async function getPublicFAQs(): Promise<FAQCategoryGroup[]> {
+export async function getPublicFAQs(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<FAQCategoryGroup[]> {
   try {
-    const faqs = await db.fAQ.findMany({
+    const rawFaqs = await db.fAQ.findMany({
       where: { status: ContentStatus.PUBLISHED },
       orderBy: [{ order: "asc" }, { question: "asc" }],
     });
+
+    const faqs = rawFaqs.map((f) =>
+      localizeEntity(f, locale, ["question", "answer", "category"])
+    );
 
     const categoryMap = new Map<string, Array<{ id: string; question: string; answer: string }>>();
     for (const faq of faqs) {
@@ -720,12 +856,19 @@ export async function getPublicFAQs(): Promise<FAQCategoryGroup[]> {
 
 // ─── 8. Gallery ─────────────────────────────────────────────────────────────
 
-export async function getPublicGallery(): Promise<any[]> {
+export async function getPublicGallery(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<any[]> {
   try {
-    const items = await db.gallery.findMany({
+    const rawItems = await db.gallery.findMany({
       where: { status: ContentStatus.PUBLISHED },
       orderBy: [{ order: "asc" }, { createdAt: "desc" }],
     });
+
+    const items = rawItems.map((g) =>
+      localizeEntity(g, locale, ["title", "description", "album", "altText"])
+    );
+
     return items.map((g) => {
       const isVideo = g.type === "VIDEO";
       const fallbackThumb = isVideo ? getVideoThumbnailUrl(g.url) : null;
@@ -758,47 +901,54 @@ export async function getPublicGallery(): Promise<any[]> {
 
 // ─── 9. CMS Pages & About Page ──────────────────────────────────────────────
 
-export async function getPublicPageBySlug(slug: string) {
+export async function getPublicPageBySlug(
+  slug: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+) {
   try {
     const cleanSlug = slug.replace(/^\/+/, "");
-    return await db.page.findFirst({
+    const page = await db.page.findFirst({
       where: {
         OR: [{ slug: cleanSlug }, { slug: `/${cleanSlug}` }],
         status: ContentStatus.PUBLISHED,
       },
     });
+    return page ? localizeEntity(page, locale, ["title", "excerpt", "content", "metaTitle", "metaDescription"]) : null;
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicPageBySlug]", error);
     return null;
   }
 }
 
-export async function getPublicAboutPage(): Promise<AboutPageData> {
+export async function getPublicAboutPage(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<AboutPageData> {
   const [dbPage, settings] = await Promise.all([
-    getPublicPageBySlug("about"),
-    getPublicSiteSettings(),
+    getPublicPageBySlug("about", locale),
+    getPublicSiteSettings(locale),
   ]);
 
+  const fallback = getMockAboutPage(locale);
   const base: AboutPageData = {
-    ...MOCK_ABOUT_PAGE,
-    hero: { ...MOCK_ABOUT_PAGE.hero },
+    ...fallback,
+    hero: { ...fallback.hero },
     introduction: {
-      ...MOCK_ABOUT_PAGE.introduction,
-      paragraphs: [...MOCK_ABOUT_PAGE.introduction.paragraphs],
+      ...fallback.introduction,
+      paragraphs: [...fallback.introduction.paragraphs],
     },
     missionVision: {
-      mission: { ...MOCK_ABOUT_PAGE.missionVision.mission },
-      vision: { ...MOCK_ABOUT_PAGE.missionVision.vision },
+      mission: { ...fallback.missionVision.mission },
+      vision: { ...fallback.missionVision.vision },
     },
-    values: MOCK_ABOUT_PAGE.values.map((v) => ({ ...v })),
-    leadership: MOCK_ABOUT_PAGE.leadership.map((l) => ({ ...l })),
+    values: fallback.values.map((v) => ({ ...v })),
+    leadership: fallback.leadership.map((l) => ({ ...l })),
     environment: {
-      ...MOCK_ABOUT_PAGE.environment,
-      featured: { ...MOCK_ABOUT_PAGE.environment.featured },
-      supporting: MOCK_ABOUT_PAGE.environment.supporting.map((p) => ({ ...p })),
+      ...fallback.environment,
+      featured: { ...fallback.environment.featured },
+      supporting: fallback.environment.supporting.map((p) => ({ ...p })),
     },
-    accreditations: MOCK_ABOUT_PAGE.accreditations ? MOCK_ABOUT_PAGE.accreditations.map((a) => ({ ...a })) : [],
-    finalCta: { ...MOCK_ABOUT_PAGE.finalCta },
+    accreditations: fallback.accreditations ? fallback.accreditations.map((a) => ({ ...a })) : [],
+    finalCta: { ...fallback.finalCta },
   };
 
   // Dynamically replace default brand names with live hospitalName from settings
@@ -821,9 +971,17 @@ export async function getPublicAboutPage(): Promise<AboutPageData> {
     if (dbPage.title) base.hero.title = dbPage.title;
     if (dbPage.excerpt) base.hero.supportingText = dbPage.excerpt;
 
-    if (dbPage.content && dbPage.content.trim().startsWith("{")) {
+    let contentToParse = dbPage.content;
+    if (locale !== "en" && dbPage.translations) {
+      const translations = typeof dbPage.translations === "string" ? JSON.parse(dbPage.translations) : dbPage.translations;
+      if (translations?.[locale]?.content) {
+        contentToParse = translations[locale].content;
+      }
+    }
+
+    if (contentToParse && contentToParse.trim().startsWith("{")) {
       try {
-        const parsed = JSON.parse(dbPage.content);
+        const parsed = JSON.parse(contentToParse);
         if (parsed.hero) {
           if (parsed.hero.title) base.hero.title = parsed.hero.title;
           if (parsed.hero.supportingText) base.hero.supportingText = parsed.hero.supportingText;
@@ -878,10 +1036,10 @@ export async function getPublicAboutPage(): Promise<AboutPageData> {
           base.finalCta = { ...base.finalCta, ...parsed.finalCta };
         }
       } catch (e) {
-        base.introduction.paragraphs = dbPage.content.split("\n\n").filter(Boolean);
+        base.introduction.paragraphs = contentToParse.split("\n\n").filter(Boolean);
       }
-    } else if (dbPage.content) {
-      base.introduction.paragraphs = dbPage.content.split("\n\n").filter(Boolean);
+    } else if (contentToParse) {
+      base.introduction.paragraphs = contentToParse.split("\n\n").filter(Boolean);
     }
   }
 
@@ -913,7 +1071,18 @@ function resolveValidImageUrl(url?: string | null): string | undefined {
   return undefined;
 }
 
-function mapFacility(f: any): FacilityDetailData {
+function mapFacility(f: any, locale: SupportedLocale = DEFAULT_LOCALE): FacilityDetailData {
+  const locF = localizeEntity(f, locale, [
+    "name",
+    "tagline",
+    "description",
+    "category",
+    "capacity",
+    "location",
+    "hours",
+    "features",
+  ]);
+
   const defaultFeatures = [
     "Specialist physician and nursing coverage",
     "Sterile climate-controlled environmental systems",
@@ -922,33 +1091,35 @@ function mapFacility(f: any): FacilityDetailData {
   ];
 
   const features =
-    Array.isArray(f.features) && f.features.length > 0
-      ? f.features
+    Array.isArray(locF.features) && locF.features.length > 0
+      ? locF.features
       : defaultFeatures;
 
-  const validImage = resolveValidImageUrl(f.image);
+  const validImage = resolveValidImageUrl(locF.image);
 
   return {
-    id: f.id,
-    slug: f.slug || f.id,
-    name: f.name,
+    id: locF.id,
+    slug: locF.slug || locF.id,
+    name: locF.name,
     image: validImage,
-    imageAlt: `${f.name} at Medhen Beza Hospital`,
-    tagline: f.tagline || f.name,
-    description: f.description || "State-of-the-art clinical environment engineered for patient safety.",
-    longDescription: f.description || "",
-    category: f.category || "Clinical Unit",
-    capacity: f.capacity || undefined,
-    location: f.location || "Main Hospital Complex",
-    hours: f.hours || "24/7 Clinical & Emergency Access",
-    phone: f.phone || "+251 11 654 3000",
+    imageAlt: `${locF.name} at Medhen Beza Hospital`,
+    tagline: locF.tagline || locF.name,
+    description: locF.description || "State-of-the-art clinical environment engineered for patient safety.",
+    longDescription: locF.description || "",
+    category: locF.category || "Clinical Unit",
+    capacity: locF.capacity || undefined,
+    location: locF.location || "Main Hospital Complex",
+    hours: locF.hours || "24/7 Clinical & Emergency Access",
+    phone: locF.phone || "+251 11 654 3000",
     features,
-    galleryImages: validImage ? [{ src: validImage, alt: f.name }] : [],
-    href: `/facilities/${f.slug || f.id}`,
+    galleryImages: validImage ? [{ src: validImage, alt: locF.name }] : [],
+    href: `/${locale}/facilities/${locF.slug || locF.id}`,
   };
 }
 
-export async function getPublicFacilities(): Promise<FacilityDetailData[]> {
+export async function getPublicFacilities(
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<FacilityDetailData[]> {
   try {
     const facilities = await db.facility.findMany({
       where: {
@@ -958,7 +1129,7 @@ export async function getPublicFacilities(): Promise<FacilityDetailData[]> {
     });
 
     if (facilities.length > 0) {
-      return facilities.map(mapFacility);
+      return facilities.map((f) => mapFacility(f, locale));
     }
 
     const depts = await db.department.findMany({
@@ -967,35 +1138,41 @@ export async function getPublicFacilities(): Promise<FacilityDetailData[]> {
       take: 6,
     });
 
-    return depts.map((d) => ({
-      id: d.id,
-      slug: d.slug,
-      name: `${d.name} Facility`,
-      image: d.image || undefined,
-      imageAlt: `${d.name} wing`,
-      tagline: d.description || "Advanced medical wing",
-      description: d.description || "State-of-the-art clinical environment.",
-      longDescription: d.description || "",
-      category: "Clinical Wing",
-      capacity: "Comprehensive Care Unit",
-      location: d.location || "Main Campus",
-      hours: d.workingHours || "24/7 Care",
-      phone: d.phone || "+251 11 654 3000",
-      features: [
-        "Advanced diagnostic and monitoring equipment",
-        "24/7 specialist physician oversight",
-        "Sterile clinical environment",
-      ],
-      galleryImages: d.image ? [{ src: d.image, alt: d.name }] : [],
-      href: `/departments/${d.slug}`,
-    }));
+    return depts.map((d) => {
+      const locD = localizeEntity(d, locale, ["name", "description", "location", "workingHours"]);
+      return {
+        id: locD.id,
+        slug: locD.slug,
+        name: `${locD.name} Facility`,
+        image: locD.image || undefined,
+        imageAlt: `${locD.name} wing`,
+        tagline: locD.description || "Advanced medical wing",
+        description: locD.description || "State-of-the-art clinical environment.",
+        longDescription: locD.description || "",
+        category: "Clinical Wing",
+        capacity: "Comprehensive Care Unit",
+        location: locD.location || "Main Campus",
+        hours: locD.workingHours || "24/7 Care",
+        phone: locD.phone || "+251 11 654 3000",
+        features: [
+          "Advanced diagnostic and monitoring equipment",
+          "24/7 specialist physician oversight",
+          "Sterile clinical environment",
+        ],
+        galleryImages: locD.image ? [{ src: locD.image, alt: locD.name }] : [],
+        href: `/${locale}/departments/${locD.slug}`,
+      };
+    });
   } catch (error) {
     console.error("[PUBLIC_QUERY_ERROR: getPublicFacilities]", error);
     return [];
   }
 }
 
-export async function getPublicFacilityBySlug(slug: string): Promise<FacilityDetailData | null> {
+export async function getPublicFacilityBySlug(
+  slug: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): Promise<FacilityDetailData | null> {
   try {
     const item = await db.facility.findFirst({
       where: {
@@ -1005,7 +1182,7 @@ export async function getPublicFacilityBySlug(slug: string): Promise<FacilityDet
     });
 
     if (item) {
-      return mapFacility(item);
+      return mapFacility(item, locale);
     }
 
     const dept = await db.department.findFirst({
@@ -1016,27 +1193,28 @@ export async function getPublicFacilityBySlug(slug: string): Promise<FacilityDet
     });
 
     if (dept) {
+      const locD = localizeEntity(dept, locale, ["name", "description", "location", "workingHours"]);
       return {
-        id: dept.id,
-        slug: dept.slug,
-        name: `${dept.name} Pavilion`,
-        image: dept.image || undefined,
-        imageAlt: dept.name,
-        tagline: dept.description || `${dept.name} Clinical Wing`,
-        description: dept.description || "State-of-the-art clinical environment.",
-        longDescription: dept.description || "",
-        category: "Department Wing",
-        capacity: "Multidisciplinary Unit",
-        location: dept.location || "Main Campus",
-        hours: dept.workingHours || "24/7 Care",
-        phone: dept.phone || "+251 11 654 3000",
+        id: locD.id,
+        slug: locD.slug,
+        name: `${locD.name} Facility`,
+        image: locD.image || undefined,
+        imageAlt: `${locD.name} wing`,
+        tagline: locD.description || "Advanced medical wing",
+        description: locD.description || "State-of-the-art clinical environment.",
+        longDescription: locD.description || "",
+        category: "Clinical Wing",
+        capacity: "Comprehensive Care Unit",
+        location: locD.location || "Main Campus",
+        hours: locD.workingHours || "24/7 Care",
+        phone: locD.phone || "+251 11 654 3000",
         features: [
-          "Modern clinical suites and procedure rooms",
-          "24/7 dedicated specialist care",
-          "Integrated diagnostic radiology and laboratory access",
+          "Advanced diagnostic and monitoring equipment",
+          "24/7 specialist physician oversight",
+          "Sterile clinical environment",
         ],
-        galleryImages: dept.image ? [{ src: dept.image, alt: dept.name }] : [],
-        href: `/facilities/${dept.slug}`,
+        galleryImages: locD.image ? [{ src: locD.image, alt: locD.name }] : [],
+        href: `/${locale}/departments/${locD.slug}`,
       };
     }
 
@@ -1046,3 +1224,4 @@ export async function getPublicFacilityBySlug(slug: string): Promise<FacilityDet
     return null;
   }
 }
+

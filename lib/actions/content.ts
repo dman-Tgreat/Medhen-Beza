@@ -178,6 +178,7 @@ export async function saveDoctorAction(
           isFeatured: doctorData.isFeatured || false,
           departmentId,
           status: targetStatus,
+          translations: (doctorData as any).translations !== undefined ? (doctorData as any).translations : undefined,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -222,6 +223,7 @@ export async function saveDoctorAction(
           isFeatured: doctorData.isFeatured || false,
           departmentId,
           status: targetStatus,
+          translations: (doctorData as any).translations !== undefined ? (doctorData as any).translations : undefined,
           createdById: session.id,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
@@ -349,6 +351,7 @@ export async function saveDepartmentAction(
           isFeatured: data.isFeatured || false,
           order: Number(validated.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -378,6 +381,7 @@ export async function saveDepartmentAction(
           isFeatured: data.isFeatured || false,
           order: Number(validated.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           createdById: session.id,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
@@ -491,6 +495,7 @@ export async function saveServiceAction(
           isFeatured: data.isFeatured || false,
           order: Number(data.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -518,6 +523,7 @@ export async function saveServiceAction(
           isFeatured: data.isFeatured || false,
           order: Number(data.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           createdById: session.id,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
@@ -572,6 +578,7 @@ export async function saveNewsAction(
     isFeatured?: boolean;
     slug?: string;
     regenerateSlug?: boolean;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult> {
@@ -623,6 +630,7 @@ export async function saveNewsAction(
       tags: cleanTags,
       image: data.featuredImage,
       author: data.authorName,
+      translations: (data as any).translations,
     });
     if (!validation.success) {
       return { error: validation.error.issues[0]?.message || "Invalid article details." };
@@ -645,6 +653,7 @@ export async function saveNewsAction(
           categoryId: resolvedCategoryId,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -671,6 +680,7 @@ export async function saveNewsAction(
           categoryId: resolvedCategoryId,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           createdById: session.id,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
@@ -719,6 +729,7 @@ export async function saveGalleryAction(
     thumbnailUrl?: string;
     type?: MediaType;
     order?: number;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult> {
@@ -738,6 +749,7 @@ export async function saveGalleryAction(
       type: data.type || "IMAGE",
       url: data.url,
       thumbnailUrl: data.thumbnailUrl,
+      translations: (data as any).translations,
     });
     if (!validation.success) {
       return { error: validation.error.issues[0]?.message || "Invalid media asset details." };
@@ -755,6 +767,7 @@ export async function saveGalleryAction(
           type: data.type || MediaType.IMAGE,
           order: Number(data.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
@@ -775,6 +788,7 @@ export async function saveGalleryAction(
           type: data.type || MediaType.IMAGE,
           order: Number(data.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           createdById: session.id,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -823,6 +837,7 @@ export async function saveEventAction(
     isFeatured?: boolean;
     slug?: string;
     regenerateSlug?: boolean;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult> {
@@ -842,6 +857,7 @@ export async function saveEventAction(
       location: data.location || "Medhen Beza Hospital Campus",
       description: data.description,
       image: data.image,
+      translations: (data as any).translations,
     });
     if (!validation.success) {
       return { error: validation.error.issues[0]?.message || "Invalid event details." };
@@ -863,6 +879,7 @@ export async function saveEventAction(
           image: data.image,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
@@ -885,6 +902,7 @@ export async function saveEventAction(
           image: data.image,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           createdById: session.id,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -938,6 +956,7 @@ export async function saveCareerAction(
     isFeatured?: boolean;
     slug?: string;
     regenerateSlug?: boolean;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult> {
@@ -968,6 +987,7 @@ export async function saveCareerAction(
       description: data.description,
       responsibilities: data.responsibilities || [],
       requirements: data.requirements || [],
+      translations: (data as any).translations,
     });
     if (!validation.success) {
       return { error: validation.error.issues[0]?.message || "Invalid career vacancy details." };
@@ -993,6 +1013,7 @@ export async function saveCareerAction(
           deadline: parsedDeadline,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
@@ -1019,6 +1040,7 @@ export async function saveCareerAction(
           deadline: parsedDeadline,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           createdById: session.id,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -1063,6 +1085,7 @@ export async function saveFAQAction(
     answer: string;
     category?: string;
     order?: number;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "publish"
 ): Promise<ActionResult> {
@@ -1080,6 +1103,7 @@ export async function saveFAQAction(
       question: data.question,
       answer: data.answer,
       category: data.category || "General",
+      translations: (data as any).translations,
     });
     if (!validation.success) {
       return { error: validation.error.issues[0]?.message || "Invalid FAQ details." };
@@ -1094,6 +1118,7 @@ export async function saveFAQAction(
           category: data.category || "General",
           order: Number(data.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
         },
       });
 
@@ -1110,6 +1135,7 @@ export async function saveFAQAction(
           category: data.category || "General",
           order: Number(data.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
         },
       });
 
@@ -1155,6 +1181,7 @@ export async function savePageAction(
     regenerateSlug?: boolean;
     metaTitle?: string;
     metaDescription?: string;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult> {
@@ -1192,6 +1219,7 @@ export async function savePageAction(
           metaTitle: data.metaTitle,
           metaDescription: data.metaDescription,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
@@ -1216,6 +1244,7 @@ export async function savePageAction(
           metaTitle: data.metaTitle,
           metaDescription: data.metaDescription,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           createdById: session.id,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },

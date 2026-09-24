@@ -116,7 +116,7 @@ export const siteSettingsSchema = z.object({
   // SEO settings
   seo_title: z.string().trim().max(200).optional(),
   seo_description: z.string().trim().max(400).optional(),
-});
+}).passthrough();
 
 export type SiteSettingsInput = z.infer<typeof siteSettingsSchema>;
 
@@ -191,7 +191,7 @@ export const facilitySchema = z.object({
   image: z.string().trim().optional(),
   order: z.number().int().min(0).default(0),
   slug: z.string().trim().optional(),
-});
+}).passthrough();
 
 export type FacilityInput = z.infer<typeof facilitySchema>;
 
@@ -229,7 +229,7 @@ export const departmentSchema = z.object({
   image: z.string().trim().optional(),
   icon: z.string().trim().max(50).optional(),
   order: z.number().int().min(0).default(0),
-});
+}).passthrough();
 
 export type DepartmentInput = z.infer<typeof departmentSchema>;
 
@@ -248,7 +248,7 @@ export const doctorSchema = z.object({
   areasOfExpertise: z.array(z.string().trim()).default([]),
   availability: z.string().trim().max(200).optional(),
   isFeatured: z.boolean().default(false),
-});
+}).passthrough();
 
 // ─── 7. Service Schema ──────────────────────────────────────────────────────
 export const serviceSchema = z.object({
@@ -265,7 +265,7 @@ export const serviceSchema = z.object({
   additionalInfo: z.string().trim().max(2000).optional(),
   image: z.string().trim().optional(),
   isEmergency: z.boolean().default(false),
-});
+}).passthrough();
 
 // ─── 8. Career Schema ───────────────────────────────────────────────────────
 export const careerSchema = z.object({
@@ -278,7 +278,7 @@ export const careerSchema = z.object({
   description: z.string().trim().min(10, "Job description is required.").max(5000),
   responsibilities: z.array(z.string().trim()).default([]),
   requirements: z.array(z.string().trim()).default([]),
-});
+}).passthrough();
 
 // ─── 9. News / Article Schema ───────────────────────────────────────────────
 export const newsSchema = z.object({
@@ -291,7 +291,7 @@ export const newsSchema = z.object({
   tags: z.array(z.string().trim()).default([]),
   image: z.string().trim().optional(),
   author: z.string().trim().max(120).optional(),
-});
+}).passthrough();
 
 // ─── 10. Event Schema ───────────────────────────────────────────────────────
 export const eventSchema = z.object({
@@ -302,7 +302,7 @@ export const eventSchema = z.object({
   description: z.string().trim().min(10, "Event description is required.").max(5000),
   registrationUrl: z.string().trim().max(500).optional(),
   image: z.string().trim().optional(),
-});
+}).passthrough();
 
 // ─── 11. FAQ Schema ─────────────────────────────────────────────────────────
 export const faqSchema = z.object({
@@ -310,7 +310,7 @@ export const faqSchema = z.object({
   question: z.string().trim().min(5, "Question must be at least 5 characters.").max(300),
   answer: z.string().trim().min(5, "Answer must be at least 5 characters.").max(3000),
   category: z.string().trim().min(2, "Category is required.").max(100),
-});
+}).passthrough();
 
 // ─── 12. Gallery Schema ─────────────────────────────────────────────────────
 export const gallerySchema = z.object({
@@ -320,4 +320,4 @@ export const gallerySchema = z.object({
   type: z.enum(["IMAGE", "VIDEO"]),
   url: z.string().trim().min(1, "Media file or URL is required."),
   thumbnailUrl: z.string().trim().optional(),
-});
+}).passthrough();

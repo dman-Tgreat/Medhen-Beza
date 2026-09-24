@@ -28,6 +28,7 @@ export interface AdminFacilityItem {
   image?: string;
   order?: number;
   status: ContentStatus;
+  translations?: any;
 }
 
 function slugify(text: string) {
@@ -77,6 +78,7 @@ export async function getAdminFacilitiesAction(): Promise<ActionResult<AdminFaci
       image: f.image || undefined,
       order: f.order,
       status: f.status,
+      translations: f.translations,
     }));
 
     return { success: true, data: mapped };
@@ -101,6 +103,7 @@ export async function saveAdminFacilityAction(
     image?: string;
     order?: number;
     status?: ContentStatus;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult<AdminFacilityItem>> {
@@ -163,6 +166,7 @@ export async function saveAdminFacilityAction(
           image: validated.image,
           order: Number(validated.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           publishedById: targetStatus === ContentStatus.PUBLISHED ? session.id : undefined,
           publishedAt: targetStatus === ContentStatus.PUBLISHED ? new Date() : undefined,
           submittedById: targetStatus === ContentStatus.PENDING_APPROVAL ? session.id : undefined,
@@ -193,6 +197,7 @@ export async function saveAdminFacilityAction(
           image: updated.image || undefined,
           order: updated.order,
           status: updated.status,
+          translations: updated.translations,
         },
       };
     } else {
@@ -213,6 +218,7 @@ export async function saveAdminFacilityAction(
           image: validated.image || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
           order: Number(validated.order) || 0,
           status: targetStatus,
+          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
           createdById: session.id,
           publishedById: targetStatus === ContentStatus.PUBLISHED ? session.id : undefined,
           publishedAt: targetStatus === ContentStatus.PUBLISHED ? new Date() : undefined,
@@ -244,6 +250,7 @@ export async function saveAdminFacilityAction(
           image: created.image || undefined,
           order: created.order,
           status: created.status,
+          translations: created.translations,
         },
       };
     }

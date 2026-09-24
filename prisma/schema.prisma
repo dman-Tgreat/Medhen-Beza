@@ -233,6 +233,8 @@ model Department {
   archivedAt DateTime?
   updatedAt  DateTime  @updatedAt
 
+  translations Json?
+
   // Relations
   doctors  Doctor[]
   services Service[]
@@ -289,6 +291,8 @@ model Service {
   archivedAt DateTime?
   updatedAt  DateTime  @updatedAt
 
+  translations Json?
+
   @@index([departmentId])
   @@index([status])
   @@index([slug])
@@ -344,6 +348,8 @@ model Doctor {
   archivedAt DateTime?
   updatedAt  DateTime  @updatedAt
 
+  translations Json?
+
   @@index([departmentId])
   @@index([status])
   @@index([slug])
@@ -359,6 +365,8 @@ model NewsCategory {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  translations Json?
 
   news News[]
 
@@ -411,6 +419,8 @@ model News {
   archivedAt DateTime?
   updatedAt  DateTime  @updatedAt
 
+  translations Json?
+
   @@index([categoryId])
   @@index([status])
   @@index([slug])
@@ -458,6 +468,8 @@ model Gallery {
 
   archivedAt DateTime?
   updatedAt  DateTime  @updatedAt
+
+  translations Json?
 
   @@index([type])
   @@index([album])
@@ -539,6 +551,8 @@ model Career {
   archivedAt DateTime?
   updatedAt  DateTime  @updatedAt
 
+  translations Json?
+
   @@index([departmentId])
   @@index([status])
   @@index([slug])
@@ -583,6 +597,8 @@ model Page {
   archivedAt DateTime?
   updatedAt  DateTime  @updatedAt
 
+  translations Json?
+
   @@index([status])
   @@index([slug])
   @@map("pages")
@@ -626,6 +642,8 @@ model HospitalEvent {
   archivedAt DateTime?
   updatedAt  DateTime  @updatedAt
 
+  translations Json?
+
   @@index([status])
   @@index([slug])
   @@map("hospital_events")
@@ -640,6 +658,8 @@ model FAQ {
   status    ContentStatus @default(PUBLISHED)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+
+  translations Json?
 
   @@index([category])
   @@index([status])
@@ -685,6 +705,8 @@ model Facility {
 
   archivedAt DateTime?
   updatedAt  DateTime  @updatedAt
+
+  translations Json?
 
   @@index([category])
   @@index([status])
