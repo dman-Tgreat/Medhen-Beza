@@ -1512,9 +1512,11 @@ async function main() {
     { key: "location_om", value: "Adaamaa, Itoophiyaa", group: "contact", description: "Location in Afan Oromo" },
   ];
 
-  for (const s of settingsData) {
-    await prisma.siteSetting.create({ data: s });
-  }
+  const settingsDataWithId = settingsData.map((s) => ({
+    id: crypto.randomUUID(),
+    ...s,
+  }));
+  await prisma.siteSetting.createMany({ data: settingsDataWithId });
   console.log(`✅ Seeded ${settingsData.length} site settings (EN, AM, OM).`);
 
   // ─── 14. Seed CMS Pages (§14) ───────────────────────────────────────────────
