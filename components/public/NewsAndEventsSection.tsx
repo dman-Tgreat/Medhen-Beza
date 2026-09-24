@@ -6,12 +6,16 @@ import { EventCard } from "@/components/content/EventCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import type { NewsDetailData, EventDetailData } from "@/lib/mock-data";
 
+import { useI18n } from "@/components/i18n/I18nProvider";
+
 interface NewsAndEventsSectionProps {
   news: NewsDetailData[];
   events: EventDetailData[];
 }
 
 export function NewsAndEventsSection({ news, events }: NewsAndEventsSectionProps) {
+  const { t } = useI18n();
+
   const allItems = [
     ...news.map((n) => ({ type: "news" as const, data: n })),
     ...events.map((e) => ({ type: "event" as const, data: e })),
@@ -21,17 +25,17 @@ export function NewsAndEventsSection({ news, events }: NewsAndEventsSectionProps
     <section className="py-16 lg:py-24">
       <div className="layout-container">
         <SectionHeader
-          eyebrow="What's Happening"
-          title="News & Events"
-          description="Stay up to date with the latest from our hospital — health insights, upcoming community events, and important announcements."
+          eyebrow={t("home.newsSectionEyebrow") || "What's Happening"}
+          title={t("home.newsSectionTitle") || "News & Events"}
+          description={t("home.newsSectionDesc") || "Stay up to date with the latest from our hospital — health insights, upcoming community events, and important announcements."}
         />
 
         <Tabs defaultValue="all" className="mt-10">
           <div className="flex justify-center mb-8">
             <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="news">News</TabsTrigger>
-              <TabsTrigger value="events">Events</TabsTrigger>
+              <TabsTrigger value="all">{t("common.all") || "All"}</TabsTrigger>
+              <TabsTrigger value="news">{t("nav.news") || "News"}</TabsTrigger>
+              <TabsTrigger value="events">{t("nav.events") || "Events"}</TabsTrigger>
             </TabsList>
           </div>
 
@@ -47,7 +51,7 @@ export function NewsAndEventsSection({ news, events }: NewsAndEventsSectionProps
               )}
               {allItems.length === 0 && (
                 <div className="col-span-full py-12 text-center text-text-muted">
-                  No published news or events at this time.
+                  {t("common.noResults") || "No published news or events at this time."}
                 </div>
               )}
             </div>
@@ -61,7 +65,7 @@ export function NewsAndEventsSection({ news, events }: NewsAndEventsSectionProps
               ))}
               {news.length === 0 && (
                 <div className="col-span-full py-12 text-center text-text-muted">
-                  No published news articles at this time.
+                  {t("news.empty") || "No published news articles at this time."}
                 </div>
               )}
             </div>
@@ -75,7 +79,7 @@ export function NewsAndEventsSection({ news, events }: NewsAndEventsSectionProps
               ))}
               {events.length === 0 && (
                 <div className="col-span-full py-12 text-center text-text-muted">
-                  No upcoming events scheduled at this time.
+                  {t("events.empty") || "No upcoming events scheduled at this time."}
                 </div>
               )}
             </div>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Calendar, PhoneCall, ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { type BreadcrumbItem } from "@/components/layout/Breadcrumbs";
+import { Breadcrumbs, type BreadcrumbItem } from "@/components/layout/Breadcrumbs";
 import { HOSPITAL_INFO } from "@/lib/constants";
 
 // ─── Shared internal helpers ──────────────────────────────────────────────────
@@ -351,45 +351,9 @@ export function PageHero({
       <div className="layout-container space-y-4">
         {/* Breadcrumbs */}
         {breadcrumbs.length > 0 && (
-          <nav aria-label="Breadcrumb">
-            <ol className="flex items-center flex-wrap gap-1 list-none p-0 m-0">
-              <li className="flex items-center gap-1">
-                <Link
-                  href="/"
-                  className="flex items-center gap-1 text-caption text-text-muted hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline"
-                >
-                  <Home className="w-3.5 h-3.5" aria-hidden />
-                  Home
-                </Link>
-              </li>
-              {breadcrumbs.map((item, i) => {
-                const isLast = i === breadcrumbs.length - 1;
-                return (
-                  <li key={i} className="flex items-center gap-1">
-                    <ChevronRight
-                      className="w-3.5 h-3.5 text-border"
-                      aria-hidden
-                    />
-                    {item.href && !isLast ? (
-                      <Link
-                        href={item.href}
-                        className="text-caption text-text-muted hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline"
-                      >
-                        {item.label}
-                      </Link>
-                    ) : (
-                      <span
-                        className="text-caption font-semibold text-text"
-                        aria-current="page"
-                      >
-                        {item.label}
-                      </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </nav>
+          <Breadcrumbs
+            items={breadcrumbs.filter((b) => b.label.toLowerCase() !== "home")}
+          />
         )}
 
         {/* Eyebrow */}

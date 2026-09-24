@@ -13,10 +13,12 @@ import {
 import { GalleryCard } from "@/components/content/GalleryCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 type MediaFilter = "All" | "Photos" | "Videos";
 
 export function GalleryDirectoryClient({ initialItems }: { initialItems: any[] }) {
+  const { t } = useI18n();
   const [filter, setFilter] = React.useState<MediaFilter>("All");
   const [activeMediaIndex, setActiveMediaIndex] = React.useState<number | null>(null);
 
@@ -29,6 +31,12 @@ export function GalleryDirectoryClient({ initialItems }: { initialItems: any[] }
   }, [initialItems, filter]);
 
   const activeMedia = activeMediaIndex !== null ? filteredItems[activeMediaIndex] : null;
+
+  const tabLabels: Record<MediaFilter, string> = {
+    All: t("common.all") || "All",
+    Photos: t("gallery.photos") || "Photos",
+    Videos: t("gallery.videos") || "Videos",
+  };
 
   return (
     <main className="container mx-auto px-4 pt-10 space-y-8">
@@ -44,7 +52,7 @@ export function GalleryDirectoryClient({ initialItems }: { initialItems: any[] }
                 : "bg-surface text-text-muted border border-border hover:text-text"
             }`}
           >
-            {tab}
+            {tabLabels[tab]}
           </button>
         ))}
       </div>
@@ -52,8 +60,8 @@ export function GalleryDirectoryClient({ initialItems }: { initialItems: any[] }
       {filteredItems.length === 0 ? (
         <EmptyState
           icon={ImageIcon}
-          title="No Media in this Section"
-          description="We are regularly updating our hospital photos and facility tours. Please check back soon."
+          title={t("common.noResults") || "No Media in this Section"}
+          description={t("common.noResults") || "We are regularly updating our hospital photos and facility tours. Please check back soon."}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

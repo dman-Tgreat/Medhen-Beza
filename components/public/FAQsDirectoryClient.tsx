@@ -1,21 +1,20 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { Search, HelpCircle, PhoneCall, Mail, X } from "lucide-react";
+import { Search, HelpCircle, X } from "lucide-react";
 import { FAQAccordion } from "@/components/content/FAQAccordion";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { FAQCategoryGroup } from "@/lib/mock-data";
-import { HOSPITAL_INFO } from "@/lib/constants";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 export function FAQsDirectoryClient({
   initialGroups,
 }: {
   initialGroups: FAQCategoryGroup[];
 }) {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const filteredGroups = React.useMemo(() => {
@@ -43,7 +42,7 @@ export function FAQsDirectoryClient({
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light pointer-events-none" />
         <Input
           type="text"
-          placeholder="Type a question or keyword (e.g. visiting hours, insurance, emergency)..."
+          placeholder={t("faqs.searchPlaceholder") || "Type a question or keyword (e.g. visiting hours, insurance, emergency)..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-11 pr-10 bg-surface min-h-[48px] h-12 text-base sm:text-body border-border shadow-xs focus-visible:ring-primary rounded-lg"
@@ -61,9 +60,9 @@ export function FAQsDirectoryClient({
       {filteredGroups.length === 0 ? (
         <EmptyState
           icon={HelpCircle}
-          title="No Matching Questions Found"
-          description="We couldn't find an answer to your specific query. Contact our patient helpdesk directly."
-          actionLabel="Clear Search"
+          title={t("faqs.empty") || "No Matching Questions Found"}
+          description={t("common.noResults") || "We couldn't find an answer to your specific query. Contact our patient helpdesk directly."}
+          actionLabel={t("common.clearAll") || "Clear Search"}
           onAction={() => setSearchQuery("")}
         />
       ) : (

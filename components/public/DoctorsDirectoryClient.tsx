@@ -25,6 +25,7 @@ import {
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { DoctorDetailData, DepartmentDetailData } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 interface DoctorsDirectoryClientProps {
   initialDoctors: DoctorDetailData[];
@@ -35,6 +36,7 @@ export function DoctorsDirectoryClient({
   initialDoctors,
   departments,
 }: DoctorsDirectoryClientProps) {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedDept, setSelectedDept] = React.useState<string>("all");
   const [selectedSpecialty, setSelectedSpecialty] = React.useState<string>("all");
@@ -86,7 +88,7 @@ export function DoctorsDirectoryClient({
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light" />
             <Input
               type="search"
-              placeholder="Search by name, specialty, condition, or language..."
+              placeholder={t("doctors.searchPlaceholder") || "Search by name, specialty, condition, or language..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-11 text-small bg-background"
@@ -108,7 +110,7 @@ export function DoctorsDirectoryClient({
               onChange={(e) => setSelectedDept(e.target.value)}
               className="h-11 rounded-lg border border-border bg-background px-3 py-2 text-small text-text focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="all">All Departments</option>
+              <option value="all">{t("doctors.allDepartments") || "All Departments"}</option>
               {departments.map((dept) => (
                 <option key={dept.slug} value={dept.slug}>
                   {dept.name}
@@ -121,7 +123,7 @@ export function DoctorsDirectoryClient({
               onChange={(e) => setSelectedSpecialty(e.target.value)}
               className="h-11 rounded-lg border border-border bg-background px-3 py-2 text-small text-text focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="all">All Specialties</option>
+              <option value="all">{t("doctors.allSpecialties") || "All Specialties"}</option>
               {allSpecialties.map((spec) => (
                 <option key={spec} value={spec}>
                   {spec}
@@ -137,7 +139,7 @@ export function DoctorsDirectoryClient({
                 className="text-text-muted hover:text-emergency h-11"
               >
                 <X className="h-4 w-4 mr-1" />
-                Reset
+                {t("common.reset") || "Reset"}
               </Button>
             )}
           </div>
@@ -150,7 +152,7 @@ export function DoctorsDirectoryClient({
               className="flex-1 justify-center gap-2"
             >
               <SlidersHorizontal className="h-4 w-4" />
-              Filters
+              {t("common.filters") || "Filters"}
               {activeFiltersCount > 0 && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-white font-bold">
                   {activeFiltersCount}
@@ -159,7 +161,7 @@ export function DoctorsDirectoryClient({
             </Button>
             {activeFiltersCount > 0 && (
               <Button variant="ghost" size="sm" onClick={resetFilters}>
-                Reset
+                {t("common.reset") || "Reset"}
               </Button>
             )}
           </div>
@@ -177,9 +179,9 @@ export function DoctorsDirectoryClient({
       {filteredDoctors.length === 0 ? (
         <EmptyState
           icon={UserSearch}
-          title="No Doctors Found"
-          description="We couldn't find any medical specialists matching your current search criteria. Try removing some filters."
-          actionLabel="Reset All Filters"
+          title={t("doctors.empty") || "No Doctors Found"}
+          description={t("common.noResults") || "We couldn't find any medical specialists matching your current search criteria. Try removing some filters."}
+          actionLabel={t("common.clearAll") || "Reset All Filters"}
           onAction={resetFilters}
         />
       ) : (

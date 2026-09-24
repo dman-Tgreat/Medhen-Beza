@@ -4,12 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import {
   Briefcase,
-  Building2,
-  Clock,
   MapPin,
   Calendar,
   Search,
-  X,
   ArrowRight,
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -17,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { CareerDetailData, DepartmentDetailData } from "@/lib/mock-data";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 export function CareersDirectoryClient({
   initialCareers,
@@ -25,6 +23,7 @@ export function CareersDirectoryClient({
   initialCareers: CareerDetailData[];
   departments: DepartmentDetailData[];
 }) {
+  const { t, locale } = useI18n();
   const [selectedDept, setSelectedDept] = React.useState<string>("all");
   const [searchQuery, setSearchQuery] = React.useState<string>("");
 
@@ -53,7 +52,7 @@ export function CareersDirectoryClient({
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-light" />
             <Input
               type="search"
-              placeholder="Search positions, medical departments, qualifications..."
+              placeholder={t("careers.searchPlaceholder") || "Search positions, medical departments, qualifications..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-11 text-small bg-background"
@@ -66,7 +65,7 @@ export function CareersDirectoryClient({
               onChange={(e) => setSelectedDept(e.target.value)}
               className="h-11 rounded-lg border border-border bg-background px-3 py-2 text-small text-text focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="all">All Departments</option>
+              <option value="all">{t("departments.all") || "All Departments"}</option>
               {departments.map((dept) => (
                 <option key={dept.slug} value={dept.slug}>
                   {dept.name}
@@ -81,9 +80,9 @@ export function CareersDirectoryClient({
       {filteredCareers.length === 0 ? (
         <EmptyState
           icon={Briefcase}
-          title="No Vacancies Matching Criteria"
-          description="We do not currently have open positions matching your query. Explore all roles or send your spontaneous CV."
-          actionLabel="View All Openings"
+          title={t("careers.empty") || "No Vacancies Matching Criteria"}
+          description={t("common.noResults") || "We do not currently have open positions matching your query. Explore all roles or send your spontaneous CV."}
+          actionLabel={t("common.viewAll") || "View All Openings"}
           onAction={() => {
             setSearchQuery("");
             setSelectedDept("all");
@@ -106,7 +105,7 @@ export function CareersDirectoryClient({
                     </div>
 
                     <h3 className="text-h4 font-bold text-text hover:text-primary transition-colors">
-                      <Link href={`/careers/${job.slug}`}>{job.position}</Link>
+                      <Link href={`/${locale}/careers/${job.slug}`}>{job.position}</Link>
                     </h3>
 
                     <p className="text-small text-text-muted line-clamp-2">
@@ -116,12 +115,12 @@ export function CareersDirectoryClient({
 
                   <div className="flex flex-col sm:flex-row md:flex-col items-start md:items-end justify-between gap-3 shrink-0">
                     <span className="text-caption text-text-light flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5 text-emergency" /> Deadline: {job.deadline}
+                      <Calendar className="h-3.5 w-3.5 text-emergency" /> {t("careers.deadline") || "Deadline"}: {job.deadline}
                     </span>
 
                     <Button asChild variant="primary" size="sm">
-                      <Link href={`/careers/${job.slug}`} className="flex items-center gap-1.5">
-                        View Details & Apply <ArrowRight className="h-4 w-4" />
+                      <Link href={`/${locale}/careers/${job.slug}`} className="flex items-center gap-1.5">
+                        {t("careers.viewDetails") || "View Details & Apply"} <ArrowRight className="h-4 w-4" />
                       </Link>
                     </Button>
                   </div>

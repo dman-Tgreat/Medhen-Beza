@@ -4,8 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  CalendarDays,
-  Clock,
   ArrowRight,
   Sparkles,
   Newspaper,
@@ -15,6 +13,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { NewsDetailData } from "@/lib/mock-data";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -23,6 +22,7 @@ export function NewsDirectoryClient({
 }: {
   initialNews: NewsDetailData[];
 }) {
+  const { t, locale } = useI18n();
   const [selectedCategory, setSelectedCategory] = React.useState("All");
   const [currentPage, setCurrentPage] = React.useState(1);
 
@@ -75,7 +75,7 @@ export function NewsDirectoryClient({
                 : "bg-surface text-text border border-border hover:bg-background"
             }`}
           >
-            {cat}
+            {cat === "All" ? (t("common.all") || "All") : cat}
           </button>
         ))}
       </div>
@@ -99,13 +99,13 @@ export function NewsDirectoryClient({
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-pill bg-secondary-light px-3 py-1 text-caption font-bold text-secondary-dark uppercase tracking-wider">
                     <Sparkles className="h-3 w-3" />
-                    Featured Story
+                    {t("common.featured") || "Featured Story"}
                   </span>
                   <span className="text-caption text-text-light">{featuredArticle.date}</span>
                 </div>
 
                 <h2 className="text-h3 font-bold text-text hover:text-primary transition-colors">
-                  <Link href={`/news/${featuredArticle.slug}`}>{featuredArticle.title}</Link>
+                  <Link href={`/${locale}/news/${featuredArticle.slug}`}>{featuredArticle.title}</Link>
                 </h2>
 
                 <p className="text-small text-text-muted leading-relaxed line-clamp-3">
@@ -114,8 +114,8 @@ export function NewsDirectoryClient({
 
                 <div className="pt-2">
                   <Button asChild variant="primary" size="default">
-                    <Link href={`/news/${featuredArticle.slug}`} className="flex items-center gap-2">
-                      Read Full Story <ArrowRight className="h-4 w-4" />
+                    <Link href={`/${locale}/news/${featuredArticle.slug}`} className="flex items-center gap-2">
+                      {t("common.readMore") || "Read Full Story"} <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
                 </div>
@@ -129,9 +129,9 @@ export function NewsDirectoryClient({
       {paginatedArticles.length === 0 ? (
         <EmptyState
           icon={Newspaper}
-          title="No Articles in this Category"
-          description="We couldn't find any published news articles for this category. Check back soon for updates."
-          actionLabel="View All News"
+          title={t("news.empty") || "No Articles in this Category"}
+          description={t("common.noResults") || "We couldn't find any published news articles for this category. Check back soon for updates."}
+          actionLabel={t("common.viewAll") || "View All News"}
           onAction={() => setSelectedCategory("All")}
         />
       ) : (

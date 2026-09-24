@@ -1,18 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { Calendar, CalendarCheck2, Clock, MapPin, Sparkles } from "lucide-react";
+import { Calendar, CalendarCheck2 } from "lucide-react";
 import { EventCard } from "@/components/content/EventCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { EventDetailData } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 export function EventsDirectoryClient({
   initialEvents,
 }: {
   initialEvents: EventDetailData[];
 }) {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = React.useState<"upcoming" | "past">("upcoming");
 
   const upcomingEvents = React.useMemo(() => {
@@ -39,7 +41,7 @@ export function EventsDirectoryClient({
             )}
           >
             <Calendar className="w-4 h-4 shrink-0" />
-            <span>Upcoming ({upcomingEvents.length})</span>
+            <span>{t("events.upcoming") || "Upcoming"} ({upcomingEvents.length})</span>
           </button>
           <button
             onClick={() => setActiveTab("past")}
@@ -51,7 +53,7 @@ export function EventsDirectoryClient({
             )}
           >
             <CalendarCheck2 className="w-4 h-4 shrink-0" />
-            <span>Archive ({pastEvents.length})</span>
+            <span>{t("events.past") || "Archive"} ({pastEvents.length})</span>
           </button>
         </div>
       </div>
@@ -59,8 +61,8 @@ export function EventsDirectoryClient({
       {currentEvents.length === 0 ? (
         <EmptyState
           icon={Calendar}
-          title={activeTab === "upcoming" ? "No Upcoming Events" : "No Past Events Found"}
-          description="Check back regularly or follow our announcements for hospital talks, blood donation camps, and community workshops."
+          title={activeTab === "upcoming" ? (t("events.empty") || "No Upcoming Events") : (t("common.noResults") || "No Past Events Found")}
+          description={t("common.noResults") || "Check back regularly or follow our announcements for hospital talks, blood donation camps, and community workshops."}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -11,6 +11,7 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { FacilityCard } from "@/components/content/FacilityCard";
 import type { FacilityDetailData } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 interface FacilitiesDirectoryClientProps {
   initialFacilities: FacilityDetailData[];
@@ -26,6 +27,7 @@ function isValidImageUrl(url?: string): boolean {
 export function FacilitiesDirectoryClient({
   initialFacilities,
 }: FacilitiesDirectoryClientProps) {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
 
@@ -71,7 +73,7 @@ export function FacilitiesDirectoryClient({
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted pointer-events-none" />
               <Input
                 type="text"
-                placeholder="Search wings, units, equipment, or capacity..."
+                placeholder={t("facilities.searchPlaceholder") || "Search wings, units, equipment, or capacity..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-11 bg-background"
@@ -97,7 +99,7 @@ export function FacilitiesDirectoryClient({
               </span>
               {categories.map((cat) => {
                 const isSelected = selectedCategory === cat;
-                const label = cat === "all" ? "All Wings & Facilities" : cat;
+                const label = cat === "all" ? (t("common.all") || "All Wings & Facilities") : cat;
                 return (
                   <button
                     key={cat}
