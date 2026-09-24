@@ -167,7 +167,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                     href={`/${locale}/doctors`}
                     className="text-small font-semibold text-primary hover:underline flex items-center gap-1"
                   >
-                    {dict.common?.viewAll || "All Specialists"} <ArrowRight className="h-3.5 w-3.5" />
+                    {dict.services?.viewAllSpecialists || dict.common?.viewAllSpecialists || dict.common?.viewAll || "All Specialists"} <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">

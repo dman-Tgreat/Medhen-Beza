@@ -1,6 +1,19 @@
 {
   "common": {
     "viewAll": "ሁሉንም ይመልከቱ",
+    "viewAllServices": "ሁሉንም አገልግሎቶች ይመልከቱ",
+    "viewAllDepartments": "ሁሉንም ክፍሎች ይመልከቱ",
+    "viewAllDoctors": "ሁሉንም ሀኪሞች ይመልከቱ",
+    "viewAllFacilities": "ሁሉንም ተቋማት ይመልከቱ",
+    "viewAllNews": "ሁሉንም ዜናዎች ይመልከቱ",
+    "viewAllEvents": "ሁሉንም ኩነቶች ይመልከቱ",
+    "viewAllGallery": "ሁሉንም ፎቶና ቪዲዮ ይመልከቱ",
+    "viewAllSpecialists": "ሁሉንም ስፔሻሊስቶች ይመልከቱ",
+    "viewAllOpenings": "ሁሉንም ክፍት የስራ መደቦች ይመልከቱ",
+    "viewDepartment": "ክፍሉን ይመልከቱ",
+    "viewProfile": "የሀኪሙን ዝርዝር ይመልከቱ",
+    "viewEvent": "ኩነቱን ይመልከቱ",
+    "exploreFacility": "ተቋሙን ይመልከቱ",
     "learnMore": "ተጨማሪ መረጃ",
     "readMore": "ሙሉውን ያንብቡ",
     "details": "ዝርዝር",
@@ -49,7 +62,8 @@
     "more": "ተጨማሪ",
     "emergency": "ድንገተኛ አደጋ",
     "openMenu": "የማውጫ ቁልፍ ይክፈቱ",
-    "closeMenu": "የማውጫ ቁልፍ ይዝጉ"
+    "closeMenu": "የማውጫ ቁልፍ ይዝጉ",
+    "menu": "ማውጫ"
   },
   "home": {
     "quickActions": "ፈጣን አገልግሎቶች",
@@ -86,7 +100,13 @@
     "emergencyBannerTitle": "በድንገተኛ አደጋ ወቅት እያንዳንዱ ሰከንድ ወሳኝ ነው",
     "emergencyBannerDesc": "የድንገተኛ ህክምና ክፍላችን በቀን 24 ሰዓት በሳምንት 7 ቀናት በልዩ የድንገተኛ ሀኪሞችና ነርሶች አገልግሎት ይሰጣል።",
     "ambulanceCall": "አምቡላንስ ይጥሩ",
-    "emergencyGate": "የድንገተኛ መግቢያ"
+    "emergencyGate": "የድንገተኛ መግቢያ",
+    "servicesViewAll": "ሁሉንም አገልግሎቶች ይመልከቱ",
+    "departmentsViewAll": "ሁሉንም ክፍሎች ይመልከቱ",
+    "doctorsViewAll": "ሁሉንም ሀኪሞች ይመልከቱ",
+    "facilitiesViewAll": "ሁሉንም ተቋማት ይመልከቱ",
+    "galleryViewAll": "ሁሉንም ፎቶና ቪዲዮ ይመልከቱ",
+    "newsViewAll": "ሁሉንም ዜናዎች ይመልከቱ"
   },
   "doctors": {
     "title": "ስፔሻሊስት ሀኪሞቻችን",
@@ -114,6 +134,8 @@
     "department": "የሚሰጥበት የህክምና ክፍል",
     "procedures": "የሚሰጡ ህክምናዎችና ሂደቶች",
     "relatedSpecialists": "ይህን አገልግሎት የሚሰጡ ሀኪሞች",
+    "viewAllSpecialists": "ሁሉንም ስፔሻሊስቶች ይመልከቱ",
+    "viewService": "አገልግሎቱን ይመልከቱ",
     "empty": "ከፍለጋዎ ጋር የሚዛመድ አገልግሎት አልተገኘም።"
   },
   "departments": {
@@ -127,6 +149,9 @@
     "contact": "የክፍሉ ቀጥታ ግንኙነት",
     "keyServices": "በዚህ ክፍል የሚሰጡ አገልግሎቶች",
     "team": "የክፍሉ የህክምና ቡድን",
+    "viewAllServices": "ሁሉንም አገልግሎቶች ይመልከቱ",
+    "viewAllDoctors": "የሀኪሞች ዝርዝር",
+    "viewDepartment": "ክፍሉን ይመልከቱ",
     "empty": "ከፍለጋዎ ጋር የሚዛመድ ክፍል አልተገኘም።"
   },
   "facilities": {
@@ -138,6 +163,7 @@
     "visitingHours": "የጠያቂዎች ሰዓት",
     "location": "ክፍልና ቦታ",
     "phone": "ቀጥታ የውስጥ መስመር",
+    "exploreFacility": "ተቋሙን ይመልከቱ",
     "empty": "በዚህ ምድብ ውስጥ የተመዘገበ ተቋም የለም።"
   },
   "news": {
@@ -151,6 +177,7 @@
     "tags": "መለያዎች",
     "share": "ጽሁፉን ያጋሩ",
     "relatedArticles": "ተዛማጅ ጽሁፎች",
+    "readMore": "ሙሉውን ያንብቡ",
     "empty": "ከፍለጋዎ ጋር የሚዛመድ ጽሁፍ አልተገኘም።"
   },
   "events": {
@@ -163,6 +190,7 @@
     "agenda": "የፕሮግራሙ ይዘት",
     "speaker": "ዋና ተናጋሪ",
     "registration": "የምዝገባ ዝርዝር",
+    "viewEvent": "ኩነቱን ይመልከቱ",
     "empty": "በአሁኑ ወቅት የታቀደ ክስተት የለም።"
   },
   "careers": {

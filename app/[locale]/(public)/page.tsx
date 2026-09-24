@@ -224,7 +224,7 @@ function FacilitiesShowcase({ facilities, locale, dict }: { facilities: any[]; l
         title={dict.home?.facilitiesSectionTitle || "State-of-the-art care environment"}
         description={dict.home?.facilitiesSectionDesc || "Our campus is designed to deliver the best clinical experience — from modern inpatient suites to cutting-edge diagnostic technology."}
         viewAllHref={`/${locale}/facilities`}
-        viewAllLabel={dict.common?.viewAll || "Explore Facilities"}
+        viewAllLabel={dict.home?.facilitiesViewAll || dict.common?.viewAllFacilities || dict.common?.viewAll || "Explore Facilities"}
         align="left"
       />
 
@@ -359,7 +359,7 @@ export default async function HomePage(props: {
             title={dict.home?.servicesSectionTitle || "Our Medical Services"}
             description={dict.home?.servicesSectionDesc || "From routine check-ups to complex surgical procedures, our specialists deliver expert care across a full spectrum of medical disciplines."}
             viewAllHref={`/${locale}/services`}
-            viewAllLabel={dict.common?.viewAll || "View All Services"}
+            viewAllLabel={dict.home?.servicesViewAll || dict.common?.viewAllServices || dict.common?.viewAll || "View All Services"}
           />
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.slice(0, 6).map((s) => (
@@ -382,7 +382,7 @@ export default async function HomePage(props: {
             title={dict.home?.departmentsSectionTitle || "Our Departments"}
             description={dict.home?.departmentsSectionDesc || "Each department is staffed by board-certified specialists supported by modern diagnostic and treatment technology."}
             viewAllHref={`/${locale}/departments`}
-            viewAllLabel={dict.common?.viewAll || "Explore Departments"}
+            viewAllLabel={dict.home?.departmentsViewAll || dict.common?.viewAllDepartments || dict.common?.viewAll || "Explore Departments"}
           />
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {departments.map((d) => (
@@ -405,7 +405,7 @@ export default async function HomePage(props: {
             title={dict.home?.doctorsSectionTitle || "Our Doctors"}
             description={dict.home?.doctorsSectionDesc || "Our medical team combines years of clinical experience with a genuine commitment to patient-centred care."}
             viewAllHref={`/${locale}/doctors`}
-            viewAllLabel={dict.common?.viewAll || "Meet All Doctors"}
+            viewAllLabel={dict.home?.doctorsViewAll || dict.common?.viewAllDoctors || dict.common?.viewAll || "Meet All Doctors"}
           />
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {doctors.slice(0, 4).map((d) => (
@@ -438,7 +438,7 @@ export default async function HomePage(props: {
             title={dict.home?.gallerySectionTitle || "Gallery"}
             description={dict.home?.gallerySectionDesc || `A glimpse of our facilities, events, and the people who make ${settings.hospitalName} what it is.`}
             viewAllHref={`/${locale}/gallery`}
-            viewAllLabel={dict.common?.viewAll || "View Gallery"}
+            viewAllLabel={dict.home?.galleryViewAll || dict.common?.viewAllGallery || dict.common?.viewAll || "View Gallery"}
           />
           <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {gallery.slice(0, 8).map((g, i) => (

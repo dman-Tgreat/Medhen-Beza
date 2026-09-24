@@ -131,7 +131,7 @@ export function NewsDirectoryClient({
           icon={Newspaper}
           title={t("news.empty") || "No Articles in this Category"}
           description={t("common.noResults") || "We couldn't find any published news articles for this category. Check back soon for updates."}
-          actionLabel={t("common.viewAll") || "View All News"}
+          actionLabel={t("common.viewAllNews") || t("common.viewAll") || "View All News"}
           onAction={() => setSelectedCategory("All")}
         />
       ) : (

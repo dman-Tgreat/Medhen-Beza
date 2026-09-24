@@ -115,7 +115,7 @@ export function ServicesDirectoryClient({
           icon={Stethoscope}
           title={t("services.empty") || "No Services Found"}
           description={t("common.noResults") || "We couldn't find any clinical services matching your search. Please check your keywords or reset filters."}
-          actionLabel={t("common.viewAll") || "View All Services"}
+          actionLabel={t("common.viewAllServices") || t("common.viewAll") || "View All Services"}
           onAction={() => {
             setSearchQuery("");
             setSelectedDept("all");

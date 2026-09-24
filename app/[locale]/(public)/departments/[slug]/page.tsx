@@ -174,7 +174,7 @@ export default async function DepartmentDetailPage({
                     href={`/${locale}/services`}
                     className="text-small font-semibold text-primary hover:underline flex items-center gap-1"
                   >
-                    {dict.common?.viewAll || "All Services"} <ArrowRight className="h-3.5 w-3.5" />
+                    {dict.departments?.viewAllServices || dict.common?.viewAllServices || dict.common?.viewAll || "All Services"} <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -196,7 +196,7 @@ export default async function DepartmentDetailPage({
                     href={`/${locale}/doctors`}
                     className="text-small font-semibold text-primary hover:underline flex items-center gap-1"
                   >
-                    {dict.common?.viewAll || "Doctors Directory"} <ArrowRight className="h-3.5 w-3.5" />
+                    {dict.departments?.viewAllDoctors || dict.common?.viewAllDoctors || dict.common?.viewAll || "Doctors Directory"} <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 gap-6">

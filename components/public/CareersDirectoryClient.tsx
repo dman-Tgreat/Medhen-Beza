@@ -82,7 +82,7 @@ export function CareersDirectoryClient({
           icon={Briefcase}
           title={t("careers.empty") || "No Vacancies Matching Criteria"}
           description={t("common.noResults") || "We do not currently have open positions matching your query. Explore all roles or send your spontaneous CV."}
-          actionLabel={t("common.viewAll") || "View All Openings"}
+          actionLabel={t("common.viewAllOpenings") || t("common.viewAll") || "View All Openings"}
           onAction={() => {
             setSearchQuery("");
             setSelectedDept("all");

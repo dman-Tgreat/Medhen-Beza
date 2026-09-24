@@ -124,9 +124,9 @@ export function FacilitiesDirectoryClient({
       <div className="layout-container">
         {filteredFacilities.length === 0 ? (
           <EmptyState
-            title="No facilities found"
-            description="No clinical facilities match your current search or category filter. Try clearing filters to see all wings."
-            actionLabel="Reset Filters"
+            title={t("facilities.empty") || "No facilities found"}
+            description={t("common.noResults") || "No clinical facilities match your current search or category filter. Try clearing filters to see all wings."}
+            actionLabel={t("common.reset") || t("common.clearAll") || "Reset Filters"}
             onAction={() => {
               setSearchQuery("");
               setSelectedCategory("all");
@@ -187,7 +187,7 @@ export function FacilitiesDirectoryClient({
                     </div>
 
                     <span className="inline-flex items-center gap-2 rounded-md bg-white text-primary px-5 py-2.5 text-small font-bold shrink-0 group-hover:bg-primary-light transition-colors">
-                      Explore Facility
+                      {t("facilities.exploreFacility") || "Explore Facility"}
                       <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </span>
                   </div>

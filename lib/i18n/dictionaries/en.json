@@ -1,6 +1,19 @@
 {
   "common": {
     "viewAll": "View All",
+    "viewAllServices": "View All Services",
+    "viewAllDepartments": "Explore Departments",
+    "viewAllDoctors": "Meet All Doctors",
+    "viewAllFacilities": "Explore Facilities",
+    "viewAllNews": "View All News",
+    "viewAllEvents": "View All Events",
+    "viewAllGallery": "View Gallery",
+    "viewAllSpecialists": "All Specialists",
+    "viewAllOpenings": "View All Openings",
+    "viewDepartment": "View Department",
+    "viewProfile": "View Profile",
+    "viewEvent": "View Event",
+    "exploreFacility": "Explore Facility",
     "learnMore": "Learn More",
     "readMore": "Read More",
     "details": "Details",
@@ -49,7 +62,8 @@
     "more": "More",
     "emergency": "Emergency",
     "openMenu": "Open navigation menu",
-    "closeMenu": "Close navigation menu"
+    "closeMenu": "Close navigation menu",
+    "menu": "Menu"
   },
   "home": {
     "quickActions": "Quick Actions",
@@ -86,7 +100,13 @@
     "emergencyBannerTitle": "In an Emergency, Every Second Counts",
     "emergencyBannerDesc": "Our emergency department is staffed 24 hours a day, 7 days a week by trauma surgeons, cardiologists, and critical care nurses.",
     "ambulanceCall": "Call Ambulance",
-    "emergencyGate": "Emergency Entrance"
+    "emergencyGate": "Emergency Entrance",
+    "servicesViewAll": "View All Services",
+    "departmentsViewAll": "Explore Departments",
+    "doctorsViewAll": "Meet All Doctors",
+    "facilitiesViewAll": "Explore Facilities",
+    "galleryViewAll": "View Gallery",
+    "newsViewAll": "View All News"
   },
   "doctors": {
     "title": "Our Specialist Physicians",
@@ -114,6 +134,8 @@
     "department": "Belongs to Department",
     "procedures": "Treatments & Procedures",
     "relatedSpecialists": "Specialists Providing this Service",
+    "viewAllSpecialists": "All Specialists",
+    "viewService": "View Service",
     "empty": "No services found matching your criteria."
   },
   "departments": {
@@ -127,6 +149,9 @@
     "contact": "Department Contact",
     "keyServices": "Services in this Department",
     "team": "Department Medical Team",
+    "viewAllServices": "All Services",
+    "viewAllDoctors": "Doctors Directory",
+    "viewDepartment": "View Department",
     "empty": "No departments found matching your criteria."
   },
   "facilities": {
@@ -138,6 +163,7 @@
     "visitingHours": "Visiting Hours",
     "location": "Wing & Location",
     "phone": "Direct Extension",
+    "exploreFacility": "Explore Facility",
     "empty": "No facilities found in this category."
   },
   "news": {
@@ -151,6 +177,7 @@
     "tags": "Tags",
     "share": "Share Article",
     "relatedArticles": "Related Articles",
+    "readMore": "Read More",
     "empty": "No articles found matching your criteria."
   },
   "events": {
@@ -163,6 +190,7 @@
     "agenda": "Program Agenda",
     "speaker": "Featured Speaker",
     "registration": "Registration Details",
+    "viewEvent": "View Event",
     "empty": "No events found at this time."
   },
   "careers": {

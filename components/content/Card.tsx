@@ -103,16 +103,43 @@ CardFooter.displayName = "CardFooter";
 
 // ─── CardLink — inline "label →" link used in all cards ──────────────────────
 
+const LABEL_TRANSLATION_MAP: Record<string, string> = {
+  "View Department": "departments.viewDepartment",
+  "View Profile": "doctors.viewProfile",
+  "Explore facility": "facilities.exploreFacility",
+  "Explore Facility": "facilities.exploreFacility",
+  "Read more": "news.readMore",
+  "Read More": "news.readMore",
+  "Learn more": "common.learnMore",
+  "Learn More": "common.learnMore",
+  "View event": "events.viewEvent",
+  "View Event": "events.viewEvent",
+  "View all": "common.viewAll",
+  "View All": "common.viewAll",
+  "View All Services": "common.viewAllServices",
+  "View All Departments": "common.viewAllDepartments",
+  "View All Doctors": "common.viewAllDoctors",
+  "View All Openings": "common.viewAllOpenings",
+  "View All News": "common.viewAllNews",
+};
+
 export interface CardLinkProps
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   label?: string;
+  translationKey?: string;
 }
 
 export const CardLink = React.forwardRef<HTMLAnchorElement, CardLinkProps>(
-  ({ label, className, children, ...props }, ref) => {
+  ({ label, translationKey, className, children, ...props }, ref) => {
     const { t } = useI18n();
     const fallbackLabel = t("common.learnMore") || "Learn more";
-    const resolvedLabel = label ?? fallbackLabel;
+    let resolvedLabel = label ?? fallbackLabel;
+    if (translationKey) {
+      resolvedLabel = t(translationKey) || resolvedLabel;
+    } else if (label && LABEL_TRANSLATION_MAP[label]) {
+      const mapped = t(LABEL_TRANSLATION_MAP[label]);
+      if (mapped) resolvedLabel = mapped;
+    }
 
     return (
       <a

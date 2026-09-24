@@ -1,6 +1,19 @@
 {
   "common": {
     "viewAll": "Hunda Ilaali",
+    "viewAllServices": "Tajaajiloota Hunda Ilaali",
+    "viewAllDepartments": "Kutaalee Hunda Ilaali",
+    "viewAllDoctors": "Ogeeyyii Hunda Ilaali",
+    "viewAllFacilities": "Dhaabbilee Hunda Ilaali",
+    "viewAllNews": "Oduu Hunda Ilaali",
+    "viewAllEvents": "Taateewwan Hunda Ilaali",
+    "viewAllGallery": "Gaalerii Hunda Ilaali",
+    "viewAllSpecialists": "Ogeeyyii Addaa Hunda",
+    "viewAllOpenings": "Banaa Hunda Ilaali",
+    "viewDepartment": "Kuticha Ilaali",
+    "viewProfile": "Seenaa Ogeessaa Ilaali",
+    "viewEvent": "Taatee Ilaali",
+    "exploreFacility": "Dhaabbaticha Ilaali",
     "learnMore": "Dabalata Baruuf",
     "readMore": "Guutuu Dubbisi",
     "details": "Bal'ina",
@@ -49,7 +62,8 @@
     "more": "Dabalata",
     "emergency": "Hatattama",
     "openMenu": "Bani",
-    "closeMenu": "Cufi"
+    "closeMenu": "Cufi",
+    "menu": "Baafata"
   },
   "home": {
     "quickActions": "Tajaajila Ariifachiisaa",
@@ -86,7 +100,13 @@
     "emergencyBannerTitle": "Balaan Hatattamaa Yommuu Ga'u, Sekoondiin Hundi Murteessaadha",
     "emergencyBannerDesc": "Kutaan yaala hatattamaa keenya guyyaatti sa'aatii 24 torbanitti guyyaa 7 ogeeyyiin dandeettii qabaniin banaadha.",
     "ambulanceCall": "Ambulaansii Waamaa",
-    "emergencyGate": "Balbala Hatattamaa"
+    "emergencyGate": "Balbala Hatattamaa",
+    "servicesViewAll": "Tajaajiloota Hunda Ilaali",
+    "departmentsViewAll": "Kutaalee Hunda Ilaali",
+    "doctorsViewAll": "Ogeeyyii Hunda Ilaali",
+    "facilitiesViewAll": "Dhaabbilee Hunda Ilaali",
+    "galleryViewAll": "Gaalerii Hunda Ilaali",
+    "newsViewAll": "Oduu Hunda Ilaali"
   },
   "doctors": {
     "title": "Ogeeyyii Ispeeshaalistii Keenya",
@@ -114,6 +134,8 @@
     "department": "Kutaa Yaalaa Tajaajilli Itti Kennamu",
     "procedures": "Tarkaanfilee fi Adeemsa Yaalaa",
     "relatedSpecialists": "Ogeeyyii Tajaajila Kana Kennan",
+    "viewAllSpecialists": "Ogeeyyii Addaa Hunda",
+    "viewService": "Tajaajila Ilaali",
     "empty": "Tajaajilli barbaaddan hin argamne."
   },
   "departments": {
@@ -127,6 +149,9 @@
     "contact": "Qunnamsiisaa Kutichaa",
     "keyServices": "Tajaajiloota Kutaa Kana Keessatti Kennaman",
     "team": "Garee Yaalaa Kutichaa",
+    "viewAllServices": "Tajaajiloota Hunda",
+    "viewAllDoctors": "Galmee Ogeeyyii",
+    "viewDepartment": "Kuticha Ilaali",
     "empty": "Kutaan barbaaddan hin argamne."
   },
   "facilities": {
@@ -138,6 +163,7 @@
     "visitingHours": "Sa'aatii Gaafannoo",
     "location": "Bakka fi Gamoo",
     "phone": "Sarara Kallattii",
+    "exploreFacility": "Dhaabbaticha Ilaali",
     "empty": "Gosa kana jalatti dhaabbanni hin jiru."
   },
   "news": {
@@ -151,6 +177,7 @@
     "tags": "Mallattoolee",
     "share": "Barreeffama Qoodaa",
     "relatedArticles": "Barreeffamoota Wal-qabatan",
+    "readMore": "Guutuu Dubbisi",
     "empty": "Barreeffamni barbaaddan hin argamne."
   },
   "events": {
@@ -163,6 +190,7 @@
     "agenda": "Sagantaa Qophii",
     "speaker": "Dubbataa Addaa",
     "registration": "Bal'ina Galmee",
+    "viewEvent": "Taatee Ilaali",
     "empty": "Yeroo ammaa kanatti qophiin qophaa'e hin jiru."
   },
   "careers": {

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { SectionHeader } from "@/components/sections/SectionHeader";
 import { NewsCard } from "@/components/content/NewsCard";
 import { EventCard } from "@/components/content/EventCard";
@@ -14,7 +16,7 @@ interface NewsAndEventsSectionProps {
 }
 
 export function NewsAndEventsSection({ news, events }: NewsAndEventsSectionProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   const allItems = [
     ...news.map((n) => ({ type: "news" as const, data: n })),
@@ -28,6 +30,8 @@ export function NewsAndEventsSection({ news, events }: NewsAndEventsSectionProps
           eyebrow={t("home.newsSectionEyebrow") || "What's Happening"}
           title={t("home.newsSectionTitle") || "News & Events"}
           description={t("home.newsSectionDesc") || "Stay up to date with the latest from our hospital — health insights, upcoming community events, and important announcements."}
+          viewAllHref={`/${locale}/news`}
+          viewAllLabel={t("home.newsViewAll") || t("common.viewAllNews") || t("common.viewAll") || "View All News"}
         />
 
         <Tabs defaultValue="all" className="mt-10">
@@ -69,6 +73,17 @@ export function NewsAndEventsSection({ news, events }: NewsAndEventsSectionProps
                 </div>
               )}
             </div>
+            {news.length > 0 && (
+              <div className="mt-8 text-center">
+                <Link
+                  href={`/${locale}/news`}
+                  className="inline-flex items-center gap-1.5 text-small font-semibold text-primary hover:underline"
+                >
+                  {t("home.newsViewAll") || t("common.viewAllNews") || "View All News"}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
           </TabsContent>
 
           {/* Events only */}
@@ -83,6 +98,17 @@ export function NewsAndEventsSection({ news, events }: NewsAndEventsSectionProps
                 </div>
               )}
             </div>
+            {events.length > 0 && (
+              <div className="mt-8 text-center">
+                <Link
+                  href={`/${locale}/events`}
+                  className="inline-flex items-center gap-1.5 text-small font-semibold text-primary hover:underline"
+                >
+                  {t("common.viewAllEvents") || "View All Events"}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

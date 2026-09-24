@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Building2, ArrowRight } from "lucide-react";
 import { CardRoot, CardImageSlot, CardBody, CardLink } from "./Card";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 export interface FacilityCardData {
   image?: string;
@@ -35,6 +38,9 @@ function isValidImageUrl(url?: string): boolean {
 }
 
 export function FacilityCard({ data, className, featured = false }: FacilityCardProps) {
+  const { t } = useI18n();
+  const exploreLabel = t("facilities.exploreFacility") || "Explore Facility";
+
   if (featured) {
     return (
       <CardRoot
@@ -89,7 +95,7 @@ export function FacilityCard({ data, className, featured = false }: FacilityCard
 
           <div className="pt-2">
             <span className="inline-flex items-center gap-2 rounded-md bg-white text-primary px-5 py-2.5 text-small font-bold transition-all duration-200 group-hover:bg-primary-light">
-              Explore Facility
+              {exploreLabel}
               <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
             </span>
           </div>

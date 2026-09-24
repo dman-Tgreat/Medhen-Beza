@@ -95,7 +95,7 @@ export function MobileNav({ isOpen, onClose, settings, currentLocale }: MobileNa
         {/* Drawer header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <span className="font-bold text-base text-text tracking-tight">
-            {t("nav.more")}
+            {t("nav.menu") || t("nav.more") || "Menu"}
           </span>
           <button
             onClick={onClose}

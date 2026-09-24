@@ -274,7 +274,7 @@ export default async function DoctorProfilePage({ params }: DoctorPageProps) {
                     href={`/${locale}/departments/${doctor.departmentSlug}`}
                     className="text-small font-semibold text-primary hover:underline flex items-center gap-1"
                   >
-                    {dict.common?.details || "View Department"} <ArrowRight className="h-3.5 w-3.5" />
+                    {dict.departments?.viewDepartment || dict.common?.viewDepartment || dict.common?.details || "View Department"} <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

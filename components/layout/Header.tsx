@@ -24,6 +24,7 @@ import type { SupportedLocale } from "@/lib/i18n/config";
 import type { PublicSiteSettings } from "@/lib/queries/public";
 
 const NAV_TRANSLATION_KEYS: Record<string, string> = {
+  "/": "nav.home",
   "/services": "nav.services",
   "/departments": "nav.departments",
   "/doctors": "nav.doctors",
@@ -45,17 +46,33 @@ function Logo({
   hospitalName?: string;
   locale?: string;
 }) {
+  const { t } = useI18n();
   // If name has "Hospital", separate it for the subtitle styling
-  const hasHospital = hospitalName.toLowerCase().includes("hospital");
+  const hasHospital =
+    hospitalName.toLowerCase().includes("hospital") ||
+    hospitalName.includes("ሆስፒታል") ||
+    hospitalName.toLowerCase().includes("hospitaala");
   const mainName = hasHospital
-    ? hospitalName.replace(/hospital/i, "").trim()
+    ? hospitalName.replace(/hospital|ሆስፒታል|hospitaala/gi, "").trim()
     : hospitalName;
+
+  const subtitle = hasHospital
+    ? locale === "am"
+      ? "ሆስፒታል"
+      : locale === "om"
+      ? "Hospitaala"
+      : "Hospital"
+    : locale === "am"
+    ? "የህክምና አገልግሎት"
+    : locale === "om"
+    ? "Tajaajila Yaalaa"
+    : "Medical Care";
 
   return (
     <Link
       href={`/${locale}`}
       className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
-      aria-label={`${hospitalName} — home`}
+      aria-label={`${hospitalName} — ${t("nav.home") || "home"}`}
     >
       <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-cta group-hover:bg-primary-dark transition-colors">
         <HeartPulse className="w-5 h-5" aria-hidden />
@@ -65,7 +82,7 @@ function Logo({
           {mainName || hospitalName}
         </span>
         <span className="text-[10px] font-semibold text-primary tracking-[0.12em] uppercase">
-          {hasHospital ? "Hospital" : "Medical Care"}
+          {subtitle}
         </span>
       </div>
     </Link>
