@@ -1,6 +1,8 @@
 import { getAdminDoctors, getAdminDepartments } from "@/lib/queries/admin";
 import { DoctorsAdminClient } from "@/components/admin/content/DoctorsAdminClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function DoctorsAdminPage() {
   const [doctors, departments] = await Promise.all([
     getAdminDoctors(),

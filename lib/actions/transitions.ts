@@ -4,6 +4,12 @@ import { ContentStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
+import {
+  revalidateDoctorPages,
+  clearDoctorFromDepartments,
+  revalidateDepartmentPages,
+  revalidateServicePages,
+} from "@/lib/actions/revalidate";
 
 export interface ActionResult<T = undefined> {
   success: boolean;
@@ -139,14 +145,43 @@ async function transition(contentType: ContentType, contentId: string, nextStatu
       }
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/approvals");
-    revalidatePath(config.adminPath);
-    revalidatePath(config.publicPath);
-    if (normalizedType === "Page" && (current as any).slug) {
-      const pageSlug = String((current as any).slug).replace(/^\/+/, "");
-      revalidatePath(`/${pageSlug}`);
-      if (pageSlug === "about") revalidatePath("/about");
+    if (normalizedType === "Doctor") {
+      const doc = await db.doctor.findUnique({
+        where: { id: contentId },
+        include: {
+          department: {
+            include: {
+              services: { select: { slug: true } },
+            },
+          },
+        },
+      });
+      if (doc) {
+        if (nextStatus !== ContentStatus.PUBLISHED) {
+          await clearDoctorFromDepartments(doc);
+        }
+        const serviceSlugs = doc.department?.services?.map((s) => s.slug) || [];
+        await revalidateDoctorPages(doc.slug, doc.department?.slug, serviceSlugs);
+      } else {
+        await revalidateDoctorPages();
+      }
+    } else if (normalizedType === "Department") {
+      const dept = await db.department.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidateDepartmentPages(dept?.slug);
+    } else if (normalizedType === "Service") {
+      const srv = await db.service.findUnique({ where: { id: contentId }, include: { department: { select: { slug: true } } } });
+      await revalidateServicePages(srv?.slug, srv?.department?.slug);
+    } else {
+      revalidatePath("/", "layout");
+      revalidatePath("/admin");
+      revalidatePath("/admin/approvals");
+      revalidatePath(config.adminPath);
+      revalidatePath(config.publicPath);
+      if (normalizedType === "Page" && (current as any).slug) {
+        const pageSlug = String((current as any).slug).replace(/^\/+/, "");
+        revalidatePath(`/${pageSlug}`);
+        if (pageSlug === "about") revalidatePath("/about");
+      }
     }
     return { success: true };
   } catch (error) {
@@ -173,9 +208,38 @@ export async function revertToDraftAction(contentType: ContentType, contentId: s
       await configFor(contentType).model(tx).update({ where: { id: contentId }, data: transitionData(config, ContentStatus.DRAFT, session.id) });
       await tx.auditLog.create({ data: { userId: session.id, userEmail: session.email, userName: session.name, action: "REVERT_TO_DRAFT", contentType: normalizeContentType(contentType), contentId, previousStatus: current.status, newStatus: ContentStatus.DRAFT } });
     });
-    revalidatePath("/admin");
-    revalidatePath("/admin/approvals");
-    revalidatePath(config.adminPath);
+
+    const normalized = normalizeContentType(contentType);
+    if (normalized === "Doctor") {
+      const doc = await db.doctor.findUnique({
+        where: { id: contentId },
+        include: {
+          department: {
+            include: {
+              services: { select: { slug: true } },
+            },
+          },
+        },
+      });
+      if (doc) {
+        await clearDoctorFromDepartments(doc);
+        const serviceSlugs = doc.department?.services?.map((s) => s.slug) || [];
+        await revalidateDoctorPages(doc.slug, doc.department?.slug, serviceSlugs);
+      } else {
+        await revalidateDoctorPages();
+      }
+    } else if (normalized === "Department") {
+      const dept = await db.department.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidateDepartmentPages(dept?.slug);
+    } else if (normalized === "Service") {
+      const srv = await db.service.findUnique({ where: { id: contentId }, include: { department: { select: { slug: true } } } });
+      await revalidateServicePages(srv?.slug, srv?.department?.slug);
+    } else {
+      revalidatePath("/", "layout");
+      revalidatePath("/admin");
+      revalidatePath("/admin/approvals");
+      revalidatePath(config.adminPath);
+    }
     return { success: true };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : "The workflow action failed." };

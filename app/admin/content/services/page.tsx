@@ -1,6 +1,8 @@
 import { getAdminServices, getAdminDepartments } from "@/lib/queries/admin";
 import { ServicesAdminClient } from "@/components/admin/content/ServicesAdminClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function ServicesAdminPage({
   searchParams,
 }: {

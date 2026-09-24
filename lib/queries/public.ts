@@ -399,6 +399,13 @@ function mapDepartment(dept: any, locale: SupportedLocale = DEFAULT_LOCALE): Dep
           return locS.title || locS.name;
         }) || [];
 
+  const defaultConsultant =
+    locale === "am"
+      ? "አማካሪ ስፔሻሊስት"
+      : locale === "om"
+      ? "Ogeessa Gorsaa Addaa"
+      : "Consultant Specialist";
+
   return {
     id: locDept.id,
     name: locDept.name,
@@ -409,7 +416,7 @@ function mapDepartment(dept: any, locale: SupportedLocale = DEFAULT_LOCALE): Dep
     phone: locDept.phone || "+251 116 000 111",
     email: locDept.email || "info@medhenbeza.com",
     location: locDept.location || "Main Hospital Complex",
-    headDoctorName: locDept.headDoctor || localizedLeadDoctor?.fullName || "Consultant Specialist",
+    headDoctorName: localizedLeadDoctor?.fullName || locDept.headDoctor || defaultConsultant,
     keyServices: specializations,
     href: `/${locale}/departments/${locDept.slug}`,
     image: locDept.image || "",

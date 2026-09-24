@@ -14,6 +14,12 @@ import {
   submitForApprovalAction,
 } from "@/lib/actions/transitions";
 import {
+  revalidateDoctorPages,
+  clearDoctorFromDepartments,
+  revalidateDepartmentPages,
+  revalidateServicePages,
+} from "@/lib/actions/revalidate";
+import {
   departmentSchema,
   doctorSchema,
   serviceSchema,
@@ -198,9 +204,13 @@ export async function saveDoctorAction(
         },
       });
 
-      revalidatePath("/admin/content/doctors");
-      revalidatePath("/doctors");
-      revalidatePath(`/doctors/${slug}`);
+      const dept = await db.department.findUnique({
+        where: { id: departmentId },
+        include: { services: { select: { slug: true } } },
+      });
+      const serviceSlugs = dept?.services?.map((s) => s.slug) || [];
+      await revalidateDoctorPages(slug, dept?.slug, serviceSlugs);
+
       const workflow = await finalizeSave(actionType, "Doctor", updated.id);
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
@@ -243,8 +253,13 @@ export async function saveDoctorAction(
         },
       });
 
-      revalidatePath("/admin/content/doctors");
-      revalidatePath("/doctors");
+      const dept = await db.department.findUnique({
+        where: { id: departmentId },
+        include: { services: { select: { slug: true } } },
+      });
+      const serviceSlugs = dept?.services?.map((s) => s.slug) || [];
+      await revalidateDoctorPages(slug, dept?.slug, serviceSlugs);
+
       const workflow = await finalizeSave(actionType, "Doctor", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };
@@ -262,6 +277,28 @@ export async function deleteDoctorAction(id: string): Promise<ActionResult> {
       "Delete Doctor"
     );
 
+    const doctor = await db.doctor.findUnique({
+      where: { id },
+      include: {
+        department: {
+          include: {
+            services: { select: { slug: true } },
+          },
+        },
+      },
+    });
+
+    if (!doctor) {
+      return { error: "Doctor profile not found or already deleted." };
+    }
+
+    const doctorSlug = doctor.slug;
+    const departmentSlug = doctor.department?.slug;
+    const serviceSlugs = doctor.department?.services?.map((s) => s.slug) || [];
+
+    // Clean up any department headDoctor references across base and localized translations
+    await clearDoctorFromDepartments(doctor);
+
     await db.doctor.delete({
       where: { id },
     });
@@ -274,13 +311,14 @@ export async function deleteDoctorAction(id: string): Promise<ActionResult> {
         action: "DELETE",
         contentType: "Doctor",
         contentId: id,
+        changes: JSON.stringify({ fullName: doctor.fullName, slug: doctorSlug }),
       },
     });
 
-    revalidatePath("/admin/content/doctors");
-    revalidatePath("/doctors");
+    await revalidateDoctorPages(doctorSlug, departmentSlug, serviceSlugs);
     return { success: true };
   } catch (error: any) {
+    console.error("[DOCTOR_DELETE_ERROR]", error);
     return { error: error.message || "Failed to delete doctor record." };
   }
 }
@@ -357,9 +395,7 @@ export async function saveDepartmentAction(
         },
       });
 
-      revalidatePath("/admin/content/departments");
-      revalidatePath("/departments");
-      revalidatePath(`/departments/${slug}`);
+      await revalidateDepartmentPages(slug);
       const workflow = await finalizeSave(actionType, "Department", updated.id);
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
@@ -388,8 +424,7 @@ export async function saveDepartmentAction(
         },
       });
 
-      revalidatePath("/admin/content/departments");
-      revalidatePath("/departments");
+      await revalidateDepartmentPages(slug);
       const workflow = await finalizeSave(actionType, "Department", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };
@@ -402,9 +437,9 @@ export async function saveDepartmentAction(
 export async function deleteDepartmentAction(id: string): Promise<ActionResult> {
   try {
     await verifyAuthorized(["HOSPITAL_DIRECTOR", "MEDICAL_DIRECTOR"], "Delete Department");
+    const dept = await db.department.findUnique({ where: { id }, select: { slug: true } });
     await db.department.delete({ where: { id } });
-    revalidatePath("/admin/content/departments");
-    revalidatePath("/departments");
+    await revalidateDepartmentPages(dept?.slug);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete department." };
@@ -501,9 +536,10 @@ export async function saveServiceAction(
         },
       });
 
-      revalidatePath("/admin/content/services");
-      revalidatePath("/services");
-      revalidatePath(`/services/${slug}`);
+      const dept = departmentId
+        ? await db.department.findUnique({ where: { id: departmentId }, select: { slug: true } })
+        : null;
+      await revalidateServicePages(slug, dept?.slug);
       const workflow = await finalizeSave(actionType, "Service", updated.id);
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
@@ -530,9 +566,10 @@ export async function saveServiceAction(
         },
       });
 
-      revalidatePath("/admin/content/services");
-      revalidatePath("/services");
-      revalidatePath(`/services/${slug}`);
+      const dept = departmentId
+        ? await db.department.findUnique({ where: { id: departmentId }, select: { slug: true } })
+        : null;
+      await revalidateServicePages(slug, dept?.slug);
       const workflow = await finalizeSave(actionType, "Service", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };
@@ -545,9 +582,12 @@ export async function saveServiceAction(
 export async function deleteServiceAction(id: string): Promise<ActionResult> {
   try {
     await verifyAuthorized(["HOSPITAL_DIRECTOR", "MEDICAL_DIRECTOR"], "Delete Service");
+    const service = await db.service.findUnique({
+      where: { id },
+      include: { department: { select: { slug: true } } },
+    });
     await db.service.delete({ where: { id } });
-    revalidatePath("/admin/content/services");
-    revalidatePath("/services");
+    await revalidateServicePages(service?.slug, service?.department?.slug);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete service." };
