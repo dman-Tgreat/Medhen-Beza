@@ -14,6 +14,7 @@ import {
   Loader2,
   LayoutTemplate,
   AlertCircle,
+  Languages,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ import {
   getAdminSettingsAction,
   saveSiteSettingsAction,
 } from "@/lib/actions/settings";
+import { cn } from "@/lib/utils";
 
 export default function SettingsAdminPage() {
   const [loading, setLoading] = useState(true);
@@ -33,6 +35,7 @@ export default function SettingsAdminPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("contact");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [locLang, setLocLang] = useState<"am" | "om">("am");
 
   // Hospital Contact Info
   const [hospitalName, setHospitalName] = useState("Medhen Beza Specialized Hospital");
@@ -62,6 +65,32 @@ export default function SettingsAdminPage() {
   // SEO & Meta Defaults
   const [metaTitle, setMetaTitle] = useState("Medhen Beza Hospital | Compassionate Care & Advanced Medicine");
   const [metaDescription, setMetaDescription] = useState("Leading specialized tertiary hospital in Addis Ababa providing 24/7 emergency response, cardiology, and surgical care.");
+
+  // Multilingual Localized Settings (Amharic)
+  const [hospitalNameAm, setHospitalNameAm] = useState("");
+  const [addressAm, setAddressAm] = useState("");
+  const [emergencyGateAm, setEmergencyGateAm] = useState("");
+  const [emergencyHoursAm, setEmergencyHoursAm] = useState("");
+  const [visitingHoursAm, setVisitingHoursAm] = useState("");
+  const [heroHeadlineAm, setHeroHeadlineAm] = useState("");
+  const [heroHeadlineAccentAm, setHeroHeadlineAccentAm] = useState("");
+  const [heroSupportingTextAm, setHeroSupportingTextAm] = useState("");
+  const [hospitalIntroTitleAm, setHospitalIntroTitleAm] = useState("");
+  const [metaTitleAm, setMetaTitleAm] = useState("");
+  const [metaDescriptionAm, setMetaDescriptionAm] = useState("");
+
+  // Multilingual Localized Settings (Afan Oromo)
+  const [hospitalNameOm, setHospitalNameOm] = useState("");
+  const [addressOm, setAddressOm] = useState("");
+  const [emergencyGateOm, setEmergencyGateOm] = useState("");
+  const [emergencyHoursOm, setEmergencyHoursOm] = useState("");
+  const [visitingHoursOm, setVisitingHoursOm] = useState("");
+  const [heroHeadlineOm, setHeroHeadlineOm] = useState("");
+  const [heroHeadlineAccentOm, setHeroHeadlineAccentOm] = useState("");
+  const [heroSupportingTextOm, setHeroSupportingTextOm] = useState("");
+  const [hospitalIntroTitleOm, setHospitalIntroTitleOm] = useState("");
+  const [metaTitleOm, setMetaTitleOm] = useState("");
+  const [metaDescriptionOm, setMetaDescriptionOm] = useState("");
 
   // Load from DB on mount
   useEffect(() => {
@@ -94,6 +123,32 @@ export default function SettingsAdminPage() {
 
         if (s.seo_title) setMetaTitle(s.seo_title);
         if (s.seo_description) setMetaDescription(s.seo_description);
+
+        // Amharic settings
+        if (s.hospital_name_am) setHospitalNameAm(s.hospital_name_am);
+        if (s.hospital_address_am) setAddressAm(s.hospital_address_am);
+        if (s.emergency_gate_am) setEmergencyGateAm(s.emergency_gate_am);
+        if (s.emergency_hours_am) setEmergencyHoursAm(s.emergency_hours_am);
+        if (s.visiting_hours_am) setVisitingHoursAm(s.visiting_hours_am);
+        if (s.hero_headline_am) setHeroHeadlineAm(s.hero_headline_am);
+        if (s.hero_headline_accent_am) setHeroHeadlineAccentAm(s.hero_headline_accent_am);
+        if (s.hero_supporting_text_am) setHeroSupportingTextAm(s.hero_supporting_text_am);
+        if (s.hospital_intro_title_am) setHospitalIntroTitleAm(s.hospital_intro_title_am);
+        if (s.seo_title_am) setMetaTitleAm(s.seo_title_am);
+        if (s.seo_description_am) setMetaDescriptionAm(s.seo_description_am);
+
+        // Afan Oromo settings
+        if (s.hospital_name_om) setHospitalNameOm(s.hospital_name_om);
+        if (s.hospital_address_om) setAddressOm(s.hospital_address_om);
+        if (s.emergency_gate_om) setEmergencyGateOm(s.emergency_gate_om);
+        if (s.emergency_hours_om) setEmergencyHoursOm(s.emergency_hours_om);
+        if (s.visiting_hours_om) setVisitingHoursOm(s.visiting_hours_om);
+        if (s.hero_headline_om) setHeroHeadlineOm(s.hero_headline_om);
+        if (s.hero_headline_accent_om) setHeroHeadlineAccentOm(s.hero_headline_accent_om);
+        if (s.hero_supporting_text_om) setHeroSupportingTextOm(s.hero_supporting_text_om);
+        if (s.hospital_intro_title_om) setHospitalIntroTitleOm(s.hospital_intro_title_om);
+        if (s.seo_title_om) setMetaTitleOm(s.seo_title_om);
+        if (s.seo_description_om) setMetaDescriptionOm(s.seo_description_om);
       }
       setLoading(false);
     }
@@ -132,6 +187,32 @@ export default function SettingsAdminPage() {
 
       seo_title: metaTitle,
       seo_description: metaDescription,
+
+      // Amharic settings
+      hospital_name_am: hospitalNameAm,
+      hospital_address_am: addressAm,
+      emergency_gate_am: emergencyGateAm,
+      emergency_hours_am: emergencyHoursAm,
+      visiting_hours_am: visitingHoursAm,
+      hero_headline_am: heroHeadlineAm,
+      hero_headline_accent_am: heroHeadlineAccentAm,
+      hero_supporting_text_am: heroSupportingTextAm,
+      hospital_intro_title_am: hospitalIntroTitleAm,
+      seo_title_am: metaTitleAm,
+      seo_description_am: metaDescriptionAm,
+
+      // Afan Oromo settings
+      hospital_name_om: hospitalNameOm,
+      hospital_address_om: addressOm,
+      emergency_gate_om: emergencyGateOm,
+      emergency_hours_om: emergencyHoursOm,
+      visiting_hours_om: visitingHoursOm,
+      hero_headline_om: heroHeadlineOm,
+      hero_headline_accent_om: heroHeadlineAccentOm,
+      hero_supporting_text_om: heroSupportingTextOm,
+      hospital_intro_title_om: hospitalIntroTitleOm,
+      seo_title_om: metaTitleOm,
+      seo_description_om: metaDescriptionOm,
     };
 
     // Client-side validation using Zod
@@ -232,6 +313,10 @@ export default function SettingsAdminPage() {
               <TabsTrigger value="seo" className="text-xs">
                 <Globe className="h-3.5 w-3.5 mr-1.5 text-amber-600" />
                 SEO & Metadata
+              </TabsTrigger>
+              <TabsTrigger value="localization" className="text-xs">
+                <Languages className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                Languages & Translations
               </TabsTrigger>
               <TabsTrigger value="system" className="text-xs">
                 <Database className="h-3.5 w-3.5 mr-1.5 text-slate-700" />
@@ -527,6 +612,348 @@ export default function SettingsAdminPage() {
                   />
                 </div>
               </div>
+            </TabsContent>
+
+            {/* Tab: Localization (Amharic & Afan Oromo) */}
+            <TabsContent value="localization" className="rounded-lg border border-border bg-surface p-6 space-y-6">
+              <div>
+                <h2 className="text-base font-bold text-text">Multilingual Site Copy & Localization</h2>
+                <p className="text-xs text-text-muted mt-0.5">
+                  Configure localized versions of public hospital identity lines, emergency driveway directions, visiting hours, and homepage copy. Content not translated here falls back seamlessly to the English default.
+                </p>
+              </div>
+
+              {/* Language Selector Pills */}
+              <div className="flex items-center gap-2 bg-background p-1.5 rounded-lg border border-border w-fit">
+                <button
+                  type="button"
+                  onClick={() => setLocLang("am")}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all",
+                    locLang === "am" ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text"
+                  )}
+                >
+                  <span>🇪🇹</span>
+                  <span>Amharic (አማርኛ)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLocLang("om")}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all",
+                    locLang === "om" ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text"
+                  )}
+                >
+                  <span>🇪🇹</span>
+                  <span>Afan Oromo (Afaan Oromoo)</span>
+                </button>
+              </div>
+
+              {locLang === "am" ? (
+                <div className="space-y-4 pt-2">
+                  <div className="p-3 bg-primary/5 rounded-md border border-primary/20 text-xs text-text">
+                    <span className="font-semibold text-primary">Editing Amharic (አማርኛ) Copy:</span> Below are the localized fields for visitors viewing the site in Amharic.
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Hospital Name (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {hospitalName}</span>
+                      </div>
+                      <Input
+                        value={hospitalNameAm}
+                        onChange={(e) => setHospitalNameAm(e.target.value)}
+                        placeholder="መድህን ቤዛ ስፔሻላይዝድ ሆስፒታል"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Hospital Address (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[200px]">EN: {address}</span>
+                      </div>
+                      <Input
+                        value={addressAm}
+                        onChange={(e) => setAddressAm(e.target.value)}
+                        placeholder="አዳማ፣ ኦሮሚያ፣ ኢትዮጵያ"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Emergency Gate Info (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[200px]">EN: {emergencyGate}</span>
+                      </div>
+                      <Input
+                        value={emergencyGateAm}
+                        onChange={(e) => setEmergencyGateAm(e.target.value)}
+                        placeholder="በር 1 (የድንገተኛ እና አምቡላንስ መግቢያ)"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Emergency Hours Text (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[200px]">EN: {emergencyHours}</span>
+                      </div>
+                      <Input
+                        value={emergencyHoursAm}
+                        onChange={(e) => setEmergencyHoursAm(e.target.value)}
+                        placeholder="24 ሰዓት ክፍት · በየቀኑ · በበዓላትም ጭምር"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Visiting Hours Text (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[300px]">EN: {visitingHours}</span>
+                      </div>
+                      <Input
+                        value={visitingHoursAm}
+                        onChange={(e) => setVisitingHoursAm(e.target.value)}
+                        placeholder="ሰኞ - እሑድ: ከጠዋቱ 12:00 - 2:00፣ ከቀኑ 6:00 - 8:00፣ ከምሽቱ 11:00 - 1:30"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Homepage Hero Headline (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {heroHeadline}</span>
+                      </div>
+                      <Input
+                        value={heroHeadlineAm}
+                        onChange={(e) => setHeroHeadlineAm(e.target.value)}
+                        placeholder="ሩህሩህ እና ጥራት ያለው እንክብካቤ።"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Headline Accent (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {heroHeadlineAccent}</span>
+                      </div>
+                      <Input
+                        value={heroHeadlineAccentAm}
+                        onChange={(e) => setHeroHeadlineAccentAm(e.target.value)}
+                        placeholder="አስተማማኝ የጤና አገልግሎት።"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Hero Supporting Description (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[300px]">EN: {heroSupportingText}</span>
+                      </div>
+                      <textarea
+                        rows={3}
+                        value={heroSupportingTextAm}
+                        onChange={(e) => setHeroSupportingTextAm(e.target.value)}
+                        placeholder="ለእርስዎ ቅርብ፣ ለጤናዎ ቆራጥ — በባለሙያዎች የሚሰጥ ልዩ እና የታካሚን ክብር የሚያስቀድም ህክምና።"
+                        className="w-full rounded-md border border-border bg-background p-2.5 text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Hospital Intro Title (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {hospitalIntroTitle}</span>
+                      </div>
+                      <Input
+                        value={hospitalIntroTitleAm}
+                        onChange={(e) => setHospitalIntroTitleAm(e.target.value)}
+                        placeholder="በእያንዳንዱ የሕይወት ደረጃ አስተማማኝ እንክብካቤ"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">SEO Meta Title (Amharic)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {metaTitle}</span>
+                      </div>
+                      <Input
+                        value={metaTitleAm}
+                        onChange={(e) => setMetaTitleAm(e.target.value)}
+                        placeholder="መድህን ቤዛ ሆስፒታል | ሩህሩህ እንክብካቤ እና ዘመናዊ ህክምና"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">SEO Meta Description (Amharic)</label>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={metaDescriptionAm}
+                        onChange={(e) => setMetaDescriptionAm(e.target.value)}
+                        placeholder="በአዳማ እና አካባቢው የ24 ሰዓት የድንገተኛ፣ የልብ ህክምና እና የቀዶ ጥገና አገልግሎት የሚሰጥ ግንባር ቀደም ሆስፒታል።"
+                        className="w-full rounded-md border border-border bg-background p-2.5 text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4 pt-2">
+                  <div className="p-3 bg-primary/5 rounded-md border border-primary/20 text-xs text-text">
+                    <span className="font-semibold text-primary">Editing Afan Oromo (Afaan Oromoo) Copy:</span> Below are the localized fields for visitors viewing the site in Afan Oromo.
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Hospital Name (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {hospitalName}</span>
+                      </div>
+                      <Input
+                        value={hospitalNameOm}
+                        onChange={(e) => setHospitalNameOm(e.target.value)}
+                        placeholder="Hospitaala Ispeeshaalaayizdii Madhan Beezaa"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Hospital Address (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[200px]">EN: {address}</span>
+                      </div>
+                      <Input
+                        value={addressOm}
+                        onChange={(e) => setAddressOm(e.target.value)}
+                        placeholder="Adaamaa, Oromiyaa, Itoophiyaa"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Emergency Gate Info (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[200px]">EN: {emergencyGate}</span>
+                      </div>
+                      <Input
+                        value={emergencyGateOm}
+                        onChange={(e) => setEmergencyGateOm(e.target.value)}
+                        placeholder="Balbala 1 (Seensa Ambulaansii fi Balaa Tasaa)"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Emergency Hours Text (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[200px]">EN: {emergencyHours}</span>
+                      </div>
+                      <Input
+                        value={emergencyHoursOm}
+                        onChange={(e) => setEmergencyHoursOm(e.target.value)}
+                        placeholder="Sa'aatii 24 Banaa · Torbanitti Guyyoota 7 · Ayyaanota Hunda"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Visiting Hours Text (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[300px]">EN: {visitingHours}</span>
+                      </div>
+                      <Input
+                        value={visitingHoursOm}
+                        onChange={(e) => setVisitingHoursOm(e.target.value)}
+                        placeholder="Wiixata - Dilbata: Ganama 12:00 - 02:00, Guyyaa 06:00 - 08:00, Galgala 11:00 - 01:30"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Homepage Hero Headline (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {heroHeadline}</span>
+                      </div>
+                      <Input
+                        value={heroHeadlineOm}
+                        onChange={(e) => setHeroHeadlineOm(e.target.value)}
+                        placeholder="Kunuunsa garaa laafinaa."
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Headline Accent (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {heroHeadlineAccent}</span>
+                      </div>
+                      <Input
+                        value={heroHeadlineAccentOm}
+                        onChange={(e) => setHeroHeadlineAccentOm(e.target.value)}
+                        placeholder="Fayyaa amansiisaa."
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Hero Supporting Description (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic truncate max-w-[300px]">EN: {heroSupportingText}</span>
+                      </div>
+                      <textarea
+                        rows={3}
+                        value={heroSupportingTextOm}
+                        onChange={(e) => setHeroSupportingTextOm(e.target.value)}
+                        placeholder="Isinitti dhiyoo, isiniif kan quuqamu — tajaajila kilinikaa addaa ogeessota fayyaa dursa dhukkubsattootaaf kennaniin."
+                        className="w-full rounded-md border border-border bg-background p-2.5 text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">Hospital Intro Title (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {hospitalIntroTitle}</span>
+                      </div>
+                      <Input
+                        value={hospitalIntroTitleOm}
+                        onChange={(e) => setHospitalIntroTitleOm(e.target.value)}
+                        placeholder="Sadarkaa jireenyaa hundatti kunuunsa amansiisaa"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">SEO Meta Title (Afan Oromo)</label>
+                        <span className="text-[10px] text-text-muted italic">EN: {metaTitle}</span>
+                      </div>
+                      <Input
+                        value={metaTitleOm}
+                        onChange={(e) => setMetaTitleOm(e.target.value)}
+                        placeholder="Hospitaala Madhan Beezaa | Kunuunsa Garaa Laafinaa fi Yaala Ammayyaa"
+                        className="text-xs h-9 bg-background"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-text">SEO Meta Description (Afan Oromo)</label>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={metaDescriptionOm}
+                        onChange={(e) => setMetaDescriptionOm(e.target.value)}
+                        placeholder="Hospitaala olaanaa Adaamaa keessatti tajaajila balaa tasaa sa'aatii 24, yaala onnee fi baqaqsanii yaaluu kennu."
+                        className="w-full rounded-md border border-border bg-background p-2.5 text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             {/* Tab 5: System / Storage */}

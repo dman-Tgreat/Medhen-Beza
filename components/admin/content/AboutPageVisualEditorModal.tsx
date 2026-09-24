@@ -305,6 +305,7 @@ interface AboutPageVisualEditorModalProps {
       excerpt?: string;
       seoTitle?: string;
       seoDescription?: string;
+      translations?: any;
     },
     actionType: "draft" | "submit" | "publish"
   ) => void;
@@ -320,6 +321,7 @@ export function AboutPageVisualEditorModal({
 }: AboutPageVisualEditorModalProps) {
   const { canPublish } = useAdminRole();
   const [form, setForm] = useState<AboutPageFormState>(DEFAULT_ABOUT_FORM);
+  const [translations, setTranslations] = useState<any>(initialPage?.translations || null);
   const [rawMode, setRawMode] = useState(false);
   const [rawJsonText, setRawJsonText] = useState("");
   const [rawJsonError, setRawJsonError] = useState<string | null>(null);
@@ -327,6 +329,18 @@ export function AboutPageVisualEditorModal({
 
   useEffect(() => {
     if (!isOpen) return;
+
+    if (initialPage?.translations) {
+      try {
+        setTranslations(
+          typeof initialPage.translations === "string"
+            ? JSON.parse(initialPage.translations)
+            : initialPage.translations
+        );
+      } catch {
+        setTranslations(initialPage.translations);
+      }
+    }
 
     if (initialPage?.content && typeof initialPage.content === "string") {
       const trimmed = initialPage.content.trim();
@@ -677,6 +691,7 @@ export function AboutPageVisualEditorModal({
         excerpt: currentData.hero.supportingText,
         seoTitle: currentData.seoTitle,
         seoDescription: currentData.seoDescription,
+        translations: translations ?? initialPage?.translations,
       },
       actionType
     );

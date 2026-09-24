@@ -28,10 +28,44 @@ import {
   X,
   AlertCircle,
   Loader2,
+  Languages,
 } from "lucide-react";
 import { MediaUploadField } from "./media-upload-field";
 import { isValidEthiopianPhone } from "@/lib/validation/phone";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
+
+export const ADMIN_LANGUAGES = [
+  { code: "en", label: "English", nativeName: "English", badge: "Default" },
+  { code: "am", label: "Amharic", nativeName: "አማርኛ", badge: "Translation" },
+  { code: "om", label: "Afan Oromo", nativeName: "Afaan Oromoo", badge: "Translation" },
+] as const;
+
+export type AdminLanguageCode = (typeof ADMIN_LANGUAGES)[number]["code"];
+
+export function isFieldTranslatable(field: FormFieldConfig): boolean {
+  if (["image", "tel", "phone", "date", "number", "email", "checkbox"].includes(field.type)) {
+    return false;
+  }
+  const nonTranslatableNames = [
+    "phone",
+    "email",
+    "slug",
+    "order",
+    "departmentId",
+    "categoryId",
+    "type",
+    "url",
+    "regenerateSlug",
+    "isFeatured",
+    "deadline",
+    "eventDate",
+  ];
+  if (nonTranslatableNames.includes(field.name)) {
+    return false;
+  }
+  return true;
+}
 
 export interface FormFieldConfig {
   name: string;
@@ -93,6 +127,7 @@ export function ContentFormModal({
   const [formData, setFormData] = useState<Record<string, any>>(initialValues);
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState("general");
+  const [currentLang, setCurrentLang] = useState<AdminLanguageCode>("en");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submittingAction, setSubmittingAction] = useState<string | null>(null);
@@ -105,8 +140,20 @@ export function ContentFormModal({
       const currentId = initialValues?.id;
       // Guarded by useRef to prevent revalidations from wiping typed form data per handoff.md
       if (!prevIsOpenRef.current || (currentId !== undefined && currentId !== prevIdRef.current)) {
-        setFormData(initialValues || {});
+        let initialTranslations = initialValues?.translations;
+        if (typeof initialTranslations === "string") {
+          try {
+            initialTranslations = JSON.parse(initialTranslations);
+          } catch {
+            initialTranslations = {};
+          }
+        }
+        setFormData({
+          ...initialValues,
+          translations: initialTranslations && typeof initialTranslations === "object" ? initialTranslations : {},
+        });
         setActiveTab("general");
+        setCurrentLang("en");
         setFieldErrors({});
         setSubmitError(null);
         prevIdRef.current = currentId;
@@ -131,23 +178,58 @@ export function ContentFormModal({
     }
   };
 
+  const handleLocalizedChange = (name: string, value: any) => {
+    if (currentLang === "en") {
+      handleChange(name, value);
+      return;
+    }
+    setFormData((prev) => {
+      const existingTranslations =
+        prev.translations && typeof prev.translations === "object" ? { ...prev.translations } : {};
+      const langTranslations = { ...(existingTranslations[currentLang] || {}) };
+      langTranslations[name] = value;
+      return {
+        ...prev,
+        translations: {
+          ...existingTranslations,
+          [currentLang]: langTranslations,
+        },
+      };
+    });
+  };
+
   const handleAddTag = (fieldName: string) => {
     const currentInput = (tagInputs[fieldName] || "").trim();
     if (!currentInput) return;
 
-    const currentTags = (formData[fieldName] as string[]) || [];
-    if (!currentTags.includes(currentInput)) {
-      handleChange(fieldName, [...currentTags, currentInput]);
+    if (currentLang === "en") {
+      const currentTags = (formData[fieldName] as string[]) || [];
+      if (!currentTags.includes(currentInput)) {
+        handleChange(fieldName, [...currentTags, currentInput]);
+      }
+    } else {
+      const localizedTags = (formData.translations?.[currentLang]?.[fieldName] as string[]) || [];
+      if (!localizedTags.includes(currentInput)) {
+        handleLocalizedChange(fieldName, [...localizedTags, currentInput]);
+      }
     }
     setTagInputs((prev) => ({ ...prev, [fieldName]: "" }));
   };
 
   const handleRemoveTag = (fieldName: string, tagToRemove: string) => {
-    const currentTags = (formData[fieldName] as string[]) || [];
-    handleChange(
-      fieldName,
-      currentTags.filter((t) => t !== tagToRemove)
-    );
+    if (currentLang === "en") {
+      const currentTags = (formData[fieldName] as string[]) || [];
+      handleChange(
+        fieldName,
+        currentTags.filter((t) => t !== tagToRemove)
+      );
+    } else {
+      const localizedTags = (formData.translations?.[currentLang]?.[fieldName] as string[]) || [];
+      handleLocalizedChange(
+        fieldName,
+        localizedTags.filter((t) => t !== tagToRemove)
+      );
+    }
   };
 
   const validateForm = (): boolean => {
@@ -259,8 +341,66 @@ export function ContentFormModal({
   const isSaving = Boolean(submittingAction) || isLoading;
 
   const renderField = (field: FormFieldConfig) => {
-    const val = formData[field.name] ?? field.defaultValue ?? "";
-    const error = fieldErrors[field.name];
+    const isTranslatable = isFieldTranslatable(field);
+    const isEditingTranslation = currentLang !== "en";
+
+    // Non-translatable field in translation mode: show shared summary
+    if (isEditingTranslation && !isTranslatable) {
+      return (
+        <div
+          key={field.name}
+          className="p-3 rounded-lg border border-border/70 bg-surface/40 flex items-center justify-between"
+        >
+          <div>
+            <span className="text-xs font-medium text-text">{field.label}</span>
+            <p className="text-[11px] text-text-light">
+              {field.type === "image"
+                ? "Media assets are shared across all language versions."
+                : "Shared configuration setting inherited from the default English profile."}
+            </p>
+          </div>
+          <span className="text-[10px] font-semibold text-text-muted bg-surface px-2 py-0.5 rounded border border-border shrink-0">
+            Shared with English
+          </span>
+        </div>
+      );
+    }
+
+    const val = isEditingTranslation
+      ? (formData.translations?.[currentLang]?.[field.name] ?? "")
+      : (formData[field.name] ?? field.defaultValue ?? "");
+    const englishVal = formData[field.name] ?? "";
+    const error = isEditingTranslation ? undefined : fieldErrors[field.name];
+
+    const onValueUpdate = (newVal: any) => {
+      if (isEditingTranslation) {
+        handleLocalizedChange(field.name, newVal);
+      } else {
+        handleChange(field.name, newVal);
+      }
+    };
+
+    const effectivePlaceholder = isEditingTranslation
+      ? `Enter ${currentLang === "am" ? "Amharic (አማርኛ)" : "Afan Oromo (Afaan Oromoo)"} translation...`
+      : field.placeholder;
+
+    const renderEnglishReference = () => {
+      if (!isEditingTranslation) return null;
+      return (
+        <div className="bg-primary/5 border border-primary/15 rounded-md p-2 text-xs mb-1.5 flex items-start gap-1.5">
+          <span className="font-semibold text-primary shrink-0 text-[10px] uppercase tracking-wide">
+            English:
+          </span>
+          <span className="text-text-muted text-[11px] italic line-clamp-3">
+            {typeof englishVal === "string" && englishVal.trim()
+              ? englishVal
+              : Array.isArray(englishVal) && englishVal.length > 0
+              ? englishVal.join(", ")
+              : "(No English value entered)"}
+          </span>
+        </div>
+      );
+    };
 
     switch (field.type) {
       case "tel":
@@ -270,9 +410,9 @@ export function ContentFormModal({
             <PhoneInput
               label={field.label}
               value={String(val)}
-              onChange={(formattedVal) => handleChange(field.name, formattedVal)}
+              onChange={(formattedVal) => onValueUpdate(formattedVal)}
               allowShortCode={field.allowShortCode}
-              required={field.required}
+              required={!isEditingTranslation && field.required}
               error={error}
               helperText={field.helperText}
               disabled={isSaving}
@@ -292,9 +432,9 @@ export function ContentFormModal({
               <PhoneInput
                 label={field.label}
                 value={String(val)}
-                onChange={(formattedVal) => handleChange(field.name, formattedVal)}
+                onChange={(formattedVal) => onValueUpdate(formattedVal)}
                 allowShortCode={field.allowShortCode}
-                required={field.required}
+                required={!isEditingTranslation && field.required}
                 error={error}
                 helperText={field.helperText}
                 disabled={isSaving}
@@ -308,15 +448,16 @@ export function ContentFormModal({
           <div key={field.name} className="space-y-1.5">
             <label className="text-xs font-semibold text-text flex items-center justify-between">
               <span>
-                {field.label} {field.required && <span className="text-emergency">*</span>}
+                {field.label} {!isEditingTranslation && field.required && <span className="text-emergency">*</span>}
               </span>
             </label>
+            {renderEnglishReference()}
             <Input
               type={field.type}
               list={field.options && field.options.length > 0 ? `${field.name}-suggestions` : undefined}
               value={val}
-              onChange={(e) => handleChange(field.name, e.target.value)}
-              placeholder={field.placeholder}
+              onChange={(e) => onValueUpdate(e.target.value)}
+              placeholder={effectivePlaceholder}
               disabled={isSaving}
               className={`text-base sm:text-xs min-h-[44px] sm:min-h-[36px] sm:h-9 bg-surface ${
                 error ? "border-emergency text-emergency" : ""
@@ -335,7 +476,7 @@ export function ContentFormModal({
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => handleChange(field.name, opt.label || opt.value)}
+                      onClick={() => onValueUpdate(opt.label || opt.value)}
                       className="text-[10px] px-2 py-0.5 rounded-full bg-background hover:bg-primary-light hover:text-primary border border-border transition-colors text-text-muted cursor-pointer"
                     >
                       {opt.label || opt.value}
@@ -356,11 +497,12 @@ export function ContentFormModal({
         return (
           <div key={field.name} className="space-y-1.5">
             <label className="text-xs font-semibold text-text">
-              {field.label} {field.required && <span className="text-emergency">*</span>}
+              {field.label} {!isEditingTranslation && field.required && <span className="text-emergency">*</span>}
             </label>
+            {renderEnglishReference()}
             <Select
               value={String(val || "")}
-              onValueChange={(v) => handleChange(field.name, v)}
+              onValueChange={(v) => onValueUpdate(v)}
               disabled={isSaving}
             >
               <SelectTrigger
@@ -368,7 +510,7 @@ export function ContentFormModal({
                   error ? "border-emergency text-emergency" : ""
                 }`}
               >
-                <SelectValue placeholder={field.placeholder || "Select option"} />
+                <SelectValue placeholder={effectivePlaceholder || "Select option"} />
               </SelectTrigger>
               <SelectContent>
                 {field.options?.map((opt) => (
@@ -393,7 +535,7 @@ export function ContentFormModal({
               <input
                 type="checkbox"
                 checked={Boolean(val)}
-                onChange={(e) => handleChange(field.name, e.target.checked)}
+                onChange={(e) => onValueUpdate(e.target.checked)}
                 disabled={isSaving}
                 className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary"
               />
@@ -410,13 +552,14 @@ export function ContentFormModal({
         return (
           <div key={field.name} className="space-y-1.5">
             <label className="text-xs font-semibold text-text">
-              {field.label} {field.required && <span className="text-emergency">*</span>}
+              {field.label} {!isEditingTranslation && field.required && <span className="text-emergency">*</span>}
             </label>
+            {renderEnglishReference()}
             <textarea
               rows={4}
               value={val}
-              onChange={(e) => handleChange(field.name, e.target.value)}
-              placeholder={field.placeholder}
+              onChange={(e) => onValueUpdate(e.target.value)}
+              placeholder={effectivePlaceholder}
               disabled={isSaving}
               className={`w-full rounded-md border bg-surface p-2.5 text-base sm:text-xs text-text focus:outline-none focus:ring-2 focus:ring-primary ${
                 error ? "border-emergency text-emergency" : "border-border"
@@ -434,8 +577,9 @@ export function ContentFormModal({
         return (
           <div key={field.name} className="space-y-1.5">
             <label className="text-xs font-semibold text-text">
-              {field.label} {field.required && <span className="text-emergency">*</span>}
+              {field.label} {!isEditingTranslation && field.required && <span className="text-emergency">*</span>}
             </label>
+            {renderEnglishReference()}
             <div className={`rounded-md border bg-surface overflow-hidden ${error ? "border-emergency" : "border-border"}`}>
               <div className="flex items-center gap-1 bg-background p-1.5 border-b border-border text-xs text-text-muted">
                 <span className="text-[10px] text-text-light px-1">Editor:</span>
@@ -443,8 +587,8 @@ export function ContentFormModal({
               <textarea
                 rows={6}
                 value={val}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-                placeholder={field.placeholder}
+                onChange={(e) => onValueUpdate(e.target.value)}
+                placeholder={effectivePlaceholder}
                 disabled={isSaving}
                 className="w-full p-2.5 text-base sm:text-xs text-text bg-surface focus:outline-none"
               />
@@ -458,12 +602,32 @@ export function ContentFormModal({
         );
 
       case "tags": {
-        const tags = (val as string[]) || [];
+        const tags = isEditingTranslation
+          ? ((formData.translations?.[currentLang]?.[field.name] as string[]) || [])
+          : ((val as string[]) || []);
+        const englishTags = (formData[field.name] as string[]) || [];
+
         return (
           <div key={field.name} className="space-y-1.5">
             <label className="text-xs font-semibold text-text">
-              {field.label} {field.required && <span className="text-emergency">*</span>}
+              {field.label} {!isEditingTranslation && field.required && <span className="text-emergency">*</span>}
             </label>
+            {isEditingTranslation && (
+              <div className="bg-primary/5 border border-primary/15 rounded-md p-2 text-xs mb-1.5 flex flex-wrap items-center gap-1.5">
+                <span className="font-semibold text-primary shrink-0 text-[10px] uppercase tracking-wide">
+                  English Tags:
+                </span>
+                {englishTags.length > 0 ? (
+                  englishTags.map((t, i) => (
+                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-surface border border-border text-text-muted">
+                      {t}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-text-light text-[11px] italic">(None)</span>
+                )}
+              </div>
+            )}
             <div className="flex gap-2">
               <Input
                 value={tagInputs[field.name] || ""}
@@ -475,7 +639,7 @@ export function ContentFormModal({
                   }
                 }}
                 disabled={isSaving}
-                placeholder={field.placeholder || "Type item and press Enter..."}
+                placeholder={effectivePlaceholder || "Type item and press Enter..."}
                 className="text-base sm:text-xs min-h-[44px] sm:min-h-[36px] sm:h-9 bg-surface"
               />
               <Button
@@ -529,7 +693,7 @@ export function ContentFormModal({
             <MediaUploadField
               label={field.label}
               value={val}
-              onChange={(url) => handleChange(field.name, url)}
+              onChange={(url) => onValueUpdate(url)}
               kind={mediaKind}
               folder={field.folder || "content"}
               aspectRatio={field.aspectRatio}
@@ -552,13 +716,69 @@ export function ContentFormModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && !isSaving && onClose()}>
       <DialogContent className="max-w-3xl sm:max-w-3xl w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-background">
         {/* Header */}
-        <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-border bg-background space-y-2">
-          <DialogTitle className="text-base sm:text-lg font-bold text-text">{title}</DialogTitle>
-          {description && (
-            <DialogDescription className="text-xs text-text-muted">
-              {description}
-            </DialogDescription>
-          )}
+        <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-border bg-background space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <DialogTitle className="text-base sm:text-lg font-bold text-text">{title}</DialogTitle>
+              {description && (
+                <DialogDescription className="text-xs text-text-muted mt-0.5">
+                  {description}
+                </DialogDescription>
+              )}
+            </div>
+          </div>
+
+          {/* Multilingual Selector Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/50">
+            <div className="flex items-center gap-1.5 bg-surface p-1 rounded-lg border border-border">
+              {ADMIN_LANGUAGES.map((lang) => {
+                const isActive = currentLang === lang.code;
+                const count =
+                  lang.code === "en"
+                    ? Object.keys(formData).filter((k) => k !== "translations" && formData[k]).length
+                    : Object.keys(formData.translations?.[lang.code] || {}).filter(
+                        (k) => formData.translations[lang.code][k]
+                      ).length;
+
+                return (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => setCurrentLang(lang.code)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
+                      isActive
+                        ? "bg-primary text-white shadow-xs font-semibold"
+                        : "text-text-muted hover:text-text hover:bg-muted/40"
+                    )}
+                  >
+                    <span className="text-sm leading-none">{lang.code === "en" ? "🇺🇸" : "🇪🇹"}</span>
+                    <span>{lang.label}</span>
+                    <span className="text-[10px] opacity-75 hidden sm:inline">({lang.nativeName})</span>
+                    {count > 0 && (
+                      <span
+                        className={cn(
+                          "ml-1 text-[10px] px-1.5 py-0.2 rounded-full",
+                          isActive ? "bg-white/20 text-white" : "bg-muted text-text-muted"
+                        )}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {currentLang !== "en" && (
+              <div className="text-[11px] text-text-muted flex items-center gap-1">
+                <Languages className="h-3.5 w-3.5 text-primary" />
+                <span>
+                  Translating into <strong className="text-text">{currentLang === "am" ? "Amharic (አማርኛ)" : "Afan Oromo (Afaan Oromoo)"}</strong>
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Submission / Validation Error Alert */}
           {submitError && (
