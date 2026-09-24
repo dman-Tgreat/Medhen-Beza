@@ -249,22 +249,22 @@ export interface AboutPageData {
 
 export const MOCK_ABOUT_PAGE: AboutPageData = {
   hero: {
-    title: "About Medhen Beza",
+    title: "About Medhin Beza",
     supportingText:
       "Committed to clinical excellence, compassionate patient care, and modern medical standards for the Addis Ababa community and beyond.",
     image: "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Medhen Beza Hospital main medical facility",
+    imageAlt: "Medhin Beza Hospital main medical facility",
   },
   introduction: {
     eyebrow: "Our Story & Purpose",
     title: "Dedicated to compassionate care & clinical innovation",
     paragraphs: [
-      "Medhen Beza Hospital was established with a clear mandate: to provide accessible, patient-centered, and high-quality medical services to individuals and families throughout the region.",
+      "Medhin Beza Hospital was established with a clear mandate: to provide accessible, patient-centered, and high-quality medical services to individuals and families throughout the region.",
       "Our modern clinical campus brings together specialized physicians, experienced nursing teams, and advanced diagnostic infrastructure to deliver comprehensive healthcare across multiple medical disciplines.",
       "Guided by strong ethical commitments and evidence-based clinical practices, we strive to make every patient visit safe, dignified, and supportive from admission through recovery.",
     ],
     photo: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1000&q=80",
-    photoAlt: "Medical team and care providers at Medhen Beza Hospital",
+    photoAlt: "Medical team and care providers at Medhin Beza Hospital",
     ctaLabel: "Contact Us",
     ctaHref: "/contact",
   },
@@ -520,22 +520,22 @@ export interface AboutPageData {
 
 const MOCK_ABOUT_PAGE_LEGACY: AboutPageData = {
   hero: {
-    title: "About Medhen Beza",
+    title: "About Medhin Beza",
     supportingText:
       "Committed to clinical excellence, compassionate patient care, and modern medical standards for the Addis Ababa community and beyond.",
     image: "",
-    imageAlt: "Medhen Beza Hospital main medical facility",
+    imageAlt: "Medhin Beza Hospital main medical facility",
   },
   introduction: {
     eyebrow: "Our Story & Purpose",
     title: "Dedicated to compassionate care & clinical innovation",
     paragraphs: [
-      "Medhen Beza Hospital was established with a clear mandate: to provide accessible, patient-centered, and high-quality medical services to individuals and families throughout the region.",
+      "Medhin Beza Hospital was established with a clear mandate: to provide accessible, patient-centered, and high-quality medical services to individuals and families throughout the region.",
       "Our modern clinical campus brings together specialized physicians, experienced nursing teams, and advanced diagnostic infrastructure to deliver comprehensive healthcare across multiple medical disciplines.",
       "Guided by strong ethical commitments and evidence-based clinical practices, we strive to make every patient visit safe, dignified, and supportive from admission through recovery.",
     ],
     photo: "",
-    photoAlt: "Medical team and care providers at Medhen Beza Hospital",
+    photoAlt: "Medical team and care providers at Medhin Beza Hospital",
     ctaLabel: "Contact Us",
     ctaHref: "/contact",
   },
@@ -618,7 +618,7 @@ const MOCK_ABOUT_PAGE_LEGACY: AboutPageData = {
       name: "Main Campus & Inpatient Pavilion",
       category: "Main Campus",
       image: "",
-      imageAlt: "Medhen Beza Hospital main campus and inpatient building exterior",
+      imageAlt: "Medhin Beza Hospital main campus and inpatient building exterior",
     },
     supporting: [
       {

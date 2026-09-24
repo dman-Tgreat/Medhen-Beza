@@ -1,10 +1,10 @@
 // ─── Hospital Identity ────────────────────────────────────────────────────────
 export const HOSPITAL_INFO = {
-  name: "Medhen Beza Hospital",
-  shortName: "Medhen Beza",
+  name: "Medhin Beza Hospital",
+  shortName: "Medhin Beza",
   tagline: "Compassionate Care, Advanced Medicine, Exceptional Service",
   description:
-    "Medhen Beza Hospital is a leading multi-specialty hospital in Adama, " +
+    "Medhin Beza Hospital is a leading multi-specialty hospital in Adama, " +
     "providing world-class healthcare with cutting-edge technology and compassionate clinical teams.",
   emergencyPhone: "+251 911 000 999",
   generalPhone: "+251 116 000 111",

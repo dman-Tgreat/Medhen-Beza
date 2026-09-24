@@ -361,7 +361,7 @@ function mapDepartment(dept: any): DepartmentDetailData {
     keyServices: specializations,
     href: `/departments/${dept.slug}`,
     image: dept.image || "",
-    imageAlt: `${dept.name} department at Medhen Beza Hospital`,
+    imageAlt: `${dept.name} department at Medhin Beza Hospital`,
     metaTitle: dept.metaTitle,
     metaDescription: dept.metaDescription,
     canonicalUrl: dept.canonicalUrl,
