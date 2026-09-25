@@ -16,6 +16,7 @@ interface FAQRecord {
   order: number;
   answer: string;
   status: ContentStatusType;
+  translations?: any;
 }
 
 interface FAQsAdminClientProps {
@@ -36,6 +37,7 @@ export function FAQsAdminClient({ initialFAQs }: FAQsAdminClientProps) {
     order: f.order || 1,
     answer: f.answer || "",
     status: f.status as ContentStatusType,
+    translations: f.translations,
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -163,6 +165,7 @@ export function FAQsAdminClient({ initialFAQs }: FAQsAdminClientProps) {
         category: values.category,
         answer: values.answer,
         order: Number(values.order) || 1,
+        translations: values.translations,
       },
       actionType
     );

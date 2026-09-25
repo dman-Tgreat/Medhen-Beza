@@ -23,6 +23,7 @@ interface DepartmentRecord {
   location: string;
   operatingHours?: string;
   status: ContentStatusType;
+  translations?: any;
 }
 
 interface DepartmentsAdminClientProps {
@@ -50,6 +51,7 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
     location: dept.location || "Main Building",
     operatingHours: dept.operatingHours || dept.workingHours || "24/7",
     status: dept.status as ContentStatusType,
+    translations: dept.translations,
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -224,6 +226,7 @@ export function DepartmentsAdminClient({ initialDepartments }: DepartmentsAdminC
         email: values.email,
         location: values.location,
         workingHours: values.workingHours || values.operatingHours,
+        translations: values.translations,
       },
       actionType
     );

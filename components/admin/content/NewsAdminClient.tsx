@@ -21,6 +21,7 @@ interface NewsRecord {
   content?: string;
   readTime?: string;
   tags?: string[];
+  translations?: any;
 }
 
 interface NewsAdminClientProps {
@@ -64,6 +65,7 @@ export function NewsAdminClient({ initialNews }: NewsAdminClientProps) {
     content: item.content || "",
     readTime: item.readTime || "",
     tags: Array.isArray(item.tags) ? item.tags : [],
+    translations: item.translations,
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -226,6 +228,7 @@ export function NewsAdminClient({ initialNews }: NewsAdminClientProps) {
         categoryName: values.categoryName,
         categoryId: values.categoryId,
         isFeatured: values.isFeatured === "true" || values.isFeatured === true,
+        translations: values.translations,
       },
       actionType
     );

@@ -18,6 +18,7 @@ interface EventRecord {
   image?: string;
   organizer?: string;
   status: ContentStatusType;
+  translations?: any;
 }
 
 interface EventsAdminClientProps {
@@ -40,6 +41,7 @@ export function EventsAdminClient({ initialEvents }: EventsAdminClientProps) {
     image: evt.image || undefined,
     organizer: evt.organizer || "Medhen Beza Administration",
     status: evt.status as ContentStatusType,
+    translations: evt.translations,
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -175,6 +177,7 @@ export function EventsAdminClient({ initialEvents }: EventsAdminClientProps) {
         description: values.description,
         image: values.image,
         isFeatured: values.isFeatured === "true" || values.isFeatured === true,
+        translations: values.translations,
       },
       actionType
     );

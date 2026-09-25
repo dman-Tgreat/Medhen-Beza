@@ -22,6 +22,7 @@ interface ServiceRecord {
   image?: string;
   isEmergency?: boolean;
   status: ContentStatusType;
+  translations?: any;
 }
 
 interface ServicesAdminClientProps {
@@ -50,6 +51,7 @@ export function ServicesAdminClient({ initialServices, departments, initialDepar
     image: srv.image || undefined,
     isEmergency: Boolean(srv.isFeatured),
     status: srv.status as ContentStatusType,
+    translations: srv.translations,
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -220,6 +222,7 @@ export function ServicesAdminClient({ initialServices, departments, initialDepar
         departmentId: values.departmentId || departments[0]?.id,
         image: values.image,
         isFeatured: values.isEmergency === "true" || values.isEmergency === true,
+        translations: values.translations,
       },
       actionType
     );

@@ -21,6 +21,7 @@ interface CareerRecord {
   responsibilities?: string[];
   requirements?: string[];
   status: ContentStatusType;
+  translations?: any;
 }
 
 interface CareersAdminClientProps {
@@ -47,6 +48,7 @@ export function CareersAdminClient({ initialCareers, departments }: CareersAdmin
     responsibilities: Array.isArray(car.responsibilities) ? car.responsibilities : [],
     requirements: Array.isArray(car.requirements) ? car.requirements : [],
     status: car.status as ContentStatusType,
+    translations: car.translations,
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -207,6 +209,7 @@ export function CareersAdminClient({ initialCareers, departments }: CareersAdmin
         description: values.description,
         responsibilities: values.responsibilities || [],
         requirements: values.requirements || [],
+        translations: values.translations,
       },
       actionType
     );

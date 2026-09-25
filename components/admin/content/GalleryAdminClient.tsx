@@ -19,6 +19,7 @@ interface GalleryRecord {
   description?: string;
   altText?: string;
   status: ContentStatusType;
+  translations?: any;
 }
 
 interface GalleryAdminClientProps {
@@ -42,6 +43,7 @@ export function GalleryAdminClient({ initialGallery }: GalleryAdminClientProps) 
     description: item.description || "",
     altText: item.altText || item.title,
     status: item.status as ContentStatusType,
+    translations: item.translations,
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -213,6 +215,7 @@ export function GalleryAdminClient({ initialGallery }: GalleryAdminClientProps) 
         thumbnailUrl: values.thumbnailUrl,
         description: values.description,
         order: values.order ? Number(values.order) : undefined,
+        translations: values.translations,
       },
       actionType
     );

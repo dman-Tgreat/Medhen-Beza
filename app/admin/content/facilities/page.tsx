@@ -244,6 +244,7 @@ export default function FacilitiesAdminPage() {
         features: values.features,
         description: values.description,
         image: values.image,
+        translations: values.translations,
       },
       actionType
     );
@@ -333,6 +334,7 @@ export default function FacilitiesAdminPage() {
                   features: editingFac.features || [],
                   description: editingFac.description,
                   image: editingFac.image,
+                  translations: editingFac.translations,
                 }
               : {}
           }
