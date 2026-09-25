@@ -244,3 +244,269 @@ export async function revalidateServicePages(serviceSlug?: string, departmentSlu
     console.error(e);
   }
 }
+
+export async function revalidateNewsPages(newsSlug?: string) {
+  try {
+    revalidatePath("/", "layout");
+    revalidatePath("/[locale]", "layout");
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    revalidatePath("/[locale]", "page");
+    revalidatePath("/[locale]/news", "page");
+    revalidatePath("/[locale]/news/[slug]", "page");
+  } catch (e) {
+    console.error(e);
+  }
+
+  for (const locale of LOCALES) {
+    try {
+      revalidatePath(`/${locale}`);
+      revalidatePath(`/${locale}/news`);
+      if (newsSlug) {
+        revalidatePath(`/${locale}/news/${newsSlug}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  try {
+    revalidatePath("/admin");
+    revalidatePath("/admin/approvals");
+    revalidatePath("/admin/content/news");
+    revalidatePath("/news");
+    if (newsSlug) revalidatePath(`/news/${newsSlug}`);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function revalidateEventPages(eventSlug?: string) {
+  try {
+    revalidatePath("/", "layout");
+    revalidatePath("/[locale]", "layout");
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    revalidatePath("/[locale]", "page");
+    revalidatePath("/[locale]/events", "page");
+    revalidatePath("/[locale]/events/[slug]", "page");
+  } catch (e) {
+    console.error(e);
+  }
+
+  for (const locale of LOCALES) {
+    try {
+      revalidatePath(`/${locale}`);
+      revalidatePath(`/${locale}/events`);
+      if (eventSlug) {
+        revalidatePath(`/${locale}/events/${eventSlug}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  try {
+    revalidatePath("/admin");
+    revalidatePath("/admin/approvals");
+    revalidatePath("/admin/content/events");
+    revalidatePath("/events");
+    if (eventSlug) revalidatePath(`/events/${eventSlug}`);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function revalidateCareerPages(careerSlug?: string) {
+  try {
+    revalidatePath("/", "layout");
+    revalidatePath("/[locale]", "layout");
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    revalidatePath("/[locale]", "page");
+    revalidatePath("/[locale]/careers", "page");
+    revalidatePath("/[locale]/careers/[slug]", "page");
+  } catch (e) {
+    console.error(e);
+  }
+
+  for (const locale of LOCALES) {
+    try {
+      revalidatePath(`/${locale}`);
+      revalidatePath(`/${locale}/careers`);
+      if (careerSlug) {
+        revalidatePath(`/${locale}/careers/${careerSlug}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  try {
+    revalidatePath("/admin");
+    revalidatePath("/admin/approvals");
+    revalidatePath("/admin/content/careers");
+    revalidatePath("/careers");
+    if (careerSlug) revalidatePath(`/careers/${careerSlug}`);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function revalidateFAQPages() {
+  try {
+    revalidatePath("/", "layout");
+    revalidatePath("/[locale]", "layout");
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    revalidatePath("/[locale]", "page");
+    revalidatePath("/[locale]/faqs", "page");
+  } catch (e) {
+    console.error(e);
+  }
+
+  for (const locale of LOCALES) {
+    try {
+      revalidatePath(`/${locale}`);
+      revalidatePath(`/${locale}/faqs`);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  try {
+    revalidatePath("/admin");
+    revalidatePath("/admin/content/faqs");
+    revalidatePath("/faqs");
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function revalidateGalleryPages() {
+  try {
+    revalidatePath("/", "layout");
+    revalidatePath("/[locale]", "layout");
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    revalidatePath("/[locale]", "page");
+    revalidatePath("/[locale]/gallery", "page");
+  } catch (e) {
+    console.error(e);
+  }
+
+  for (const locale of LOCALES) {
+    try {
+      revalidatePath(`/${locale}`);
+      revalidatePath(`/${locale}/gallery`);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  try {
+    revalidatePath("/admin");
+    revalidatePath("/admin/content/gallery");
+    revalidatePath("/gallery");
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function revalidatePageRoutes(pageSlug?: string) {
+  try {
+    revalidatePath("/", "layout");
+    revalidatePath("/[locale]", "layout");
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    revalidatePath("/[locale]", "page");
+  } catch (e) {
+    console.error(e);
+  }
+
+  for (const locale of LOCALES) {
+    try {
+      revalidatePath(`/${locale}`);
+      revalidatePath(`/${locale}/about`);
+      if (pageSlug) {
+        const clean = pageSlug.replace(/^\/+/, "");
+        revalidatePath(`/${locale}/${clean}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  try {
+    revalidatePath("/admin");
+    revalidatePath("/admin/content/pages");
+    revalidatePath("/");
+    revalidatePath("/about");
+    if (pageSlug) {
+      const clean = pageSlug.replace(/^\/+/, "");
+      revalidatePath(`/${clean}`);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function revalidateFacilityPages(facilitySlug?: string) {
+  try {
+    revalidatePath("/", "layout");
+    revalidatePath("/[locale]", "layout");
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    revalidatePath("/[locale]", "page");
+    revalidatePath("/[locale]/facilities", "page");
+    revalidatePath("/[locale]/facilities/[slug]", "page");
+  } catch (e) {
+    console.error(e);
+  }
+
+  for (const locale of LOCALES) {
+    try {
+      revalidatePath(`/${locale}`);
+      revalidatePath(`/${locale}/facilities`);
+      if (facilitySlug) {
+        revalidatePath(`/${locale}/facilities/${facilitySlug}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  try {
+    revalidatePath("/admin");
+    revalidatePath("/admin/content/facilities");
+    revalidatePath("/");
+    revalidatePath("/facilities");
+    if (facilitySlug) {
+      revalidatePath(`/facilities/${facilitySlug}`);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+

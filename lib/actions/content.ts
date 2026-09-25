@@ -18,6 +18,12 @@ import {
   clearDoctorFromDepartments,
   revalidateDepartmentPages,
   revalidateServicePages,
+  revalidateNewsPages,
+  revalidateEventPages,
+  revalidateCareerPages,
+  revalidateFAQPages,
+  revalidateGalleryPages,
+  revalidatePageRoutes,
 } from "@/lib/actions/revalidate";
 import {
   departmentSchema,
@@ -30,6 +36,7 @@ import {
   gallerySchema,
 } from "@/lib/validation/schemas";
 import { normalizeEthiopianPhone } from "@/lib/validation/phone";
+import { normalizeTranslations } from "@/lib/i18n/localize";
 
 export interface ActionResult<T = any> {
   success?: boolean;
@@ -122,6 +129,7 @@ export async function saveDoctorAction(
     isFeatured?: boolean;
     slug?: string;
     regenerateSlug?: boolean;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult> {
@@ -184,7 +192,7 @@ export async function saveDoctorAction(
           isFeatured: doctorData.isFeatured || false,
           departmentId,
           status: targetStatus,
-          translations: (doctorData as any).translations !== undefined ? (doctorData as any).translations : undefined,
+          translations: normalizeTranslations(doctorData.translations) !== undefined ? normalizeTranslations(doctorData.translations) : undefined,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -233,7 +241,7 @@ export async function saveDoctorAction(
           isFeatured: doctorData.isFeatured || false,
           departmentId,
           status: targetStatus,
-          translations: (doctorData as any).translations !== undefined ? (doctorData as any).translations : undefined,
+          translations: normalizeTranslations(doctorData.translations) !== undefined ? normalizeTranslations(doctorData.translations) : undefined,
           createdById: session.id,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
@@ -350,6 +358,7 @@ export async function saveDepartmentAction(
     order?: number;
     slug?: string;
     regenerateSlug?: boolean;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult> {
@@ -389,7 +398,7 @@ export async function saveDepartmentAction(
           isFeatured: data.isFeatured || false,
           order: Number(validated.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -417,7 +426,7 @@ export async function saveDepartmentAction(
           isFeatured: data.isFeatured || false,
           order: Number(validated.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           createdById: session.id,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
@@ -471,6 +480,7 @@ export async function saveServiceAction(
     order?: number;
     slug?: string;
     regenerateSlug?: boolean;
+    translations?: any;
   },
   actionType: "draft" | "submit" | "publish" = "draft"
 ): Promise<ActionResult> {
@@ -530,7 +540,7 @@ export async function saveServiceAction(
           isFeatured: data.isFeatured || false,
           order: Number(data.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
@@ -559,7 +569,7 @@ export async function saveServiceAction(
           isFeatured: data.isFeatured || false,
           order: Number(data.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           createdById: session.id,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
@@ -693,15 +703,13 @@ export async function saveNewsAction(
           categoryId: resolvedCategoryId,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/news");
-      revalidatePath("/news");
-      revalidatePath(`/news/${slug}`);
+      await revalidateNewsPages(slug);
       const workflow = await finalizeSave(actionType, "News", updated.id);
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
@@ -720,15 +728,14 @@ export async function saveNewsAction(
           categoryId: resolvedCategoryId,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           createdById: session.id,
           ...(actionType === "submit" ? { submittedById: session.id, submittedAt: new Date() } : {}),
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/news");
-      revalidatePath("/news");
+      await revalidateNewsPages(slug);
       const workflow = await finalizeSave(actionType, "News", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };
@@ -741,9 +748,9 @@ export async function saveNewsAction(
 export async function deleteNewsAction(id: string): Promise<ActionResult> {
   try {
     await verifyAuthorized(["HOSPITAL_DIRECTOR", "CONTENT_STAFF"], "Delete News");
+    const news = await db.news.findUnique({ where: { id }, select: { slug: true } });
     await db.news.delete({ where: { id } });
-    revalidatePath("/admin/content/news");
-    revalidatePath("/news");
+    await revalidateNewsPages(news?.slug);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete news." };
@@ -807,13 +814,12 @@ export async function saveGalleryAction(
           type: data.type || MediaType.IMAGE,
           order: Number(data.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/gallery");
-      revalidatePath("/gallery");
+      await revalidateGalleryPages();
       const workflow = await finalizeSave(actionType, "Gallery", updated.id);
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
@@ -828,14 +834,13 @@ export async function saveGalleryAction(
           type: data.type || MediaType.IMAGE,
           order: Number(data.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           createdById: session.id,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/gallery");
-      revalidatePath("/gallery");
+      await revalidateGalleryPages();
       const workflow = await finalizeSave(actionType, "Gallery", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };
@@ -849,8 +854,7 @@ export async function deleteGalleryAction(id: string): Promise<ActionResult> {
   try {
     await verifyAuthorized(["HOSPITAL_DIRECTOR", "CONTENT_STAFF"], "Delete Gallery Asset");
     await db.gallery.delete({ where: { id } });
-    revalidatePath("/admin/content/gallery");
-    revalidatePath("/gallery");
+    await revalidateGalleryPages();
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete gallery item." };
@@ -919,14 +923,12 @@ export async function saveEventAction(
           image: data.image,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/events");
-      revalidatePath("/events");
-      revalidatePath(`/events/${slug}`);
+      await revalidateEventPages(slug);
       const workflow = await finalizeSave(actionType, "HospitalEvent", updated.id);
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
@@ -942,14 +944,13 @@ export async function saveEventAction(
           image: data.image,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           createdById: session.id,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/events");
-      revalidatePath("/events");
+      await revalidateEventPages(slug);
       const workflow = await finalizeSave(actionType, "HospitalEvent", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };
@@ -962,9 +963,9 @@ export async function saveEventAction(
 export async function deleteEventAction(id: string): Promise<ActionResult> {
   try {
     await verifyAuthorized(["HOSPITAL_DIRECTOR", "CONTENT_STAFF"], "Delete Event");
+    const event = await db.hospitalEvent.findUnique({ where: { id }, select: { slug: true } });
     await db.hospitalEvent.delete({ where: { id } });
-    revalidatePath("/admin/content/events");
-    revalidatePath("/events");
+    await revalidateEventPages(event?.slug);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete event." };
@@ -1053,14 +1054,12 @@ export async function saveCareerAction(
           deadline: parsedDeadline,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/careers");
-      revalidatePath("/careers");
-      revalidatePath(`/careers/${slug}`);
+      await revalidateCareerPages(slug);
       const workflow = await finalizeSave(actionType, "Career", updated.id);
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
@@ -1080,14 +1079,13 @@ export async function saveCareerAction(
           deadline: parsedDeadline,
           isFeatured: data.isFeatured || false,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           createdById: session.id,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/careers");
-      revalidatePath("/careers");
+      await revalidateCareerPages(slug);
       const workflow = await finalizeSave(actionType, "Career", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };
@@ -1100,9 +1098,9 @@ export async function saveCareerAction(
 export async function deleteCareerAction(id: string): Promise<ActionResult> {
   try {
     await verifyAuthorized(["HOSPITAL_DIRECTOR", "HR_STAFF"], "Delete Career");
+    const career = await db.career.findUnique({ where: { id }, select: { slug: true } });
     await db.career.delete({ where: { id } });
-    revalidatePath("/admin/content/careers");
-    revalidatePath("/careers");
+    await revalidateCareerPages(career?.slug);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete career." };
@@ -1158,12 +1156,11 @@ export async function saveFAQAction(
           category: data.category || "General",
           order: Number(data.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
         },
       });
 
-      revalidatePath("/admin/content/faqs");
-      revalidatePath("/faqs");
+      await revalidateFAQPages();
       const workflow = await finalizeSave(actionType, "FAQ", updated.id);
       if (!workflow.success) return workflow;
       return { success: true, data: updated };
@@ -1175,12 +1172,11 @@ export async function saveFAQAction(
           category: data.category || "General",
           order: Number(data.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
         },
       });
 
-      revalidatePath("/admin/content/faqs");
-      revalidatePath("/faqs");
+      await revalidateFAQPages();
       const workflow = await finalizeSave(actionType, "FAQ", created.id);
       if (!workflow.success) return workflow;
       return { success: true, data: created };
@@ -1194,8 +1190,7 @@ export async function deleteFAQAction(id: string): Promise<ActionResult> {
   try {
     await verifyAuthorized(["HOSPITAL_DIRECTOR", "CONTENT_STAFF"], "Delete FAQ");
     await db.fAQ.delete({ where: { id } });
-    revalidatePath("/admin/content/faqs");
-    revalidatePath("/faqs");
+    await revalidateFAQPages();
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete FAQ." };
@@ -1259,16 +1254,12 @@ export async function savePageAction(
           metaTitle: data.metaTitle,
           metaDescription: data.metaDescription,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/pages");
-      revalidatePath("/admin/approvals");
-      revalidatePath(`/${slug}`);
-      if (slug === "about") revalidatePath("/about");
-      revalidatePath("/");
+      await revalidatePageRoutes(slug);
 
       const workflow = await finalizeSave(actionType, "Page", updated.id);
       if (!workflow.success) return workflow;
@@ -1284,17 +1275,13 @@ export async function savePageAction(
           metaTitle: data.metaTitle,
           metaDescription: data.metaDescription,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           createdById: session.id,
           ...(actionType === "publish" ? { publishedById: session.id, publishedAt: new Date() } : {}),
         },
       });
 
-      revalidatePath("/admin/content/pages");
-      revalidatePath("/admin/approvals");
-      revalidatePath(`/${slug}`);
-      if (slug === "about") revalidatePath("/about");
-      revalidatePath("/");
+      await revalidatePageRoutes(slug);
 
       const workflow = await finalizeSave(actionType, "Page", created.id);
       if (!workflow.success) return workflow;
@@ -1308,8 +1295,9 @@ export async function savePageAction(
 export async function deletePageAction(id: string): Promise<ActionResult> {
   try {
     await verifyAuthorized(["HOSPITAL_DIRECTOR", "CONTENT_STAFF"], "Delete Page");
+    const page = await db.page.findUnique({ where: { id }, select: { slug: true } });
     await db.page.delete({ where: { id } });
-    revalidatePath("/admin/content/pages");
+    await revalidatePageRoutes(page?.slug);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete page." };

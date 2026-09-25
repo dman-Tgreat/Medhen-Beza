@@ -6,6 +6,8 @@ import { ContentStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { facilitySchema } from "@/lib/validation/schemas";
 import { normalizeEthiopianPhone } from "@/lib/validation/phone";
+import { normalizeTranslations } from "@/lib/i18n/localize";
+import { revalidateFacilityPages } from "@/lib/actions/revalidate";
 
 export interface ActionResult<T = any> {
   success?: boolean;
@@ -166,7 +168,7 @@ export async function saveAdminFacilityAction(
           image: validated.image,
           order: Number(validated.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           publishedById: targetStatus === ContentStatus.PUBLISHED ? session.id : undefined,
           publishedAt: targetStatus === ContentStatus.PUBLISHED ? new Date() : undefined,
           submittedById: targetStatus === ContentStatus.PENDING_APPROVAL ? session.id : undefined,
@@ -174,11 +176,7 @@ export async function saveAdminFacilityAction(
         },
       });
 
-      revalidatePath("/admin/content/facilities");
-      revalidatePath("/facilities");
-      revalidatePath(`/facilities/${slug}`);
-      revalidatePath(`/facilities/${updated.id}`);
-      revalidatePath("/");
+      await revalidateFacilityPages(slug);
 
       return {
         success: true,
@@ -218,7 +216,7 @@ export async function saveAdminFacilityAction(
           image: validated.image || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
           order: Number(validated.order) || 0,
           status: targetStatus,
-          translations: (data as any).translations !== undefined ? (data as any).translations : undefined,
+          translations: normalizeTranslations((data as any).translations) !== undefined ? normalizeTranslations((data as any).translations) : undefined,
           createdById: session.id,
           publishedById: targetStatus === ContentStatus.PUBLISHED ? session.id : undefined,
           publishedAt: targetStatus === ContentStatus.PUBLISHED ? new Date() : undefined,
@@ -227,11 +225,7 @@ export async function saveAdminFacilityAction(
         },
       });
 
-      revalidatePath("/admin/content/facilities");
-      revalidatePath("/facilities");
-      revalidatePath(`/facilities/${slug}`);
-      revalidatePath(`/facilities/${created.id}`);
-      revalidatePath("/");
+      await revalidateFacilityPages(slug);
 
       return {
         success: true,

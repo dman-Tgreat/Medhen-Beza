@@ -266,10 +266,13 @@ export async function getPublicSiteSettings(
 function mapDoctor(doc: any, locale: SupportedLocale = DEFAULT_LOCALE): DoctorDetailData {
   const locDoc = localizeEntity(doc, locale, [
     "fullName",
+    "name",
     "specialty",
     "position",
     "biography",
     "experience",
+    "qualifications",
+    "languages",
     "areasOfExpertise",
     "availability",
     "metaTitle",
@@ -475,6 +478,8 @@ export async function getPublicDepartmentBySlug(
 function mapService(srv: any, locale: SupportedLocale = DEFAULT_LOCALE): ServiceDetailData {
   const locSrv = localizeEntity(srv, locale, [
     "title",
+    "name",
+    "summary",
     "description",
     "content",
     "additionalInfo",
@@ -509,7 +514,7 @@ function mapService(srv: any, locale: SupportedLocale = DEFAULT_LOCALE): Service
     id: locSrv.id,
     name: locSrv.title || locSrv.name,
     slug: locSrv.slug,
-    description: locSrv.description || locSrv.summary || "Specialized clinical service.",
+    description: locSrv.summary || locSrv.description || "Specialized clinical service.",
     longDescription: locSrv.content || locSrv.description || locSrv.summary || "",
     departmentSlug: locDept?.slug || locSrv.department?.slug || "general",
     departmentName: locDept?.name || locSrv.department?.name || "General Medicine",

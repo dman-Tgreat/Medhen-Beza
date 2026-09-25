@@ -31,6 +31,7 @@ interface PageRecord {
   seoDescription?: string;
   lastUpdated: string;
   status: ContentStatusType;
+  translations?: any;
 }
 
 interface PagesAdminClientProps {
@@ -55,6 +56,7 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
     seoDescription: p.metaDescription || p.seoDescription || "",
     lastUpdated: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "—",
     status: p.status as ContentStatusType,
+    translations: p.translations,
   }));
 
   const aboutPageRecord = formattedPages.find(
@@ -191,6 +193,7 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
       excerpt?: string;
       seoTitle?: string;
       seoDescription?: string;
+      translations?: any;
     },
     actionType: "draft" | "submit" | "publish"
   ) => {
@@ -206,6 +209,7 @@ export function PagesAdminClient({ initialPages }: PagesAdminClientProps) {
         excerpt: data.excerpt,
         metaTitle: data.seoTitle,
         metaDescription: data.seoDescription,
+        translations: data.translations ?? editingPage?.translations,
       },
       actionType
     );

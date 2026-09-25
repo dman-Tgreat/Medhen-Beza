@@ -40,6 +40,7 @@ interface StandardPageEditorModalProps {
       excerpt?: string;
       seoTitle?: string;
       seoDescription?: string;
+      translations?: any;
     },
     actionType: "draft" | "submit" | "publish"
   ) => void;
@@ -119,6 +120,7 @@ export function StandardPageEditorModal({
         excerpt: excerpt.trim(),
         seoTitle: seoTitle.trim(),
         seoDescription: seoDescription.trim(),
+        translations: initialPage?.translations,
       },
       actionType
     );
