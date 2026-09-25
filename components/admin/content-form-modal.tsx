@@ -34,6 +34,7 @@ import { MediaUploadField } from "./media-upload-field";
 import { isValidEthiopianPhone } from "@/lib/validation/phone";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { FIELD_ALIASES } from "@/lib/i18n/localize";
 
 export const ADMIN_LANGUAGES = [
   { code: "en", label: "English", nativeName: "English", badge: "Default" },
@@ -366,8 +367,23 @@ export function ContentFormModal({
       );
     }
 
+    const getTranslationValue = (lang: string, fieldName: string) => {
+      const langTrans = formData.translations?.[lang];
+      if (!langTrans || typeof langTrans !== "object") return "";
+      if (langTrans[fieldName] !== undefined && langTrans[fieldName] !== null && langTrans[fieldName] !== "") {
+        return langTrans[fieldName];
+      }
+      const aliases = FIELD_ALIASES[fieldName] || [];
+      for (const alias of aliases) {
+        if (langTrans[alias] !== undefined && langTrans[alias] !== null && langTrans[alias] !== "") {
+          return langTrans[alias];
+        }
+      }
+      return "";
+    };
+
     const val = isEditingTranslation
-      ? (formData.translations?.[currentLang]?.[field.name] ?? "")
+      ? getTranslationValue(currentLang, field.name)
       : (formData[field.name] ?? field.defaultValue ?? "");
     const englishVal = formData[field.name] ?? "";
     const error = isEditingTranslation ? undefined : fieldErrors[field.name];
@@ -602,7 +618,9 @@ export function ContentFormModal({
         );
 
       case "tags": {
-        const tags = isEditingTranslation
+        const tags = Array.isArray(val)
+          ? (val as string[])
+          : isEditingTranslation
           ? ((formData.translations?.[currentLang]?.[field.name] as string[]) || [])
           : ((val as string[]) || []);
         const englishTags = (formData[field.name] as string[]) || [];

@@ -26,6 +26,7 @@ interface DoctorRecord {
   areasOfExpertise: string[];
   availability?: string;
   isFeatured: boolean;
+  translations?: any;
 }
 
 interface DoctorsAdminClientProps {
@@ -57,6 +58,7 @@ export function DoctorsAdminClient({ initialDoctors, departments }: DoctorsAdmin
     areasOfExpertise: doc.areasOfExpertise || [],
     availability: doc.availability || "",
     isFeatured: Boolean(doc.isFeatured),
+    translations: doc.translations,
   }));
 
   const formFields: FormFieldConfig[] = [
@@ -265,6 +267,7 @@ export function DoctorsAdminClient({ initialDoctors, departments }: DoctorsAdmin
         areasOfExpertise: values.areasOfExpertise,
         availability: values.availability,
         isFeatured: Boolean(values.isFeatured),
+        translations: values.translations,
       },
       actionType
     );

@@ -9,6 +9,12 @@ import {
   clearDoctorFromDepartments,
   revalidateDepartmentPages,
   revalidateServicePages,
+  revalidateNewsPages,
+  revalidateEventPages,
+  revalidateCareerPages,
+  revalidateFAQPages,
+  revalidateGalleryPages,
+  revalidatePageRoutes,
 } from "@/lib/actions/revalidate";
 
 export interface ActionResult<T = undefined> {
@@ -171,17 +177,28 @@ async function transition(contentType: ContentType, contentId: string, nextStatu
     } else if (normalizedType === "Service") {
       const srv = await db.service.findUnique({ where: { id: contentId }, include: { department: { select: { slug: true } } } });
       await revalidateServicePages(srv?.slug, srv?.department?.slug);
+    } else if (normalizedType === "News") {
+      const news = await db.news.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidateNewsPages(news?.slug);
+    } else if (normalizedType === "HospitalEvent") {
+      const ev = await db.hospitalEvent.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidateEventPages(ev?.slug);
+    } else if (normalizedType === "Career") {
+      const car = await db.career.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidateCareerPages(car?.slug);
+    } else if (normalizedType === "FAQ") {
+      await revalidateFAQPages();
+    } else if (normalizedType === "Gallery") {
+      await revalidateGalleryPages();
+    } else if (normalizedType === "Page") {
+      const page = await db.page.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidatePageRoutes(page?.slug);
     } else {
       revalidatePath("/", "layout");
       revalidatePath("/admin");
       revalidatePath("/admin/approvals");
       revalidatePath(config.adminPath);
       revalidatePath(config.publicPath);
-      if (normalizedType === "Page" && (current as any).slug) {
-        const pageSlug = String((current as any).slug).replace(/^\/+/, "");
-        revalidatePath(`/${pageSlug}`);
-        if (pageSlug === "about") revalidatePath("/about");
-      }
     }
     return { success: true };
   } catch (error) {
@@ -234,6 +251,22 @@ export async function revertToDraftAction(contentType: ContentType, contentId: s
     } else if (normalized === "Service") {
       const srv = await db.service.findUnique({ where: { id: contentId }, include: { department: { select: { slug: true } } } });
       await revalidateServicePages(srv?.slug, srv?.department?.slug);
+    } else if (normalized === "News") {
+      const news = await db.news.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidateNewsPages(news?.slug);
+    } else if (normalized === "HospitalEvent") {
+      const ev = await db.hospitalEvent.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidateEventPages(ev?.slug);
+    } else if (normalized === "Career") {
+      const car = await db.career.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidateCareerPages(car?.slug);
+    } else if (normalized === "FAQ") {
+      await revalidateFAQPages();
+    } else if (normalized === "Gallery") {
+      await revalidateGalleryPages();
+    } else if (normalized === "Page") {
+      const page = await db.page.findUnique({ where: { id: contentId }, select: { slug: true } });
+      await revalidatePageRoutes(page?.slug);
     } else {
       revalidatePath("/", "layout");
       revalidatePath("/admin");
