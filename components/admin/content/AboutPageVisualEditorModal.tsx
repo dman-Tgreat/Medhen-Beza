@@ -46,10 +46,13 @@ import {
   Briefcase,
   HelpCircle,
   ExternalLink,
+  Languages,
 } from "lucide-react";
 import { MediaUploadField } from "@/components/admin/media-upload-field";
 import { useAdminRole } from "@/components/admin/role-context";
 import { cn } from "@/lib/utils";
+import { ADMIN_LANGUAGES } from "@/components/admin/content-form-modal";
+import { MOCK_ABOUT_PAGE_AM, MOCK_ABOUT_PAGE_OM } from "@/lib/mock-data";
 
 interface AboutLeaderItem {
   name: string;
@@ -279,6 +282,257 @@ const DEFAULT_ABOUT_FORM: AboutPageFormState = {
     "Learn about Medhen Beza Hospital — our history, clinical leadership team, mission, values, and world-class healthcare facilities in Adama.",
 };
 
+const DEFAULT_ABOUT_FORM_AM: AboutPageFormState = {
+  hero: {
+    title: MOCK_ABOUT_PAGE_AM.hero.title,
+    supportingText: MOCK_ABOUT_PAGE_AM.hero.supportingText,
+    image: MOCK_ABOUT_PAGE_AM.hero.image || DEFAULT_ABOUT_FORM.hero.image,
+    imageAlt: MOCK_ABOUT_PAGE_AM.hero.imageAlt || "የመድህን ቤዛ ሆስፒታል ግቢ",
+  },
+  introduction: {
+    eyebrow: MOCK_ABOUT_PAGE_AM.introduction.eyebrow,
+    title: MOCK_ABOUT_PAGE_AM.introduction.title,
+    paragraphs: [...MOCK_ABOUT_PAGE_AM.introduction.paragraphs],
+    photo: MOCK_ABOUT_PAGE_AM.introduction.photo || DEFAULT_ABOUT_FORM.introduction.photo,
+    photoAlt: MOCK_ABOUT_PAGE_AM.introduction.photoAlt || "የመድህን ቤዛ ሆስፒታል የህክምና ቡድን",
+    ctaLabel: MOCK_ABOUT_PAGE_AM.introduction.ctaLabel,
+    ctaHref: MOCK_ABOUT_PAGE_AM.introduction.ctaHref,
+  },
+  missionVision: {
+    mission: {
+      eyebrow: MOCK_ABOUT_PAGE_AM.missionVision.mission.eyebrow,
+      title: MOCK_ABOUT_PAGE_AM.missionVision.mission.title,
+      text: MOCK_ABOUT_PAGE_AM.missionVision.mission.text,
+    },
+    vision: {
+      eyebrow: MOCK_ABOUT_PAGE_AM.missionVision.vision.eyebrow,
+      title: MOCK_ABOUT_PAGE_AM.missionVision.vision.title,
+      text: MOCK_ABOUT_PAGE_AM.missionVision.vision.text,
+    },
+  },
+  values: MOCK_ABOUT_PAGE_AM.values.map((v, i) => ({
+    label: v.label,
+    description: v.description,
+    icon: DEFAULT_ABOUT_FORM.values[i]?.icon || "Heart",
+  })),
+  leadership: MOCK_ABOUT_PAGE_AM.leadership.map((l) => ({
+    name: l.name,
+    position: l.position,
+    photo: l.photo || "",
+    photoAlt: l.photoAlt || l.name,
+  })),
+  environment: {
+    eyebrow: MOCK_ABOUT_PAGE_AM.environment.eyebrow,
+    title: MOCK_ABOUT_PAGE_AM.environment.title,
+    description: MOCK_ABOUT_PAGE_AM.environment.description,
+    featured: {
+      name: MOCK_ABOUT_PAGE_AM.environment.featured.name,
+      category: MOCK_ABOUT_PAGE_AM.environment.featured.category,
+      image: MOCK_ABOUT_PAGE_AM.environment.featured.image || DEFAULT_ABOUT_FORM.environment.featured.image,
+      imageAlt: MOCK_ABOUT_PAGE_AM.environment.featured.imageAlt || "",
+    },
+    supporting: MOCK_ABOUT_PAGE_AM.environment.supporting.map((s, idx) => ({
+      name: s.name,
+      category: s.category,
+      image: s.image || DEFAULT_ABOUT_FORM.environment.supporting[idx]?.image || "",
+      imageAlt: s.imageAlt || "",
+    })),
+  },
+  accreditations: (MOCK_ABOUT_PAGE_AM.accreditations || []).map((a) => ({
+    name: a.name,
+    issuer: a.issuer,
+  })),
+  finalCta: {
+    title: MOCK_ABOUT_PAGE_AM.finalCta.title,
+    description: MOCK_ABOUT_PAGE_AM.finalCta.description,
+    ctaLabel: MOCK_ABOUT_PAGE_AM.finalCta.ctaLabel,
+    ctaHref: MOCK_ABOUT_PAGE_AM.finalCta.ctaHref,
+  },
+  seoTitle: "ስለ መድህን ቤዛ ሆስፒታል | አዳማ",
+  seoDescription: MOCK_ABOUT_PAGE_AM.hero.supportingText,
+};
+
+const DEFAULT_ABOUT_FORM_OM: AboutPageFormState = {
+  hero: {
+    title: MOCK_ABOUT_PAGE_OM.hero.title,
+    supportingText: MOCK_ABOUT_PAGE_OM.hero.supportingText,
+    image: MOCK_ABOUT_PAGE_OM.hero.image || DEFAULT_ABOUT_FORM.hero.image,
+    imageAlt: MOCK_ABOUT_PAGE_OM.hero.imageAlt || "Gamoo guddaa Hospitaala Medhen Beza",
+  },
+  introduction: {
+    eyebrow: MOCK_ABOUT_PAGE_OM.introduction.eyebrow,
+    title: MOCK_ABOUT_PAGE_OM.introduction.title,
+    paragraphs: [...MOCK_ABOUT_PAGE_OM.introduction.paragraphs],
+    photo: MOCK_ABOUT_PAGE_OM.introduction.photo || DEFAULT_ABOUT_FORM.introduction.photo,
+    photoAlt: MOCK_ABOUT_PAGE_OM.introduction.photoAlt || "Garee yaala Hospitaala Medhen Beza",
+    ctaLabel: MOCK_ABOUT_PAGE_OM.introduction.ctaLabel,
+    ctaHref: MOCK_ABOUT_PAGE_OM.introduction.ctaHref,
+  },
+  missionVision: {
+    mission: {
+      eyebrow: MOCK_ABOUT_PAGE_OM.missionVision.mission.eyebrow,
+      title: MOCK_ABOUT_PAGE_OM.missionVision.mission.title,
+      text: MOCK_ABOUT_PAGE_OM.missionVision.mission.text,
+    },
+    vision: {
+      eyebrow: MOCK_ABOUT_PAGE_OM.missionVision.vision.eyebrow,
+      title: MOCK_ABOUT_PAGE_OM.missionVision.vision.title,
+      text: MOCK_ABOUT_PAGE_OM.missionVision.vision.text,
+    },
+  },
+  values: MOCK_ABOUT_PAGE_OM.values.map((v, i) => ({
+    label: v.label,
+    description: v.description,
+    icon: DEFAULT_ABOUT_FORM.values[i]?.icon || "Heart",
+  })),
+  leadership: MOCK_ABOUT_PAGE_OM.leadership.map((l) => ({
+    name: l.name,
+    position: l.position,
+    photo: l.photo || "",
+    photoAlt: l.photoAlt || l.name,
+  })),
+  environment: {
+    eyebrow: MOCK_ABOUT_PAGE_OM.environment.eyebrow,
+    title: MOCK_ABOUT_PAGE_OM.environment.title,
+    description: MOCK_ABOUT_PAGE_OM.environment.description,
+    featured: {
+      name: MOCK_ABOUT_PAGE_OM.environment.featured.name,
+      category: MOCK_ABOUT_PAGE_OM.environment.featured.category,
+      image: MOCK_ABOUT_PAGE_OM.environment.featured.image || DEFAULT_ABOUT_FORM.environment.featured.image,
+      imageAlt: MOCK_ABOUT_PAGE_OM.environment.featured.imageAlt || "",
+    },
+    supporting: MOCK_ABOUT_PAGE_OM.environment.supporting.map((s, idx) => ({
+      name: s.name,
+      category: s.category,
+      image: s.image || DEFAULT_ABOUT_FORM.environment.supporting[idx]?.image || "",
+      imageAlt: s.imageAlt || "",
+    })),
+  },
+  accreditations: (MOCK_ABOUT_PAGE_OM.accreditations || []).map((a) => ({
+    name: a.name,
+    issuer: a.issuer,
+  })),
+  finalCta: {
+    title: MOCK_ABOUT_PAGE_OM.finalCta.title,
+    description: MOCK_ABOUT_PAGE_OM.finalCta.description,
+    ctaLabel: MOCK_ABOUT_PAGE_OM.finalCta.ctaLabel,
+    ctaHref: MOCK_ABOUT_PAGE_OM.finalCta.ctaHref,
+  },
+  seoTitle: "Waa'ee Hospitaala Medhen Beza | Adaamaa",
+  seoDescription: MOCK_ABOUT_PAGE_OM.hero.supportingText,
+};
+
+function parseAboutPageContent(
+  rawContent: any,
+  fallbackForm: AboutPageFormState,
+  meta?: { title?: string; excerpt?: string; seoTitle?: string; seoDescription?: string }
+): AboutPageFormState {
+  if (!rawContent) return fallbackForm;
+  let parsed: any = null;
+  if (typeof rawContent === "string") {
+    const trimmed = rawContent.trim();
+    if (trimmed.startsWith("{")) {
+      try {
+        parsed = JSON.parse(trimmed);
+      } catch {}
+    } else if (trimmed.length > 0) {
+      return {
+        ...fallbackForm,
+        hero: {
+          ...fallbackForm.hero,
+          title: meta?.title || fallbackForm.hero.title,
+          supportingText: meta?.excerpt || fallbackForm.hero.supportingText,
+        },
+        introduction: {
+          ...fallbackForm.introduction,
+          paragraphs: trimmed.split("\n\n").filter(Boolean),
+        },
+      };
+    }
+  } else if (typeof rawContent === "object") {
+    parsed = rawContent;
+  }
+
+  if (!parsed || typeof parsed !== "object") return fallbackForm;
+
+  return {
+    hero: {
+      title: parsed.hero?.title || meta?.title || fallbackForm.hero.title,
+      supportingText: parsed.hero?.supportingText || meta?.excerpt || fallbackForm.hero.supportingText,
+      image: parsed.hero?.image || fallbackForm.hero.image,
+      imageAlt: parsed.hero?.imageAlt || fallbackForm.hero.imageAlt,
+    },
+    introduction: {
+      eyebrow: parsed.introduction?.eyebrow || fallbackForm.introduction.eyebrow,
+      title: parsed.introduction?.title || fallbackForm.introduction.title,
+      paragraphs:
+        Array.isArray(parsed.introduction?.paragraphs) && parsed.introduction.paragraphs.length > 0
+          ? parsed.introduction.paragraphs
+          : fallbackForm.introduction.paragraphs,
+      photo: parsed.introduction?.photo || fallbackForm.introduction.photo,
+      photoAlt: parsed.introduction?.photoAlt || fallbackForm.introduction.photoAlt,
+      ctaLabel: parsed.introduction?.ctaLabel || fallbackForm.introduction.ctaLabel,
+      ctaHref: parsed.introduction?.ctaHref || fallbackForm.introduction.ctaHref,
+    },
+    missionVision: {
+      mission: {
+        eyebrow: parsed.missionVision?.mission?.eyebrow || fallbackForm.missionVision.mission.eyebrow,
+        title: parsed.missionVision?.mission?.title || fallbackForm.missionVision.mission.title,
+        text: parsed.missionVision?.mission?.text || fallbackForm.missionVision.mission.text,
+      },
+      vision: {
+        eyebrow: parsed.missionVision?.vision?.eyebrow || fallbackForm.missionVision.vision.eyebrow,
+        title: parsed.missionVision?.vision?.title || fallbackForm.missionVision.vision.title,
+        text: parsed.missionVision?.vision?.text || fallbackForm.missionVision.vision.text,
+      },
+    },
+    values:
+      Array.isArray(parsed.values) && parsed.values.length > 0
+        ? parsed.values.map((v: any, i: number) => ({
+            label: v.label || fallbackForm.values[i]?.label || "",
+            description: v.description || fallbackForm.values[i]?.description || "",
+            icon: typeof v.icon === "string" ? v.icon : fallbackForm.values[i]?.icon || "Heart",
+          }))
+        : fallbackForm.values,
+    leadership:
+      Array.isArray(parsed.leadership) && parsed.leadership.length > 0
+        ? parsed.leadership.map((l: any, i: number) => ({
+            name: l.name || fallbackForm.leadership[i]?.name || "",
+            position: l.position || fallbackForm.leadership[i]?.position || "",
+            photo: l.photo || fallbackForm.leadership[i]?.photo || "",
+            photoAlt: l.photoAlt || l.name || fallbackForm.leadership[i]?.photoAlt || "",
+          }))
+        : fallbackForm.leadership,
+    environment: {
+      eyebrow: parsed.environment?.eyebrow || fallbackForm.environment.eyebrow,
+      title: parsed.environment?.title || fallbackForm.environment.title,
+      description: parsed.environment?.description || fallbackForm.environment.description,
+      featured: {
+        name: parsed.environment?.featured?.name || fallbackForm.environment.featured.name,
+        category: parsed.environment?.featured?.category || fallbackForm.environment.featured.category,
+        image: parsed.environment?.featured?.image || fallbackForm.environment.featured.image,
+        imageAlt: parsed.environment?.featured?.imageAlt || fallbackForm.environment.featured.imageAlt,
+      },
+      supporting:
+        Array.isArray(parsed.environment?.supporting) && parsed.environment.supporting.length > 0
+          ? parsed.environment.supporting
+          : fallbackForm.environment.supporting,
+    },
+    accreditations:
+      Array.isArray(parsed.accreditations) && parsed.accreditations.length > 0
+        ? parsed.accreditations
+        : fallbackForm.accreditations,
+    finalCta: {
+      title: parsed.finalCta?.title || fallbackForm.finalCta.title,
+      description: parsed.finalCta?.description || fallbackForm.finalCta.description,
+      ctaLabel: parsed.finalCta?.ctaLabel || fallbackForm.finalCta.ctaLabel,
+      ctaHref: parsed.finalCta?.ctaHref || fallbackForm.finalCta.ctaHref,
+    },
+    seoTitle: meta?.seoTitle || parsed.seoTitle || fallbackForm.seoTitle,
+    seoDescription: meta?.seoDescription || parsed.seoDescription || fallbackForm.seoDescription,
+  };
+}
+
 const AVAILABLE_ICONS = [
   { label: "Heart (Compassion)", value: "Heart" },
   { label: "Award (Excellence)", value: "Award" },
@@ -320,141 +574,115 @@ export function AboutPageVisualEditorModal({
   isLoading = false,
 }: AboutPageVisualEditorModalProps) {
   const { canPublish } = useAdminRole();
-  const [form, setForm] = useState<AboutPageFormState>(DEFAULT_ABOUT_FORM);
+  const [currentLang, setCurrentLang] = useState<"en" | "am" | "om">("en");
+  const [forms, setForms] = useState<Record<"en" | "am" | "om", AboutPageFormState>>({
+    en: DEFAULT_ABOUT_FORM,
+    am: DEFAULT_ABOUT_FORM_AM,
+    om: DEFAULT_ABOUT_FORM_OM,
+  });
   const [translations, setTranslations] = useState<any>(initialPage?.translations || null);
   const [rawMode, setRawMode] = useState(false);
   const [rawJsonText, setRawJsonText] = useState("");
   const [rawJsonError, setRawJsonError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("hero");
 
+  const form = forms[currentLang];
+  const setForm = (action: React.SetStateAction<AboutPageFormState>) => {
+    setForms((prev) => {
+      const current = prev[currentLang];
+      const next = typeof action === "function" ? action(current) : action;
+      return {
+        ...prev,
+        [currentLang]: next,
+      };
+    });
+  };
+
+  const renderEnglishRef = (text: string | string[] | undefined) => {
+    if (currentLang === "en" || !text) return null;
+    const content = Array.isArray(text) ? text.filter(Boolean).join("\n\n") : text;
+    if (!content.trim()) return null;
+    return (
+      <div className="rounded-md bg-muted/50 border border-border/60 p-2 text-xs text-text-muted my-1">
+        <span className="font-semibold text-text text-[10px] uppercase tracking-wider block mb-0.5">
+          English Reference:
+        </span>
+        <p className="whitespace-pre-wrap leading-relaxed text-[11px] text-text-muted">{content}</p>
+      </div>
+    );
+  };
+
   useEffect(() => {
     if (!isOpen) return;
 
+    setCurrentLang("en");
+
+    let parsedTranslations: any = null;
     if (initialPage?.translations) {
       try {
-        setTranslations(
+        parsedTranslations =
           typeof initialPage.translations === "string"
             ? JSON.parse(initialPage.translations)
-            : initialPage.translations
-        );
+            : initialPage.translations;
+        setTranslations(parsedTranslations);
       } catch {
+        parsedTranslations = initialPage.translations;
         setTranslations(initialPage.translations);
       }
+    } else {
+      setTranslations(null);
     }
 
-    if (initialPage?.content && typeof initialPage.content === "string") {
-      const trimmed = initialPage.content.trim();
-      if (trimmed.startsWith("{")) {
-        try {
-          const parsed = JSON.parse(trimmed);
-          setForm({
-            hero: {
-              title: parsed.hero?.title || initialPage.title || DEFAULT_ABOUT_FORM.hero.title,
-              supportingText:
-                parsed.hero?.supportingText || initialPage.excerpt || DEFAULT_ABOUT_FORM.hero.supportingText,
-              image: parsed.hero?.image || DEFAULT_ABOUT_FORM.hero.image,
-              imageAlt: parsed.hero?.imageAlt || DEFAULT_ABOUT_FORM.hero.imageAlt,
-            },
-            introduction: {
-              eyebrow: parsed.introduction?.eyebrow || DEFAULT_ABOUT_FORM.introduction.eyebrow,
-              title: parsed.introduction?.title || DEFAULT_ABOUT_FORM.introduction.title,
-              paragraphs:
-                Array.isArray(parsed.introduction?.paragraphs) && parsed.introduction.paragraphs.length > 0
-                  ? parsed.introduction.paragraphs
-                  : DEFAULT_ABOUT_FORM.introduction.paragraphs,
-              photo: parsed.introduction?.photo || DEFAULT_ABOUT_FORM.introduction.photo,
-              photoAlt: parsed.introduction?.photoAlt || DEFAULT_ABOUT_FORM.introduction.photoAlt,
-              ctaLabel: parsed.introduction?.ctaLabel || DEFAULT_ABOUT_FORM.introduction.ctaLabel,
-              ctaHref: parsed.introduction?.ctaHref || DEFAULT_ABOUT_FORM.introduction.ctaHref,
-            },
-            missionVision: {
-              mission: {
-                eyebrow: parsed.missionVision?.mission?.eyebrow || DEFAULT_ABOUT_FORM.missionVision.mission.eyebrow,
-                title: parsed.missionVision?.mission?.title || DEFAULT_ABOUT_FORM.missionVision.mission.title,
-                text: parsed.missionVision?.mission?.text || DEFAULT_ABOUT_FORM.missionVision.mission.text,
-              },
-              vision: {
-                eyebrow: parsed.missionVision?.vision?.eyebrow || DEFAULT_ABOUT_FORM.missionVision.vision.eyebrow,
-                title: parsed.missionVision?.vision?.title || DEFAULT_ABOUT_FORM.missionVision.vision.title,
-                text: parsed.missionVision?.vision?.text || DEFAULT_ABOUT_FORM.missionVision.vision.text,
-              },
-            },
-            values:
-              Array.isArray(parsed.values) && parsed.values.length > 0
-                ? parsed.values.map((v: any) => ({
-                    label: v.label || "",
-                    description: v.description || "",
-                    icon: typeof v.icon === "string" ? v.icon : "Heart",
-                  }))
-                : DEFAULT_ABOUT_FORM.values,
-            leadership:
-              Array.isArray(parsed.leadership) && parsed.leadership.length > 0
-                ? parsed.leadership.map((l: any) => ({
-                    name: l.name || "",
-                    position: l.position || "",
-                    photo: l.photo || "",
-                    photoAlt: l.photoAlt || l.name || "",
-                  }))
-                : DEFAULT_ABOUT_FORM.leadership,
-            environment: {
-              eyebrow: parsed.environment?.eyebrow || DEFAULT_ABOUT_FORM.environment.eyebrow,
-              title: parsed.environment?.title || DEFAULT_ABOUT_FORM.environment.title,
-              description: parsed.environment?.description || DEFAULT_ABOUT_FORM.environment.description,
-              featured: {
-                name: parsed.environment?.featured?.name || DEFAULT_ABOUT_FORM.environment.featured.name,
-                category: parsed.environment?.featured?.category || DEFAULT_ABOUT_FORM.environment.featured.category,
-                image: parsed.environment?.featured?.image || DEFAULT_ABOUT_FORM.environment.featured.image,
-                imageAlt: parsed.environment?.featured?.imageAlt || DEFAULT_ABOUT_FORM.environment.featured.imageAlt,
-              },
-              supporting:
-                Array.isArray(parsed.environment?.supporting) && parsed.environment.supporting.length > 0
-                  ? parsed.environment.supporting
-                  : DEFAULT_ABOUT_FORM.environment.supporting,
-            },
-            accreditations:
-              Array.isArray(parsed.accreditations) && parsed.accreditations.length > 0
-                ? parsed.accreditations
-                : DEFAULT_ABOUT_FORM.accreditations,
-            finalCta: {
-              title: parsed.finalCta?.title || DEFAULT_ABOUT_FORM.finalCta.title,
-              description: parsed.finalCta?.description || DEFAULT_ABOUT_FORM.finalCta.description,
-              ctaLabel: parsed.finalCta?.ctaLabel || DEFAULT_ABOUT_FORM.finalCta.ctaLabel,
-              ctaHref: parsed.finalCta?.ctaHref || DEFAULT_ABOUT_FORM.finalCta.ctaHref,
-            },
-            seoTitle: initialPage.seoTitle || DEFAULT_ABOUT_FORM.seoTitle,
-            seoDescription: initialPage.seoDescription || DEFAULT_ABOUT_FORM.seoDescription,
-          });
-          return;
-        } catch (e) {
-          // If JSON parse fails, fallback gracefully to default
-        }
-      } else if (trimmed.length > 0) {
-        // Plain text content in database -> use as introduction paragraphs
-        setForm((prev) => ({
-          ...DEFAULT_ABOUT_FORM,
-          hero: {
-            ...DEFAULT_ABOUT_FORM.hero,
-            title: initialPage.title || DEFAULT_ABOUT_FORM.hero.title,
-            supportingText: initialPage.excerpt || DEFAULT_ABOUT_FORM.hero.supportingText,
-          },
-          introduction: {
-            ...DEFAULT_ABOUT_FORM.introduction,
-            paragraphs: trimmed.split("\n\n").filter(Boolean),
-          },
-        }));
-        return;
+    const enForm = parseAboutPageContent(
+      initialPage?.content,
+      DEFAULT_ABOUT_FORM,
+      {
+        title: initialPage?.title,
+        excerpt: initialPage?.excerpt,
+        seoTitle: initialPage?.seoTitle,
+        seoDescription: initialPage?.seoDescription,
       }
-    }
+    );
 
-    // Default init
-    setForm(DEFAULT_ABOUT_FORM);
+    const amRawContent = parsedTranslations?.am?.content;
+    const amForm = parseAboutPageContent(
+      amRawContent,
+      DEFAULT_ABOUT_FORM_AM,
+      {
+        title: parsedTranslations?.am?.title,
+        excerpt: parsedTranslations?.am?.excerpt,
+        seoTitle: parsedTranslations?.am?.metaTitle || parsedTranslations?.am?.seoTitle,
+        seoDescription: parsedTranslations?.am?.metaDescription || parsedTranslations?.am?.seoDescription,
+      }
+    );
+
+    const omRawContent = parsedTranslations?.om?.content;
+    const omForm = parseAboutPageContent(
+      omRawContent,
+      DEFAULT_ABOUT_FORM_OM,
+      {
+        title: parsedTranslations?.om?.title,
+        excerpt: parsedTranslations?.om?.excerpt,
+        seoTitle: parsedTranslations?.om?.metaTitle || parsedTranslations?.om?.seoTitle,
+        seoDescription: parsedTranslations?.om?.metaDescription || parsedTranslations?.om?.seoDescription,
+      }
+    );
+
+    setForms({
+      en: enForm,
+      am: amForm,
+      om: omForm,
+    });
     setRawMode(false);
+    setRawJsonText("");
+    setRawJsonError(null);
+    setActiveTab("hero");
   }, [isOpen, initialPage]);
 
   // Sync to raw JSON string when toggling raw mode
   const handleToggleRawMode = () => {
     if (!rawMode) {
-      setRawJsonText(JSON.stringify(form, null, 2));
+      setRawJsonText(JSON.stringify(forms[currentLang], null, 2));
       setRawJsonError(null);
       setRawMode(true);
     } else {
@@ -467,6 +695,101 @@ export function AboutPageVisualEditorModal({
         setRawJsonError("Invalid JSON syntax: " + err.message);
       }
     }
+  };
+
+  const handleLanguageChange = (nextLang: "en" | "am" | "om") => {
+    if (nextLang === currentLang) return;
+
+    if (rawMode) {
+      try {
+        const parsed = JSON.parse(rawJsonText);
+        setForms((prev) => ({ ...prev, [currentLang]: parsed }));
+        setRawJsonText(JSON.stringify(forms[nextLang], null, 2));
+        setRawJsonError(null);
+      } catch (err: any) {
+        setRawJsonError("Invalid JSON syntax. Please fix before switching languages.");
+        return;
+      }
+    }
+
+    setForms((prev) => {
+      const en = prev.en;
+      const target = prev[nextLang];
+
+      // Ensure leadership items match English count and share photos
+      const syncedLeadership = en.leadership.map((enLead, idx) => {
+        const existing = target.leadership[idx];
+        return {
+          name: existing?.name || "",
+          position: existing?.position || "",
+          photo: existing?.photo || enLead.photo || "",
+          photoAlt: existing?.photoAlt || existing?.name || enLead.photoAlt || "",
+        };
+      });
+
+      // Ensure values match English count and icons
+      const syncedValues = en.values.map((enVal, idx) => {
+        const existing = target.values[idx];
+        return {
+          label: existing?.label || "",
+          description: existing?.description || "",
+          icon: existing?.icon || enVal.icon || "Heart",
+        };
+      });
+
+      return {
+        ...prev,
+        [nextLang]: {
+          ...target,
+          hero: {
+            ...target.hero,
+            image: target.hero.image || en.hero.image,
+            imageAlt: target.hero.imageAlt || en.hero.imageAlt,
+          },
+          introduction: {
+            ...target.introduction,
+            paragraphs: en.introduction.paragraphs.map(
+              (_, i) => target.introduction.paragraphs[i] || ""
+            ),
+            photo: target.introduction.photo || en.introduction.photo,
+            photoAlt: target.introduction.photoAlt || en.introduction.photoAlt,
+            ctaHref: target.introduction.ctaHref || en.introduction.ctaHref,
+          },
+          leadership: syncedLeadership,
+          values: syncedValues,
+          environment: {
+            ...target.environment,
+            featured: {
+              ...target.environment.featured,
+              image: target.environment.featured.image || en.environment.featured.image,
+              category: target.environment.featured.category || en.environment.featured.category,
+            },
+            supporting: en.environment.supporting.map((enSup, idx) => {
+              const existing = target.environment.supporting[idx];
+              return {
+                name: existing?.name || "",
+                category: existing?.category || enSup.category || "",
+                image: existing?.image || enSup.image || "",
+                imageAlt: existing?.imageAlt || enSup.imageAlt || "",
+              };
+            }),
+          },
+          accreditations: en.accreditations.map((enAcc, idx) => {
+            const existing = target.accreditations[idx];
+            return {
+              name: existing?.name || "",
+              issuer: existing?.issuer || enAcc.issuer || "",
+            };
+          }),
+          finalCta: {
+            ...target.finalCta,
+            ctaHref: target.finalCta.ctaHref || en.finalCta.ctaHref,
+          },
+        },
+      };
+    });
+
+    setCurrentLang(nextLang);
   };
 
   // ─── Paragraphs Handlers ──────────────────────────────────────────────────
@@ -671,27 +994,57 @@ export function AboutPageVisualEditorModal({
       }
     }
 
-    const payloadContent = JSON.stringify({
-      hero: currentData.hero,
-      introduction: currentData.introduction,
-      missionVision: currentData.missionVision,
-      values: currentData.values,
-      leadership: currentData.leadership,
-      environment: currentData.environment,
-      accreditations: currentData.accreditations,
-      finalCta: currentData.finalCta,
-    });
+    const currentForms = {
+      ...forms,
+      [currentLang]: currentData,
+    };
+
+    const serializeContent = (data: AboutPageFormState) =>
+      JSON.stringify({
+        hero: data.hero,
+        introduction: data.introduction,
+        missionVision: data.missionVision,
+        values: data.values,
+        leadership: data.leadership,
+        environment: data.environment,
+        accreditations: data.accreditations,
+        finalCta: data.finalCta,
+      });
+
+    const enContent = serializeContent(currentForms.en);
+    const amContent = serializeContent(currentForms.am);
+    const omContent = serializeContent(currentForms.om);
+
+    const translationsPayload = {
+      ...(translations || {}),
+      am: {
+        ...(translations?.am || {}),
+        title: currentForms.am.hero.title || currentForms.en.hero.title || "About Medhen Beza Hospital",
+        excerpt: currentForms.am.hero.supportingText || currentForms.en.hero.supportingText,
+        metaTitle: currentForms.am.seoTitle || currentForms.en.seoTitle,
+        metaDescription: currentForms.am.seoDescription || currentForms.en.seoDescription,
+        content: amContent,
+      },
+      om: {
+        ...(translations?.om || {}),
+        title: currentForms.om.hero.title || currentForms.en.hero.title || "About Medhen Beza Hospital",
+        excerpt: currentForms.om.hero.supportingText || currentForms.en.hero.supportingText,
+        metaTitle: currentForms.om.seoTitle || currentForms.en.seoTitle,
+        metaDescription: currentForms.om.seoDescription || currentForms.en.seoDescription,
+        content: omContent,
+      },
+    };
 
     onSubmit(
       {
         id: initialPage?.id,
-        title: currentData.hero.title || "About Medhen Beza Hospital",
+        title: currentForms.en.hero.title || "About Medhen Beza Hospital",
         slug: "about",
-        content: payloadContent,
-        excerpt: currentData.hero.supportingText,
-        seoTitle: currentData.seoTitle,
-        seoDescription: currentData.seoDescription,
-        translations: translations ?? initialPage?.translations,
+        content: enContent,
+        excerpt: currentForms.en.hero.supportingText,
+        seoTitle: currentForms.en.seoTitle,
+        seoDescription: currentForms.en.seoDescription,
+        translations: translationsPayload,
       },
       actionType
     );
@@ -701,7 +1054,7 @@ export function AboutPageVisualEditorModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-5xl sm:max-w-5xl w-[95vw] h-[92vh] max-h-[900px] flex flex-col p-0 gap-0 overflow-hidden bg-background">
         {/* Header */}
-        <DialogHeader className="p-5 sm:p-6 border-b border-border bg-surface shrink-0">
+        <DialogHeader className="p-5 sm:p-6 border-b border-border bg-surface shrink-0 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-light text-primary border border-primary/20 shrink-0">
@@ -738,6 +1091,41 @@ export function AboutPageVisualEditorModal({
                 )}
               </Button>
             </div>
+          </div>
+
+          {/* Multilingual Selector Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/50">
+            <div className="flex items-center gap-1.5 bg-background p-1 rounded-lg border border-border">
+              {ADMIN_LANGUAGES.map((lang) => {
+                const isActive = currentLang === lang.code;
+                return (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => handleLanguageChange(lang.code as "en" | "am" | "om")}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
+                      isActive
+                        ? "bg-primary text-white shadow-xs font-semibold"
+                        : "text-text-muted hover:text-text hover:bg-muted/40"
+                    )}
+                  >
+                    <span className="text-sm leading-none">{lang.code === "en" ? "🇺🇸" : "🇪🇹"}</span>
+                    <span>{lang.label}</span>
+                    <span className="text-[10px] opacity-75 hidden sm:inline">({lang.nativeName})</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {currentLang !== "en" && (
+              <div className="text-[11px] text-text-muted flex items-center gap-1.5 bg-primary/5 px-2.5 py-1 rounded-md border border-primary/20">
+                <Languages className="h-3.5 w-3.5 text-primary" />
+                <span>
+                  Translating into <strong className="text-text">{currentLang === "am" ? "Amharic (አማርኛ)" : "Afan Oromo (Afaan Oromoo)"}</strong>
+                </span>
+              </div>
+            )}
           </div>
         </DialogHeader>
 
@@ -808,6 +1196,7 @@ export function AboutPageVisualEditorModal({
                       <label className="text-xs font-semibold text-text">
                         Hero Main Headline <span className="text-emergency">*</span>
                       </label>
+                      {renderEnglishRef(forms.en.hero.title)}
                       <Input
                         value={form.hero.title}
                         onChange={(e) =>
@@ -825,6 +1214,7 @@ export function AboutPageVisualEditorModal({
                       <label className="text-xs font-semibold text-text">
                         Hero Subtitle & Supporting Statement <span className="text-emergency">*</span>
                       </label>
+                      {renderEnglishRef(forms.en.hero.supportingText)}
                       <textarea
                         value={form.hero.supportingText}
                         onChange={(e) =>
@@ -843,6 +1233,7 @@ export function AboutPageVisualEditorModal({
                       <label className="text-xs font-semibold text-text">
                         Campus Photo Accessibility Alt Text
                       </label>
+                      {renderEnglishRef(forms.en.hero.imageAlt)}
                       <Input
                         value={form.hero.imageAlt}
                         onChange={(e) =>
@@ -885,6 +1276,7 @@ export function AboutPageVisualEditorModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="text-xs font-semibold text-text">Section Eyebrow</label>
+                        {renderEnglishRef(forms.en.introduction.eyebrow)}
                         <Input
                           value={form.introduction.eyebrow}
                           onChange={(e) =>
@@ -899,6 +1291,7 @@ export function AboutPageVisualEditorModal({
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-xs font-semibold text-text">Section Title</label>
+                        {renderEnglishRef(forms.en.introduction.title)}
                         <Input
                           value={form.introduction.title}
                           onChange={(e) =>
@@ -976,6 +1369,7 @@ export function AboutPageVisualEditorModal({
                                 </Button>
                               </div>
                             </div>
+                            {renderEnglishRef(forms.en.introduction.paragraphs[idx])}
                             <textarea
                               value={p}
                               onChange={(e) => handleUpdateParagraph(idx, e.target.value)}
@@ -991,6 +1385,7 @@ export function AboutPageVisualEditorModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                       <div className="space-y-1.5">
                         <label className="text-xs font-semibold text-text">CTA Button Label</label>
+                        {renderEnglishRef(forms.en.introduction.ctaLabel)}
                         <Input
                           value={form.introduction.ctaLabel}
                           onChange={(e) =>
@@ -1039,6 +1434,7 @@ export function AboutPageVisualEditorModal({
                     />
                     <div className="space-y-1.5 pt-2">
                       <label className="text-xs font-semibold text-text">Photo Alt Text</label>
+                      {renderEnglishRef(forms.en.introduction.photoAlt)}
                       <Input
                         value={form.introduction.photoAlt}
                         onChange={(e) =>
@@ -1161,6 +1557,7 @@ export function AboutPageVisualEditorModal({
                               <label className="text-xs font-semibold text-text">
                                 Full Name & Honorific <span className="text-emergency">*</span>
                               </label>
+                              {renderEnglishRef(forms.en.leadership[idx]?.name)}
                               <Input
                                 value={leader.name}
                                 onChange={(e) => handleUpdateLeader(idx, "name", e.target.value)}
@@ -1173,6 +1570,7 @@ export function AboutPageVisualEditorModal({
                               <label className="text-xs font-semibold text-text">
                                 Position & Medical Title <span className="text-emergency">*</span>
                               </label>
+                              {renderEnglishRef(forms.en.leadership[idx]?.position)}
                               <Input
                                 value={leader.position}
                                 onChange={(e) =>
@@ -1187,6 +1585,7 @@ export function AboutPageVisualEditorModal({
                               <label className="text-xs font-semibold text-text">
                                 Image Alt Description
                               </label>
+                              {renderEnglishRef(forms.en.leadership[idx]?.photoAlt)}
                               <Input
                                 value={leader.photoAlt || ""}
                                 onChange={(e) =>
@@ -1218,6 +1617,7 @@ export function AboutPageVisualEditorModal({
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-text">Mission Eyebrow</label>
+                      {renderEnglishRef(forms.en.missionVision.mission.eyebrow)}
                       <Input
                         value={form.missionVision.mission.eyebrow}
                         onChange={(e) =>
@@ -1236,6 +1636,7 @@ export function AboutPageVisualEditorModal({
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-text">Mission Headline</label>
+                      {renderEnglishRef(forms.en.missionVision.mission.title)}
                       <Input
                         value={form.missionVision.mission.title}
                         onChange={(e) =>
@@ -1254,6 +1655,7 @@ export function AboutPageVisualEditorModal({
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-text">Mission Statement</label>
+                      {renderEnglishRef(forms.en.missionVision.mission.text)}
                       <textarea
                         value={form.missionVision.mission.text}
                         onChange={(e) =>
@@ -1283,6 +1685,7 @@ export function AboutPageVisualEditorModal({
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-text">Vision Eyebrow</label>
+                      {renderEnglishRef(forms.en.missionVision.vision.eyebrow)}
                       <Input
                         value={form.missionVision.vision.eyebrow}
                         onChange={(e) =>
@@ -1301,6 +1704,7 @@ export function AboutPageVisualEditorModal({
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-text">Vision Headline</label>
+                      {renderEnglishRef(forms.en.missionVision.vision.title)}
                       <Input
                         value={form.missionVision.vision.title}
                         onChange={(e) =>
@@ -1319,6 +1723,7 @@ export function AboutPageVisualEditorModal({
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-text">Vision Statement</label>
+                      {renderEnglishRef(forms.en.missionVision.vision.text)}
                       <textarea
                         value={form.missionVision.vision.text}
                         onChange={(e) =>
@@ -1381,6 +1786,7 @@ export function AboutPageVisualEditorModal({
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-semibold text-text-muted">Value Label</label>
+                        {renderEnglishRef(forms.en.values[idx]?.label)}
                         <Input
                           value={val.label}
                           onChange={(e) => handleUpdateValue(idx, "label", e.target.value)}
@@ -1412,6 +1818,7 @@ export function AboutPageVisualEditorModal({
                         <label className="text-[11px] font-semibold text-text-muted">
                           Description
                         </label>
+                        {renderEnglishRef(forms.en.values[idx]?.description)}
                         <textarea
                           value={val.description}
                           onChange={(e) => handleUpdateValue(idx, "description", e.target.value)}
@@ -1430,6 +1837,7 @@ export function AboutPageVisualEditorModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-text">Section Eyebrow</label>
+                    {renderEnglishRef(forms.en.environment.eyebrow)}
                     <Input
                       value={form.environment.eyebrow}
                       onChange={(e) =>
@@ -1444,6 +1852,7 @@ export function AboutPageVisualEditorModal({
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-text">Section Title</label>
+                    {renderEnglishRef(forms.en.environment.title)}
                     <Input
                       value={form.environment.title}
                       onChange={(e) =>
@@ -1456,6 +1865,23 @@ export function AboutPageVisualEditorModal({
                       className="bg-surface text-sm"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-text">Section Description</label>
+                  {renderEnglishRef(forms.en.environment.description)}
+                  <textarea
+                    value={form.environment.description || ""}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        environment: { ...prev.environment, description: e.target.value },
+                      }))
+                    }
+                    rows={2}
+                    placeholder="Short description of the facilities and environment..."
+                    className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
+                  />
                 </div>
 
                 {/* Featured Large Facility */}
@@ -1484,6 +1910,7 @@ export function AboutPageVisualEditorModal({
                     <div className="sm:col-span-7 space-y-3">
                       <div className="space-y-1">
                         <label className="text-xs font-semibold text-text">Facility Name</label>
+                        {renderEnglishRef(forms.en.environment.featured.name)}
                         <Input
                           value={form.environment.featured.name}
                           onChange={(e) =>
@@ -1501,6 +1928,7 @@ export function AboutPageVisualEditorModal({
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-semibold text-text">Category Tag</label>
+                        {renderEnglishRef(forms.en.environment.featured.category)}
                         <Input
                           value={form.environment.featured.category}
                           onChange={(e) =>
@@ -1567,22 +1995,28 @@ export function AboutPageVisualEditorModal({
                           aspectLabel="4:3 photo"
                         />
                         <div className="space-y-2">
-                          <Input
-                            value={sup.name}
-                            onChange={(e) =>
-                              handleUpdateSupportingFacility(idx, "name", e.target.value)
-                            }
-                            placeholder="Facility name"
-                            className="bg-background text-xs h-8"
-                          />
-                          <Input
-                            value={sup.category}
-                            onChange={(e) =>
-                              handleUpdateSupportingFacility(idx, "category", e.target.value)
-                            }
-                            placeholder="Category"
-                            className="bg-background text-xs h-8"
-                          />
+                          <div>
+                            {renderEnglishRef(forms.en.environment.supporting[idx]?.name)}
+                            <Input
+                              value={sup.name}
+                              onChange={(e) =>
+                                handleUpdateSupportingFacility(idx, "name", e.target.value)
+                              }
+                              placeholder="Facility name"
+                              className="bg-background text-xs h-8"
+                            />
+                          </div>
+                          <div>
+                            {renderEnglishRef(forms.en.environment.supporting[idx]?.category)}
+                            <Input
+                              value={sup.category}
+                              onChange={(e) =>
+                                handleUpdateSupportingFacility(idx, "category", e.target.value)
+                              }
+                              placeholder="Category"
+                              className="bg-background text-xs h-8"
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1633,6 +2067,7 @@ export function AboutPageVisualEditorModal({
                         <label className="text-[11px] font-semibold text-text-muted">
                           Accreditation Name
                         </label>
+                        {renderEnglishRef(forms.en.accreditations[idx]?.name)}
                         <Input
                           value={acc.name}
                           onChange={(e) => handleUpdateAccreditation(idx, "name", e.target.value)}
@@ -1644,6 +2079,7 @@ export function AboutPageVisualEditorModal({
                         <label className="text-[11px] font-semibold text-text-muted">
                           Issuing Organization
                         </label>
+                        {renderEnglishRef(forms.en.accreditations[idx]?.issuer)}
                         <Input
                           value={acc.issuer}
                           onChange={(e) => handleUpdateAccreditation(idx, "issuer", e.target.value)}
@@ -1662,6 +2098,7 @@ export function AboutPageVisualEditorModal({
                   <h3 className="text-sm font-bold text-text">Bottom Call-to-Action Banner</h3>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-text">Banner Title</label>
+                    {renderEnglishRef(forms.en.finalCta.title)}
                     <Input
                       value={form.finalCta.title}
                       onChange={(e) =>
@@ -1676,6 +2113,7 @@ export function AboutPageVisualEditorModal({
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-text">Description</label>
+                    {renderEnglishRef(forms.en.finalCta.description)}
                     <textarea
                       value={form.finalCta.description}
                       onChange={(e) =>
@@ -1692,6 +2130,7 @@ export function AboutPageVisualEditorModal({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-text">Button Label</label>
+                      {renderEnglishRef(forms.en.finalCta.ctaLabel)}
                       <Input
                         value={form.finalCta.ctaLabel}
                         onChange={(e) =>
@@ -1728,6 +2167,7 @@ export function AboutPageVisualEditorModal({
                   <h3 className="text-sm font-bold text-text">Search Engine Optimization (SEO)</h3>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-text">SEO Meta Title</label>
+                    {renderEnglishRef(forms.en.seoTitle)}
                     <Input
                       value={form.seoTitle}
                       onChange={(e) => setForm((prev) => ({ ...prev, seoTitle: e.target.value }))}
@@ -1737,6 +2177,7 @@ export function AboutPageVisualEditorModal({
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-text">SEO Meta Description</label>
+                    {renderEnglishRef(forms.en.seoDescription)}
                     <textarea
                       value={form.seoDescription}
                       onChange={(e) =>
